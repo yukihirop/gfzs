@@ -17,11 +17,13 @@ class BoxSelector:
      The user can browser though the textboxes and select one with enter.
   """
 
-  def __init__(self, data):
+  def __init__(self, stdscr, colors, data):
     """Create a BoxSelector object.
        'data' is list of string. Each string is used to build
        a textbox.
     """
+    self.stdscr = stdscr
+    self.colors = colors
     self.data = data
     # Element parameters. Channge them here.
     self.TEXTBOX_HEIGHT = 8
@@ -32,27 +34,16 @@ class BoxSelector:
     """ Just run this when you want to spawn the selection process. """
     self._init_curses()
     self._create_pad()
-    
+
     windows = self._make_textboxes()
     picked = self._select_textbox(windows)
     self._end_curses()
+
     return picked
 
   def _init_curses(self):
     """ Inits the curses application """
-    # initscr() returns a window object representing the entire screen.
-    self.stdscr = curses.initscr()
-    # turn off automatic echoing of keys to the screen
-    curses.noecho()
-    # Enable non-blocking mode. keys are read directly, without hitting enter.
-    curses.cbreak()
-    # Disable the mouse cursor.
-    curses.curs_set(0)
-    self.stdscr.keypad(1)
-    # Enable colorous output.
-    self.colors = Colors(curses)
-    self.stdscr.bkgd(self.colors.normal)
-    self.stdscr.refresh()
+    # Something
 
 
   def _end_curses(self):
@@ -106,6 +97,18 @@ class BoxSelector:
 
     return windows
 
+  def _wait_input_prompt(self, footer):
+    maxy, _ = self.stdscr.getmaxyx()
+    
+    self.stdscr.move(maxy - 1, 100)
+    footer.refresh()
+
+    c = self.stdscr.getch()
+
+    while True:
+      if c == ord('q'):
+        break
+
   def _refresh_view(self, window):
     """ Centers and aligns the view according to the window argument given.
         Returns the(y, x) coordinates of the centered window. """
@@ -121,6 +124,7 @@ class BoxSelector:
   def _select_textbox(self, windows):
     # See at the root textbox.
     topy, topx = self._refresh_view(windows[0])
+    maxy, maxx = self.stdscr.getmaxyx()
 
     current_selected = 0
     last = 1
@@ -137,7 +141,6 @@ class BoxSelector:
       # While the textbox can be displayed on the page with the current top_textbox,
       # don't after the view. When this becomes impossible,
       # center the view to last displayable textbox on the previous view.
-      maxy, maxx = self.stdscr.getmaxyx()
       cy, cx = windows[current_selected].getbegyx()
       per_page = maxy//self.TEXTBOX_HEIGHT
 
@@ -162,12 +165,12 @@ class BoxSelector:
       c = self.stdscr.getch()
 
       # Vim like KEY_UP/KEY_DOWN with j(DOWN) and k(UP)
-      if c == ord('j') or c == ARROW_DOWN:
+      if c == ARROW_DOWN:
         if (current_selected >= len(windows)-1):
           current_selected = 0  # wrap around.
         else:
           current_selected += 1
-      elif c == ord('k') or c == ARROW_UP:
+      elif c == ARROW_UP:
         if current_selected <= 0:
           current_selected = len(windows) - 1  # wrap around.
         else:
@@ -179,7 +182,13 @@ class BoxSelector:
         return int(current_selected)
 
 if __name__ == '__main__':
+  import curses
   import signal
+
+  # local
+
+  from colors import Colors
+
   signal.signal(signal.SIGINT, signal.SIG_DFL)
   
   data = [
@@ -329,5 +338,19 @@ if __name__ == '__main__':
     }
   ]
 
-  choice = BoxSelector(data).pick()
+  # initscr() returns a window object representing the entire screen.
+  stdscr = curses.initscr()
+  # turn off automatic echoing of keys to the screen
+  curses.noecho()
+  # Enable non-blocking mode. keys are read directly, without hitting enter.
+  curses.cbreak()
+  # Disable the mouse cursor.
+  curses.curs_set(0)
+  stdscr.keypad(1)
+
+  colors = Colors(curses)
+  stdscr.bkgd(colors.normal)
+  stdscr.refresh()
+
+  choice = BoxSelector(stdscr, colors, data).pick()
   print(data[choice].get('title'))
