@@ -1,12 +1,17 @@
 # ref: https://github.com/NikolaiT/Scripts/blob/master/scripts/python/curses/text_selector.py
 
 import curses
-import debug
 import unicodedata
 import textwrap
 
+# local
+
+import debug
+from colors import Colors
+
 ARROW_DOWN = 258
 ARROW_UP = 259
+
 class BoxSelector:
   """Display options build from a list of strings in a (unix) terminal.
      The user can browser though the textboxes and select one with enter.
@@ -45,10 +50,8 @@ class BoxSelector:
     curses.curs_set(0)
     self.stdscr.keypad(1)
     # Enable colorous output.
-    curses.start_color()
-    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_GREEN)
-    curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLACK)
-    self.stdscr.bkgd(curses.color_pair(2))
+    self.colors = Colors(curses)
+    self.stdscr.bkgd(self.colors.normal)
     self.stdscr.refresh()
 
 
@@ -94,11 +97,12 @@ class BoxSelector:
         url = self.data[k].get('url')
         abstract = self.data[k].get('abstract')
 
-        windows[k].addstr(2, 2, '%s%-3s %s' % ('', str(k + 1) + '.', title))
-        windows[k].addstr(3, 6, url)
+        windows[k].addstr(2, 2, '%s%-3s' % ('', str(k + 1) + '.'), self.colors.index)
+        windows[k].addstr(2, 6, title, self.colors.title)
+        windows[k].addstr(3, 6, url, self.colors.url)
         lines = textwrap.wrap(abstract, abstract_line_len)
         for l in range(len(lines)):
-          windows[k].addstr(4 + l, 6, lines[l])
+          windows[k].addstr(4 + l, 6, lines[l], self.colors.abstract)
 
     return windows
 
@@ -125,8 +129,8 @@ class BoxSelector:
     while True:
       # Highligth the selected one, the last selected textbox should
       # become normal again.
-      windows[current_selected].bkgd(curses.color_pair(1)) # color
-      windows[last].bkgd(curses.color_pair(2))  # normal
+      windows[current_selected].border(self.colors.highlight)
+      windows[last].border()
 
       # Paging
 
