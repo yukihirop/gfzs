@@ -365,4 +365,5 @@ if __name__ == '__main__':
   stdscr.refresh()
 
   choice = BoxSelector(stdscr, colors, data).pick()
-  print(data[choice].get('title'))
+  if choice != None:
+    print(data[choice].get('title'))
