@@ -99,18 +99,6 @@ class BoxSelector:
 
     return windows
 
-  def _wait_input_prompt(self, footer):
-    maxy, _ = self.stdscr.getmaxyx()
-    
-    self.stdscr.move(maxy - 1, 100)
-    footer.refresh()
-
-    c = self.stdscr.getch()
-
-    while True:
-      if c == ord('q'):
-        break
-
   def _refresh_view(self, window):
     """ Centers and aligns the view according to the window argument given.
         Returns the(y, x) coordinates of the centered window. """
