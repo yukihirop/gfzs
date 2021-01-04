@@ -27,6 +27,7 @@ class BoxSelector:
     self.stdscr = stdscr
     self.colors = colors
     self.data = data
+    self.windows = []
     # Element parameters. Channge them here.
     self.TEXTBOX_HEIGHT = 8
     self.PAD_WIDTH = 400
@@ -37,8 +38,8 @@ class BoxSelector:
     self._init_curses()
     self._create_pad()
 
-    windows = self._make_textboxes()
-    picked = self._select_textbox(windows)
+    self.windows = self._make_textboxes()
+    picked = self._select_textbox()
     self._end_curses()
 
     return picked
@@ -47,7 +48,6 @@ class BoxSelector:
     """ Inits the curses application """
     # Something
 
-
   def _end_curses(self):
     """ Terminates the curses application. """
     curses.nocbreak()
@@ -55,12 +55,14 @@ class BoxSelector:
     curses.echo()
     curses.endwin()
 
+  def _reset_pad(self):
+    self.pad.clear()
+    self._create_pad()
 
   def _create_pad(self):
     """ Creates a big self.pad to place the textboxes in. """
     self.pad = curses.newpad(self.PAD_HEIGHT, self.PAD_WIDTH)
     self.pad.box()
-
 
   def _make_textboxes(self):
     """ Build the textboxes in the pad center and put them in the
@@ -80,17 +82,18 @@ class BoxSelector:
 
         windows.append(window)
         i += self.TEXTBOX_HEIGHT
-    
+
     # When all are displayed as multi-byte character strings
     abstract_line_len = maxx//2
     for k in range(len(windows)):
         windows[k].box()
-        
+
         title = self.data[k].get('title')
         url = self.data[k].get('url')
         abstract = self.data[k].get('abstract')
 
-        windows[k].addstr(2, 2, '%s%-3s' % ('', str(k + 1) + '.'), self.colors.index)
+        windows[k].addstr(2, 2, '%s%-3s' %
+                          ('', str(k + 1) + '.'), self.colors.index)
         windows[k].addstr(2, 6, title, self.colors.title)
         windows[k].addstr(3, 6, url, self.colors.url)
         lines = textwrap.wrap(abstract, abstract_line_len)
@@ -100,10 +103,10 @@ class BoxSelector:
     return windows
 
   def _refresh_view(self, window):
-    """ Centers and aligns the view according to the window argument given.
-        Returns the(y, x) coordinates of the centered window. """
+    """ Refresh windows """
     cy, cx = window.getbegyx()
     maxy, maxx = self.stdscr.getmaxyx()
+
     per_page = maxy // self.TEXTBOX_HEIGHT
     display_limit_pos_y = self.TEXTBOX_HEIGHT * (per_page - 1)
     display_limit_pos_x = maxx - 1
@@ -111,16 +114,18 @@ class BoxSelector:
     self.pad.refresh(cy, cx, 1, 2, display_limit_pos_y, display_limit_pos_x)
     return (cy, cx)
 
-  def _select_textbox(self, windows):
+  def _select_textbox(self):
     # See at the root textbox.
-    topy, topx = self._refresh_view(windows[0])
+    topy, topx = self._refresh_view(self.windows[0])
     maxy, maxx = self.stdscr.getmaxyx()
 
     current_selected = 0
     last = 1
-    top_textbox = windows[0]
+    top_textbox = self.windows[0]
 
     while True:
+      windows = self.windows
+
       # Highligth the selected one, the last selected textbox should
       # become normal again.
       windows[current_selected].border(self.colors.highlight)
@@ -149,7 +154,7 @@ class BoxSelector:
 
       if last != current_selected:
         last = current_selected
-      
+
       topy, topx = self._refresh_view(top_textbox)
 
       c = self.stdscr.getch()
@@ -179,6 +184,9 @@ class BoxSelector:
           current_selected = len(windows) - per_page + 1  # wrap around.
         else:
           current_selected = current_pagetop_index - (per_page - 1)
+      elif c == curses.KEY_RESIZE:
+        self._reset_pad()
+        self.windows = self._make_textboxes()
       elif c == ord('q'):  # Quit without selecting.
         break
       # Ah hitting enter, return the index of the selected list element.
