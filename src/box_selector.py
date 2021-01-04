@@ -11,6 +11,8 @@ from colors import Colors
 
 ARROW_DOWN = 258
 ARROW_UP = 259
+ARROW_LEFT = 260
+ARROW_RIGHT = 261
 
 class BoxSelector:
   """Display options build from a list of strings in a (unix) terminal.
@@ -175,6 +177,20 @@ class BoxSelector:
           current_selected = len(windows) - 1  # wrap around.
         else:
           current_selected -= 1
+      elif c == ARROW_RIGHT:
+        next_pagetop_index = (per_page - 1) * \
+            (current_selected//(per_page - 1) + 1)
+        if (next_pagetop_index <= len(windows)-1):
+          current_selected = next_pagetop_index
+        else:
+          current_selected = 0  # wrap around.
+      elif c == ARROW_LEFT:
+        current_pagetop_index = (per_page - 1) * \
+            (current_selected//(per_page - 1))
+        if (current_pagetop_index == 0):
+          current_selected = len(windows) - per_page + 1  # wrap around.
+        else:
+          current_selected = current_pagetop_index - (per_page - 1)
       elif c == ord('q'):  # Quit without selecting.
         break
       # Ah hitting enter, return the index of the selected list element.
