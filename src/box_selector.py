@@ -1,7 +1,12 @@
 # ref: https://github.com/NikolaiT/Scripts/blob/master/scripts/python/curses/text_selector.py
 
 import curses
+import debug
+import unicodedata
+import textwrap
 
+ARROW_DOWN = 258
+ARROW_UP = 259
 class BoxSelector:
   """Display options build from a list of strings in a (unix) terminal.
      The user can browser though the textboxes and select one with enter.
@@ -79,16 +84,23 @@ class BoxSelector:
 
         windows.append(window)
         i += self.TEXTBOX_HEIGHT
-
+    
+    # When all are displayed as multi-byte character strings
+    abstract_line_len = maxx//2
     for k in range(len(windows)):
         windows[k].box()
-        # windows[k].addstr(2,2, '%s%-3s %s' % ('', str(k+1) + '.', self.data[k].get('title')))
-        windows[k].addstr(2, 4, self.data[k].get('title'))
-        windows[k].addstr(3, 4, self.data[k].get('url'))
-        windows[k].addstr(4, 4, self.data[k].get('abstract'))
+        
+        title = self.data[k].get('title')
+        url = self.data[k].get('url')
+        abstract = self.data[k].get('abstract')
+
+        windows[k].addstr(2, 2, '%s%-3s %s' % ('', str(k + 1) + '.', title))
+        windows[k].addstr(3, 6, url)
+        lines = textwrap.wrap(abstract, abstract_line_len)
+        for l in range(len(lines)):
+          windows[k].addstr(4 + l, 6, lines[l])
 
     return windows
-
 
   def _refresh_view(self, window):
     """ Centers and aligns the view according to the window argument given.
@@ -144,8 +156,6 @@ class BoxSelector:
       topy, topx = self._refresh_view(top_textbox)
 
       c = self.stdscr.getch()
-      ARROW_DOWN = 258
-      ARROW_UP = 259
 
       # Vim like KEY_UP/KEY_DOWN with j(DOWN) and k(UP)
       if c == ord('j') or c == ARROW_DOWN:
