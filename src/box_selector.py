@@ -46,7 +46,13 @@ class BoxSelector:
 
   def _init_curses(self):
     """ Inits the curses application """
-    # Something
+    # turn off automatic echoing of keys to the screen
+    curses.noecho()
+    # Enable non-blocking mode. keys are read directly, without hitting enter.
+    curses.cbreak()
+    # Disable the mouse cursor.
+    curses.curs_set(0)
+    self.stdscr.keypad(1)
 
   def _end_curses(self):
     """ Terminates the curses application. """
@@ -352,14 +358,6 @@ if __name__ == '__main__':
 
   # initscr() returns a window object representing the entire screen.
   stdscr = curses.initscr()
-  # turn off automatic echoing of keys to the screen
-  curses.noecho()
-  # Enable non-blocking mode. keys are read directly, without hitting enter.
-  curses.cbreak()
-  # Disable the mouse cursor.
-  curses.curs_set(0)
-  stdscr.keypad(1)
-
   colors = Colors(curses)
   stdscr.bkgd(colors.normal)
   stdscr.refresh()
