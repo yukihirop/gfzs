@@ -33,13 +33,13 @@ class BoxSelector:
     self.PAD_WIDTH = 400
     self.PAD_HEIGHT = 1000
 
-  def pick(self):
+  def _pick(self):
     """ Just run this when you want to spawn the selection process. """
     self._init_curses()
     self._create_pad()
 
     self.windows = self._make_textboxes()
-    picked = self._select_textbox()
+    picked = self._loop()
     self._end_curses()
 
     return picked
@@ -120,7 +120,7 @@ class BoxSelector:
     self.pad.refresh(cy, cx, 1, 2, display_limit_pos_y, display_limit_pos_x)
     return (cy, cx)
 
-  def _select_textbox(self):
+  def _loop(self):
     # See at the root textbox.
     topy, topx = self._refresh_view(self.windows[0])
     maxy, maxx = self.stdscr.getmaxyx()
@@ -362,6 +362,6 @@ if __name__ == '__main__':
   stdscr.bkgd(colors.normal)
   stdscr.refresh()
 
-  choice = BoxSelector(stdscr, colors, data).pick()
+  choice = BoxSelector(stdscr, colors, data)._pick()
   if choice != None:
     print(data[choice].get('title'))

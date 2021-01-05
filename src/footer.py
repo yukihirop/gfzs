@@ -14,11 +14,11 @@ class Footer:
     self.colors = colors
     self.multibyte = Multibyte(self.stdscr)
 
-  def wait_input_prompt(self):
+  def _wait_input_prompt(self):
     self._init_curses()
 
     self._make_footer()
-    inp = self._wait_input_prompt()
+    inp = self._loop()
     self._end_curses()
     return inp
 
@@ -44,7 +44,7 @@ class Footer:
     maxy, maxx = self.stdscr.getmaxyx()
     self.stdscr.addstr(maxy - 1, 0, self.message, self.colors.prompt)
 
-  def _wait_input_prompt(self):
+  def _loop(self):
     maxy, maxx = self.stdscr.getmaxyx()
     self.stdscr.move(maxy - 1, len(self.message) + 1)
     self.stdscr.refresh()
@@ -79,5 +79,5 @@ if __name__ == '__main__':
   colors = Colors(curses)
   stdscr.bkgd(colors.normal)
 
-  inp = Footer(stdscr, colors).wait_input_prompt()
+  inp = Footer(stdscr, colors)._wait_input_prompt()
   print('result:', inp)
