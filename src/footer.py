@@ -8,16 +8,19 @@ from multibyte import Multibyte
 KEY_ENTER = 10
 
 class Footer:
-  def __init__(self, stdscr, colors):
+  def __init__(self, stdscr, colors, model):
     self.message = 'googler (? for help)'
     self.stdscr = stdscr
     self.colors = colors
+    self.model = model
     self.multibyte = Multibyte(self.stdscr)
 
-  def _wait_input_prompt(self):
+  def create(self):
     self._init_curses()
-
     self._make_footer()
+
+  def _wait_input_prompt(self):
+    self.create()
     inp = self._loop()
     self._end_curses()
     return inp
@@ -32,12 +35,16 @@ class Footer:
     # Aable the mouse cursor.
     curses.curs_set(1)
 
-  def _end_curses(self):
+  def _finish_curses(self):
+    self._end_curses(self, False)
+
+  def _end_curses(self, end = True):
     """ Terminates the curses application. """
     curses.nocbreak()
     self.stdscr.keypad(0)
     curses.echo()
-    curses.endwin()
+    if end:
+      curses.endwin()
 
   # stdscr.getch doesn't work when I addstr to subwin
   def _make_footer(self):
@@ -63,6 +70,7 @@ class Footer:
           return inp
         else:
           inp += chr(user_input)
+          self.model.update_query(inp)
 
 if __name__ == '__main__':
   import curses
@@ -71,6 +79,7 @@ if __name__ == '__main__':
   # local
 
   from colors import Colors
+  from model import Model
 
   signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -78,6 +87,8 @@ if __name__ == '__main__':
   stdscr = curses.initscr()
   colors = Colors(curses)
   stdscr.bkgd(colors.normal)
+  model = Model([])
 
-  inp = Footer(stdscr, colors)._wait_input_prompt()
+  inp = Footer(stdscr, colors, model)._wait_input_prompt()
+  print('query:', model.query)
   print('result:', inp)
