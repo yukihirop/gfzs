@@ -19,26 +19,36 @@ class BoxSelector:
      The user can browser though the textboxes and select one with enter.
   """
 
-  def __init__(self, stdscr, colors, data):
+  def __init__(self, stdscr, colors, model):
     """Create a BoxSelector object.
        'data' is list of string. Each string is used to build
        a textbox.
     """
     self.stdscr = stdscr
     self.colors = colors
-    self.data = data
+    self.model = model
     self.windows = []
     # Element parameters. Channge them here.
     self.TEXTBOX_HEIGHT = 8
     self.PAD_WIDTH = 400
     self.PAD_HEIGHT = 1000
 
-  def _pick(self):
-    """ Just run this when you want to spawn the selection process. """
+  def create(self):
     self._init_curses()
     self._create_pad()
-
     self.windows = self._make_textboxes()
+
+  def destroy(self):
+    self._delete_pad()
+    self._finish_curses()
+
+  def reset(self):
+    self._reset_pad()
+    self.windows = self._make_textboxes()
+
+  def _pick(self):
+    """ Just run this when you want to spawn the selection process. """
+    self.create()
     picked = self._loop()
     self._end_curses()
 
@@ -54,15 +64,22 @@ class BoxSelector:
     curses.curs_set(0)
     self.stdscr.keypad(1)
 
-  def _end_curses(self):
+  def _finish_curses(self):
+    self._end_curses(self, False)
+
+  def _end_curses(self, end = True):
     """ Terminates the curses application. """
     curses.nocbreak()
     self.stdscr.keypad(0)
     curses.echo()
-    curses.endwin()
+    if end:
+      curses.endwin()
+
+  def _delete_pad(self):
+    self.pad.clear()
 
   def _reset_pad(self):
-    self.pad.clear()
+    self._delete_pad()
     self._create_pad()
 
   def _create_pad(self):
@@ -78,7 +95,9 @@ class BoxSelector:
 
     windows = []
     i = 1
-    for s in self.data:
+    data = self.model.find()
+
+    for s in data:
         window = self.pad.derwin(
             self.TEXTBOX_HEIGHT,
             maxx - 4,
@@ -94,9 +113,9 @@ class BoxSelector:
     for k in range(len(windows)):
         windows[k].box()
 
-        title = self.data[k].get('title')
-        url = self.data[k].get('url')
-        abstract = self.data[k].get('abstract')
+        title = data[k].get('title')
+        url = data[k].get('url')
+        abstract = data[k].get('abstract')
 
         windows[k].addstr(2, 2, '%s%-3s' %
                           ('', str(k + 1) + '.'), self.colors.index)
@@ -191,8 +210,7 @@ class BoxSelector:
         else:
           current_selected = current_pagetop_index - (per_page - 1)
       elif c == curses.KEY_RESIZE:
-        self._reset_pad()
-        self.windows = self._make_textboxes()
+        self.reset()
       elif c == ord('q'):  # Quit without selecting.
         break
       # Ah hitting enter, return the index of the selected list element.
@@ -206,6 +224,7 @@ if __name__ == '__main__':
   # local
 
   from colors import Colors
+  from model import Model
 
   signal.signal(signal.SIGINT, signal.SIG_DFL)
   
@@ -361,7 +380,10 @@ if __name__ == '__main__':
   colors = Colors(curses)
   stdscr.bkgd(colors.normal)
   stdscr.refresh()
+  
+  model = Model(data)
+  model.update_query('Amazon')
 
-  choice = BoxSelector(stdscr, colors, data)._pick()
+  choice = BoxSelector(stdscr, colors, model)._pick()
   if choice != None:
     print(data[choice].get('title'))

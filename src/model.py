@@ -20,18 +20,26 @@ class Model:
     self.old_query = self.query
     self.query = query
 
+  def find(self, query=None, score=30):
+      return self.find_by_title(query, score)
+
   # e.g.) data = { title: { title, url, abstract }, ...}
-  def find_by_title(self, query, score = 30):
-    self.update_query(query)
+  def find_by_title(self, query=None, score=30):
+    if query != None:
+        self.update_query(query)
+        
+    if self.query != None:
+        data = self._collection_nested_by_title()
+        titles = data.keys()
+        fuzzysorted = fuzzyprocess.extract(self.query, titles, limit=len(titles))
 
-    data = self._collection_nested_by_title()
-    titles = data.keys()
-    fuzzysorted = fuzzyprocess.extract(self.query, titles, limit=len(titles))
-
-    # fuzzysorted reutrns an array of tuples: [('one', 45), ('three', 45), ('two', 0)]
-    for item in fuzzysorted:
-      if item[1] > score:
-        self.result.append(data.get(item[0]))
+        # fuzzysorted reutrns an array of tuples: [('one', 45), ('three', 45), ('two', 0)]
+        self.result = []
+        for item in fuzzysorted:
+            if item[1] > score:
+                self.result.append(data.get(item[0]))
+    else:
+        self.result = self.collection
 
     return self.result
   
