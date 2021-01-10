@@ -38,6 +38,7 @@ class BoxSelector:
     self._init_curses()
     self._create_pad()
     self.windows = self._make_textboxes()
+    self._refresh_view(self.windows[0])
 
   def destroy(self):
     self._delete_pad()
@@ -49,7 +50,10 @@ class BoxSelector:
 
   def update_result(self, user_input):
     current_selected = 0
-    last = 1
+    if len(self.windows) > 1:
+      last = 1
+    else:
+      last = 0
     # See at the root textbox.
     topy, _ = self._refresh_view(self.windows[0])
     maxy, _ = self.stdscr.getmaxyx()
@@ -202,30 +206,31 @@ class BoxSelector:
     per_page = maxy//self.TEXTBOX_HEIGHT
 
     windows = self.windows
+    windows_len = len(windows)
 
     # Vim like KEY_UP/KEY_DOWN with j(DOWN) and k(UP)
-    if user_input == ARROW_DOWN:
-      if (current_selected >= len(windows)-1):
+    if windows_len > 1 and user_input == ARROW_DOWN:
+      if (current_selected >= windows_len-1):
         current_selected = 0  # wrap around.
       else:
         current_selected += 1
-    elif user_input == ARROW_UP:
+    elif windows_len > 1 and user_input == ARROW_UP:
         if current_selected <= 0:
-          current_selected = len(windows) - 1  # wrap around.
+          current_selected = windows_len - 1  # wrap around.
         else:
           current_selected -= 1
-    elif user_input == ARROW_RIGHT:
+    elif windows_len > per_page and user_input == ARROW_RIGHT:
         next_pagetop_index = (per_page - 1) * \
            (current_selected // (per_page - 1) + 1)
-        if (next_pagetop_index <= len(windows)-1):
+        if (next_pagetop_index <= windows_len-1):
           current_selected = next_pagetop_index
         else:
           current_selected = 0  # wrap around.
-    elif user_input == ARROW_LEFT:
+    elif windows_len > per_page and user_input == ARROW_LEFT:
         current_pagetop_index = (per_page - 1) * \
           (current_selected//(per_page - 1))
         if (current_pagetop_index == 0):
-          current_selected = len(windows) - per_page + 1  # wrap around.
+          current_selected = windows_len - per_page + 1  # wrap around.
         else:
           current_selected = current_pagetop_index - (per_page - 1)
     elif user_input == curses.KEY_RESIZE:
@@ -237,7 +242,10 @@ class BoxSelector:
 
   def _loop(self):
     current_selected = 0
-    last = 1
+    if len(self.windows) > 1:
+      last = 1
+    else:
+      last = 0
     # See at the root textbox.
     topy, _ = self._refresh_view(self.windows[0])
     maxy, _ = self.stdscr.getmaxyx()
