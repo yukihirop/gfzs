@@ -27,6 +27,7 @@ class BoxSelector:
     self.stdscr = stdscr
     self.colors = colors
     self.model = model
+    self.stop_loop = False
     self.windows = []
     # Element parameters. Channge them here.
     self.TEXTBOX_HEIGHT = 8
@@ -45,6 +46,26 @@ class BoxSelector:
   def reset(self):
     self._reset_pad()
     self.windows = self._make_textboxes()
+
+  def update_result(self, user_input):
+    current_selected = 0
+    last = 1
+    # See at the root textbox.
+    topy, _ = self._refresh_view(self.windows[0])
+    maxy, _ = self.stdscr.getmaxyx()
+    top_textbox = self.windows[0]
+
+    while True:
+      if self.stop_loop:
+        break
+
+      current_selected, last, topy, top_textbox = self._update_view_in_loop(
+          current_selected, last, topy, maxy, top_textbox)
+      
+      if user_input == curses.KEY_ENTER or user_input == 10:
+        return int(current_selected)
+
+      current_selected = self._handle_key_in_loop(user_input, current_selected)
 
   def _pick(self):
     """ Just run this when you want to spawn the selection process. """
@@ -139,83 +160,108 @@ class BoxSelector:
     self.pad.refresh(cy, cx, 1, 2, display_limit_pos_y, display_limit_pos_x)
     return (cy, cx)
 
-  def _loop(self):
-    # See at the root textbox.
-    topy, topx = self._refresh_view(self.windows[0])
-    maxy, maxx = self.stdscr.getmaxyx()
+  def _update_view_in_loop(self, current_selected, last, topy, maxy, top_textbox) -> (int, int, int, object):
+    windows = self.windows
 
-    current_selected = 0
-    last = 1
-    top_textbox = self.windows[0]
+    # Highligth the selected one, the last selected textbox should
+    # become normal again.
+    windows[current_selected].border(self.colors.highlight)
+    windows[last].border()
 
-    while True:
-      windows = self.windows
+    # Paging
 
-      # Highligth the selected one, the last selected textbox should
-      # become normal again.
-      windows[current_selected].border(self.colors.highlight)
-      windows[last].border()
+    # While the textbox can be displayed on the page with the current top_textbox,
+    # don't after the view. When this becomes impossible,
+    # center the view to last displayable textbox on the previous view.
+    cy, cx = windows[current_selected].getbegyx()
+    per_page = maxy//self.TEXTBOX_HEIGHT
 
-      # Paging
+    # The current window is to far down. Switch the top textbox.
+    # When you reach the bottom, redisplay the current box at the top
+    if ((topy + maxy - self.TEXTBOX_HEIGHT) <= cy):
+      top_textbox = windows[current_selected]
 
-      # While the textbox can be displayed on the page with the current top_textbox,
-      # don't after the view. When this becomes impossible,
-      # center the view to last displayable textbox on the previous view.
-      cy, cx = windows[current_selected].getbegyx()
-      per_page = maxy//self.TEXTBOX_HEIGHT
+    # The current window is to far up. There is a better way though...
+    # Update the top until you reach the top of the screen.
+    if topy >= cy + self.TEXTBOX_HEIGHT:
+      if (current_selected < per_page - 1):
+        top_textbox = windows[0]
+      else:
+        top_textbox = windows[current_selected - per_page + 1]
 
-      # The current window is to far down. Switch the top textbox.
-      # When you reach the bottom, redisplay the current box at the top
-      if ((topy + maxy - self.TEXTBOX_HEIGHT) <= cy):
-        top_textbox = windows[current_selected]
+    if last != current_selected:
+      last = current_selected
 
-      # The current window is to far up. There is a better way though...
-      # Update the top until you reach the top of the screen.
-      if topy >= cy + self.TEXTBOX_HEIGHT:
-        if (current_selected < per_page - 1):
-          top_textbox = windows[0]
-        else:
-          top_textbox = windows[current_selected - per_page + 1]
+    refresh_topy, _ = self._refresh_view(top_textbox)
 
-      if last != current_selected:
-        last = current_selected
+    self.windows = windows
+    return (current_selected, last, refresh_topy, top_textbox)
 
-      topy, topx = self._refresh_view(top_textbox)
+  def _handle_key_in_loop(self, user_input, current_selected) -> int:
+    maxy, _ = self.stdscr.getmaxyx()
+    per_page = maxy//self.TEXTBOX_HEIGHT
 
-      c = self.stdscr.getch()
+    windows = self.windows
 
-      # Vim like KEY_UP/KEY_DOWN with j(DOWN) and k(UP)
-      if c == ARROW_DOWN:
-        if (current_selected >= len(windows)-1):
-          current_selected = 0  # wrap around.
-        else:
-          current_selected += 1
-      elif c == ARROW_UP:
+    # Vim like KEY_UP/KEY_DOWN with j(DOWN) and k(UP)
+    if user_input == ARROW_DOWN:
+      if (current_selected >= len(windows)-1):
+        current_selected = 0  # wrap around.
+      else:
+        current_selected += 1
+    elif user_input == ARROW_UP:
         if current_selected <= 0:
           current_selected = len(windows) - 1  # wrap around.
         else:
           current_selected -= 1
-      elif c == ARROW_RIGHT:
+    elif user_input == ARROW_RIGHT:
         next_pagetop_index = (per_page - 1) * \
-            (current_selected//(per_page - 1) + 1)
+           (current_selected // (per_page - 1) + 1)
         if (next_pagetop_index <= len(windows)-1):
           current_selected = next_pagetop_index
         else:
           current_selected = 0  # wrap around.
-      elif c == ARROW_LEFT:
+    elif user_input == ARROW_LEFT:
         current_pagetop_index = (per_page - 1) * \
-            (current_selected//(per_page - 1))
+          (current_selected//(per_page - 1))
         if (current_pagetop_index == 0):
           current_selected = len(windows) - per_page + 1  # wrap around.
         else:
           current_selected = current_pagetop_index - (per_page - 1)
-      elif c == curses.KEY_RESIZE:
+    elif user_input == curses.KEY_RESIZE:
         self.reset()
-      elif c == ord('q'):  # Quit without selecting.
+    elif user_input == ord('q'):  # Quit without selecting.
+        self.stop_loop = True
+
+    return current_selected
+
+  def _loop(self):
+    current_selected = 0
+    last = 1
+    # See at the root textbox.
+    topy, _ = self._refresh_view(self.windows[0])
+    maxy, _ = self.stdscr.getmaxyx()
+    top_textbox = self.windows[0]
+
+    while True:
+      if self.stop_loop:
         break
-      # Ah hitting enter, return the index of the selected list element.
-      elif c == curses.KEY_ENTER or c == 10:
+
+      current_selected, last, topy, top_textbox = self._update_view_in_loop(
+          current_selected, last, topy, maxy, top_textbox)
+
+      try:
+          user_input = self.stdscr.getch()
+      except curses.error:
+          continue
+      except KeyboardInterrupt:
+          break
+
+      if user_input == curses.KEY_ENTER or user_input == 10:
         return int(current_selected)
+
+      current_selected = self._handle_key_in_loop(user_input, current_selected)
+
 
 if __name__ == '__main__':
   import curses
