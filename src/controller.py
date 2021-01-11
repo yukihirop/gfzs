@@ -1,4 +1,5 @@
 import curses
+import curses.ascii
 import threading
 
 # local
@@ -50,9 +51,14 @@ class Controller:
         input_mode = True
         user_input = ''
         result_updating_timer = None
+        query = ''
         
         self.box_selector.create()
         self.box_selector.init_properties_after_create()
+        self.box_selector.update_view_in_loop()
+
+        # debug.log('current_selected(0)', self.box_selector.current_selected)
+        # debug.log('last(0)', self.box_selector.helper.last)
 
         self.footer.create()
         self.footer.activate()
@@ -74,13 +80,26 @@ class Controller:
                 break
 
             if input_mode:
-                if user_input == KEY_ESC:
+                if user_input == self.box_selector.ARROW_DOWN or \
+                    user_input == self.box_selector.ARROW_UP or \
+                        user_input == self.box_selector.ARROW_LEFT or \
+                            user_input == self.box_selector.ARROW_RIGHT:
                     input_mode = False
+                    self.footer.update_query(query)
+                    search_and_refresh_display(user_input)
+                elif user_input == KEY_ESC:
+                    pass
                 elif user_input == KEY_ENTER:
                     input_mode = False
+                    self.footer.update_query(query)
                     search_and_refresh_display(user_input)
+                    # https://www.programcreek.com/python/?code=mingrammer%2Fawesome-finder%2Fawesome-finder-master%2Fawesome%2Ftui.py
+                elif user_input in (curses.ascii.BS, curses.ascii.DEL, curses.KEY_BACKSPACE):
+                    self.footer.delete_char()
+                    query = query[:-1]
                 else:
-                    self.footer.update_query(user_input)
+                    query += chr(user_input)
+                    self.footer.update_query(query)
             else:
                 if user_input == KEY_ESC:
                     input_mode = True

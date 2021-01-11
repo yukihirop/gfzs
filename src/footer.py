@@ -34,7 +34,7 @@ class Footer:
     self.stdscr.move(maxy - 1, len(self.message) + 1)
     self.stdscr.refresh()
 
-  def _delete_char(self):
+  def delete_char(self):
     maxy, _ = self.stdscr.getmaxyx()
 
     if self.query == None or self.query == '':
@@ -100,7 +100,7 @@ class Footer:
           return inp
         # https://www.programcreek.com/python/?code=mingrammer%2Fawesome-finder%2Fawesome-finder-master%2Fawesome%2Ftui.py
         elif user_input in (curses.ascii.BS, curses.ascii.DEL, curses.KEY_BACKSPACE):
-          self._delete_char()
+          self.delete_char()
           inp = inp[:-1]
         else:
           inp += chr(user_input)

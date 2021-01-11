@@ -51,15 +51,34 @@ class BoxSelector:
     self.PAD_HEIGHT = 1000
 
   @property
+  def ARROW_DOWN(self) -> int:
+    return ARROW_DOWN
+  
+  @property
+  def ARROW_UP(self) -> int:
+    return ARROW_UP
+
+  @property
+  def ARROW_LEFT(self) -> int:
+    return ARROW_LEFT
+
+  @property
+  def ARROW_RIGHT(self) -> int:
+    return ARROW_RIGHT
+
+  @property
   def current_selected(self) -> int:
     return self.helper.current_selected
 
   def init_properties_after_create(self):
     current_selected = 0
-    last = 0
     topy, _ = self._refresh_view(self.windows[0])
     maxy, _ = self.stdscr.getmaxyx()
     top_textbox = self.windows[0]
+    if len(self.windows) > 1:
+      last = 1
+    else:
+      last = 0
 
     self.helper.update_attributues(current_selected, last, topy, maxy, top_textbox)
 
