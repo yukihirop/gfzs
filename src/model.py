@@ -6,7 +6,7 @@ class Model:
   def __init__(self, collection):
     self.collection = collection
     self.result = []
-    self.query = self.old_query = ''
+    self.query = self.old_query = None
   
   @property
   def summary_count(self):
@@ -15,6 +15,9 @@ class Model:
   @property
   def current_count(self):
     return len(self.result)
+
+  def should_search_again(self):
+    return self.query != self.old_query
 
   def update_query(self, query):
     self.old_query = self.query

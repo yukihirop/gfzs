@@ -14,6 +14,21 @@ ARROW_UP = 259
 ARROW_LEFT = 260
 ARROW_RIGHT = 261
 
+class BoxSelectorHelper:
+  def __init__(self):
+    self.current_selected = 0
+    self.last = 1
+    self.topy = 1
+    self.maxy = 1
+    self.top_textbox = None
+
+  def update_attributues(self, current_selected, last, topy, maxy, top_textbox):
+    self.current_selected = current_selected
+    self.last = last
+    self.topy = topy
+    self.maxy = maxy
+    self.top_textbox = top_textbox
+
 class BoxSelector:
   """Display options build from a list of strings in a (unix) terminal.
      The user can browser though the textboxes and select one with enter.
@@ -29,10 +44,24 @@ class BoxSelector:
     self.model = model
     self.stop_loop = False
     self.windows = []
+    self.helper = BoxSelectorHelper()
     # Element parameters. Channge them here.
     self.TEXTBOX_HEIGHT = 8
     self.PAD_WIDTH = 400
     self.PAD_HEIGHT = 1000
+
+  @property
+  def current_selected(self) -> int:
+    return self.helper.current_selected
+
+  def init_properties_after_create(self):
+    current_selected = 0
+    last = 0
+    topy, _ = self._refresh_view(self.windows[0])
+    maxy, _ = self.stdscr.getmaxyx()
+    top_textbox = self.windows[0]
+
+    self.helper.update_attributues(current_selected, last, topy, maxy, top_textbox)
 
   def create(self):
     self._init_curses()
@@ -45,31 +74,12 @@ class BoxSelector:
     self._finish_curses()
 
   def reset(self):
+    self._init_curses()
     self._reset_pad()
     self.windows = self._make_textboxes()
 
-  def update_result(self, user_input):
-    current_selected = 0
-    if len(self.windows) > 1:
-      last = 1
-    else:
-      last = 0
-    # See at the root textbox.
-    topy, _ = self._refresh_view(self.windows[0])
-    maxy, _ = self.stdscr.getmaxyx()
-    top_textbox = self.windows[0]
-
-    while True:
-      if self.stop_loop:
-        break
-
-      current_selected, last, topy, top_textbox = self._update_view_in_loop(
-          current_selected, last, topy, maxy, top_textbox)
-      
-      if user_input == curses.KEY_ENTER or user_input == 10:
-        return int(current_selected)
-
-      current_selected = self._handle_key_in_loop(user_input, current_selected)
+    if len(self.windows) > 0:
+      self._refresh_view(self.windows[0])
 
   def _pick(self):
     """ Just run this when you want to spawn the selection process. """
@@ -164,8 +174,18 @@ class BoxSelector:
     self.pad.refresh(cy, cx, 1, 2, display_limit_pos_y, display_limit_pos_x)
     return (cy, cx)
 
-  def _update_view_in_loop(self, current_selected, last, topy, maxy, top_textbox) -> (int, int, int, object):
+  def update_view_in_loop(self):
     windows = self.windows
+    windows_len = len(windows)
+
+    if windows_len == 0:
+      return
+
+    current_selected = self.current_selected
+    last = self.helper.last
+    topy = self.helper.topy
+    maxy = self.helper.maxy
+    top_textbox = self.helper.top_textbox
 
     # Highligth the selected one, the last selected textbox should
     # become normal again.
@@ -199,14 +219,19 @@ class BoxSelector:
     refresh_topy, _ = self._refresh_view(top_textbox)
 
     self.windows = windows
-    return (current_selected, last, refresh_topy, top_textbox)
+    self.helper.update_attributues(
+        current_selected, last, refresh_topy, maxy, top_textbox)
 
-  def _handle_key_in_loop(self, user_input, current_selected) -> int:
-    maxy, _ = self.stdscr.getmaxyx()
-    per_page = maxy//self.TEXTBOX_HEIGHT
-
+  def handle_key_in_loop(self, user_input) -> int:
     windows = self.windows
     windows_len = len(windows)
+
+    if windows_len == 0:
+      return
+
+    current_selected = self.current_selected
+    maxy = self.helper.maxy
+    per_page = maxy//self.TEXTBOX_HEIGHT
 
     # Vim like KEY_UP/KEY_DOWN with j(DOWN) and k(UP)
     if windows_len > 1 and user_input == ARROW_DOWN:
@@ -238,7 +263,7 @@ class BoxSelector:
     elif user_input == ord('q'):  # Quit without selecting.
         self.stop_loop = True
 
-    return current_selected
+    self.helper.current_selected = current_selected
 
   def _loop(self):
     current_selected = 0
@@ -251,12 +276,13 @@ class BoxSelector:
     maxy, _ = self.stdscr.getmaxyx()
     top_textbox = self.windows[0]
 
+    self.helper.update_attributues(current_selected, last, topy, maxy, top_textbox)
+
     while True:
       if self.stop_loop:
         break
 
-      current_selected, last, topy, top_textbox = self._update_view_in_loop(
-          current_selected, last, topy, maxy, top_textbox)
+      self.update_view_in_loop()
 
       try:
           user_input = self.stdscr.getch()
@@ -266,9 +292,9 @@ class BoxSelector:
           break
 
       if user_input == curses.KEY_ENTER or user_input == 10:
-        return int(current_selected)
+        return int(self.current_selected)
 
-      current_selected = self._handle_key_in_loop(user_input, current_selected)
+      self.handle_key_in_loop(user_input)
 
 
 if __name__ == '__main__':

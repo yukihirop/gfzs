@@ -6,6 +6,7 @@ import debug
 from multibyte import Multibyte
 
 KEY_ENTER = 10
+KEY_ESC = 27
 
 class Footer:
   def __init__(self, stdscr, colors, model):
@@ -14,10 +15,22 @@ class Footer:
     self.colors = colors
     self.model = model
     self.multibyte = Multibyte(self.stdscr)
+    self.query = ''
 
   def create(self):
     self._init_curses()
     self._make_footer()
+
+  def activate(self):
+    self._init_curses()
+    maxy, _ = self.stdscr.getmaxyx()
+    self.stdscr.move(maxy - 1, len(self.message) + 1)
+    self.stdscr.refresh()
+
+
+  def update_query(self, user_input):
+    self.query += chr(user_input)
+    self.model.update_query(self.query)
 
   def _wait_input_prompt(self):
     self.create()
@@ -52,9 +65,7 @@ class Footer:
     self.stdscr.addstr(maxy - 1, 0, self.message, self.colors.prompt)
 
   def _loop(self):
-    maxy, maxx = self.stdscr.getmaxyx()
-    self.stdscr.move(maxy - 1, len(self.message) + 1)
-    self.stdscr.refresh()
+    self.activate()
 
     inp = ''
     while True:

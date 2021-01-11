@@ -1,34 +1,108 @@
 import curses
+import threading
 
 # local
 
+import debug
 from box_selector import BoxSelector
+from footer import Footer
 from colors import Colors
+from model import Model
+from multibyte import Multibyte
 
-class View:
-  def __init__(self, data):
-    self._init_curses()
-    self.box_selector = BoxSelector(self.stdscr, self.colors, data)
+KEY_ENTER = 10
+KEY_ESC = 27
 
-  def pick(self):
-    picked = self.box_selector.pick()
-    return picked
 
-  def _init_curses(self):
-    """ Inits the curses application """
-    # initscr() returns a window object representing the entire screen.
-    self.stdscr = curses.initscr()
-    # turn off automatic echoing of keys to the screen
-    curses.noecho()
-    # Enable non-blocking mode. keys are read directly, without hitting enter.
-    curses.cbreak()
-    # Disable the mouse cursor.
-    curses.curs_set(0)
-    self.stdscr.keypad(1)
-    # Enable colorous output.
-    self.colors = Colors(curses)
-    self.stdscr.bkgd(self.colors.normal)
-    self.stdscr.refresh()
+class Controller:
+    def __init__(self, data):
+        self._init_curses()
+        self.model = Model(data)
+        self.box_selector = BoxSelector(self.stdscr, self.colors, self.model)
+        self.footer = Footer(self.stdscr, self.colors, self.model)
+        self.multibyte = Multibyte(self.stdscr)
+        self.global_lock = threading.Lock()
+
+    def _init_curses(self):
+        """ Inits the curses application """
+        # initscr() returns a window object representing the entire screen.
+        self.stdscr = curses.initscr()
+        # turn off automatic echoing of keys to the screen
+        curses.noecho()
+        # Enable non-blocking mode. keys are read directly, without hitting enter.
+        curses.cbreak()
+        # Disable the mouse cursor.
+        curses.curs_set(0)
+        self.stdscr.keypad(1)
+        # Enable colorous output.
+        self.colors = Colors(curses)
+        self.stdscr.bkgd(self.colors.normal)
+        self.stdscr.refresh()
+
+    def _end_curses(self):
+        """ Terminates the curses application. """
+        curses.nocbreak()
+        self.stdscr.keypad(0)
+        curses.echo()
+        curses.endwin()
+
+    def _loop(self) -> int:
+        input_mode = True
+        user_input = ''
+        result_updating_timer = None
+        
+        self.box_selector.create()
+        self.box_selector.init_properties_after_create()
+
+        self.footer.create()
+        self.footer.activate()
+
+        def search_and_refresh_display(user_input):
+            self.box_selector.reset()
+            self.box_selector.update_view_in_loop()
+            self.box_selector.handle_key_in_loop(user_input)
+
+        while True:
+            if not input_mode:
+                self.box_selector.update_view_in_loop()
+
+            try:
+                user_input = self.multibyte.getch()
+            except curses.error:
+                continue
+            except KeyboardInterrupt:
+                break
+
+            if input_mode:
+                if user_input == KEY_ESC:
+                    input_mode = False
+                elif user_input == KEY_ENTER:
+                    input_mode = False
+                    search_and_refresh_display(user_input)
+                else:
+                    self.footer.update_query(user_input)
+            else:
+                if user_input == KEY_ESC:
+                    input_mode = True
+                    self.footer.activate()
+                elif user_input == KEY_ENTER:
+                    self._end_curses()
+                    return self.box_selector.current_selected
+                else:
+                    self.box_selector.handle_key_in_loop(user_input)
+
+            # if self.model.should_search_again():
+            #     # search again
+            #     with self.global_lock:
+            #         if not result_updating_timer is None:
+            #             # clear timer
+            #             result_updating_timer.cancel()
+            #             result_updating_timer = None
+            #         # with bounce
+            #         debug.log('bounce#query', self.model.query)
+            #         t = threading.Timer(0.05, search_and_refresh_display, [user_input])
+            #         result_updating_timer = t
+            #         t.start()
 
 
 if __name__ == '__main__':
@@ -182,6 +256,8 @@ if __name__ == '__main__':
       }
   ]
 
-  view = View(data)
-  choice = view.pick()
-  print(data[choice].get('title'))
+  controller = Controller(data)
+  choice = controller._loop()
+  result = controller.model.result
+  if not choice is None:
+    print(result[choice].get('title'))
