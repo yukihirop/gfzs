@@ -1,4 +1,5 @@
 import curses
+import curses.ascii
 
 # local
 
@@ -15,7 +16,13 @@ class Footer:
     self.colors = colors
     self.model = model
     self.multibyte = Multibyte(self.stdscr)
-    self.query = ''
+
+  @property
+  def query(self):
+    return self.model.query
+  
+  def update_query(self, query):
+    self.model.update_query(query)
 
   def create(self):
     self._init_curses()
@@ -27,10 +34,22 @@ class Footer:
     self.stdscr.move(maxy - 1, len(self.message) + 1)
     self.stdscr.refresh()
 
+  def _delete_char(self):
+    maxy, _ = self.stdscr.getmaxyx()
 
-  def update_query(self, user_input):
-    self.query += chr(user_input)
-    self.model.update_query(self.query)
+    if self.query == None or self.query == '':
+      self.stdscr.delch(maxy - 1, len(self.message) + 1 + 1)  #?
+      self.stdscr.delch(maxy - 1, len(self.message) + 1) #^
+      self.stdscr.move(maxy - 1, len(self.message) + 1)
+    else:
+      query_len = len(self.query)
+      if query_len > 0:
+        # backspace = ^?
+        self.stdscr.delch(maxy - 1, len(self.message) + 1 + query_len - 1 + 2) #?
+        self.stdscr.delch(maxy - 1, len(self.message) + 1 + query_len - 1 + 1) #^
+        self.stdscr.delch(maxy - 1, len(self.message) + 1 + query_len - 1)
+        self.stdscr.move(maxy - 1, len(self.message) + 1 + query_len - 1)
+        self.update_query(self.query[:-1])
 
   def _wait_input_prompt(self):
     self.create()
@@ -79,9 +98,13 @@ class Footer:
         # Ah hitting enter, return the index of the selected list element.
         if user_input == curses.KEY_ENTER or user_input == KEY_ENTER:
           return inp
+        # https://www.programcreek.com/python/?code=mingrammer%2Fawesome-finder%2Fawesome-finder-master%2Fawesome%2Ftui.py
+        elif user_input in (curses.ascii.BS, curses.ascii.DEL, curses.KEY_BACKSPACE):
+          self._delete_char()
+          inp = inp[:-1]
         else:
           inp += chr(user_input)
-          self.model.update_query(inp)
+          self.update_query(inp)
 
 if __name__ == '__main__':
   import curses

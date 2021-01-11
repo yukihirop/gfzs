@@ -28,10 +28,10 @@ class Model:
 
   # e.g.) data = { title: { title, url, abstract }, ...}
   def find_by_title(self, query=None, score=30):
-    if query != None:
+    if query != None and query != '':
         self.update_query(query)
         
-    if self.query != None:
+    if self.query != None and self.query != '':
         data = self._collection_nested_by_title()
         titles = data.keys()
         fuzzysorted = fuzzyprocess.extract(self.query, titles, limit=len(titles))
