@@ -40,15 +40,18 @@ class Footer:
     if self.query == None or self.query == '':
       self.stdscr.delch(maxy - 1, len(self.message) + 1 + 1)  #?
       self.stdscr.delch(maxy - 1, len(self.message) + 1) #^
-      self.stdscr.move(maxy - 1, len(self.message) + 1)
     else:
-      query_len = len(self.query)
+      query_len = self.multibyte.get_east_asian_width_count(self.query)
       if query_len > 0:
         # backspace = ^?
-        self.stdscr.delch(maxy - 1, len(self.message) + 1 + query_len - 1 + 2) #?
-        self.stdscr.delch(maxy - 1, len(self.message) + 1 + query_len - 1 + 1) #^
-        self.stdscr.delch(maxy - 1, len(self.message) + 1 + query_len - 1)
-        self.stdscr.move(maxy - 1, len(self.message) + 1 + query_len - 1)
+        debug.log('query_len', query_len)
+        if self.multibyte.is_full_width(self.query[-1]):
+          k = 2
+        else:
+          k = 1
+        self.stdscr.delch(maxy - 1, len(self.message) + 1 + query_len - k + 2) #?
+        self.stdscr.delch(maxy - 1, len(self.message) + 1 + query_len - k + 1) #^
+        self.stdscr.delch(maxy - 1, len(self.message) + 1 + query_len - k)
         self.update_query(self.query[:-1])
 
   def _wait_input_prompt(self):
@@ -60,7 +63,7 @@ class Footer:
   def _init_curses(self):
     """ Inits the curses application """
     # turn off automatic echoing of keys to the screen
-    curses.echo()
+    curses.noecho()
     # Buffering off
     # https://docs.python.org/ja/3/library/curses.html#curses.cbreak
     curses.cbreak()
@@ -103,6 +106,7 @@ class Footer:
           self.delete_char()
           inp = inp[:-1]
         else:
+          self.stdscr.addstr(chr(user_input))
           inp += chr(user_input)
           self.update_query(inp)
 
