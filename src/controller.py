@@ -51,7 +51,6 @@ class Controller:
         input_mode = True
         user_input = ''
         result_updating_timer = None
-        query = ''
         
         self.box_selector.create()
         self.box_selector.init_properties_after_create()
@@ -63,9 +62,12 @@ class Controller:
         self.footer.create()
         self.footer.activate()
 
-        def search_and_refresh_display(user_input):
+        def search_and_refresh_display(user_input, is_init_property=False):
+            if is_init_property:
+                self.box_selector.init_properties_after_create()
             self.box_selector.reset()
             self.box_selector.update_view_in_loop()
+            self.box_selector.update_query('')
             self.box_selector.handle_key_in_loop(user_input)
 
         while True:
@@ -85,30 +87,38 @@ class Controller:
                         user_input == self.box_selector.ARROW_LEFT or \
                             user_input == self.box_selector.ARROW_RIGHT:
                     input_mode = False
-                    self.footer.update_query(query)
                     search_and_refresh_display(user_input)
                 elif user_input == KEY_ESC:
                     pass
                 elif user_input == KEY_ENTER:
                     input_mode = False
-                    self.footer.update_query(query)
-                    search_and_refresh_display(user_input)
-                    # https://www.programcreek.com/python/?code=mingrammer%2Fawesome-finder%2Fawesome-finder-master%2Fawesome%2Ftui.py
+                    search_and_refresh_display(user_input, is_init_property=True)
+
+                # https://www.programcreek.com/python/?code=mingrammer%2Fawesome-finder%2Fawesome-finder-master%2Fawesome%2Ftui.py
                 elif user_input in (curses.ascii.BS, curses.ascii.DEL, curses.KEY_BACKSPACE):
                     self.footer.delete_char()
-                    query = query[:-1]
                 else:
-                    query += chr(user_input)
-                    self.footer.update_query(query)
+                    text = chr(user_input)
+                    self.footer.write(text)
+                    self.footer.push_query(text)
             else:
-                if user_input == KEY_ESC:
+                if user_input == self.box_selector.ARROW_DOWN or \
+                        user_input == self.box_selector.ARROW_UP or \
+                            user_input == self.box_selector.ARROW_LEFT or \
+                                user_input == self.box_selector.ARROW_RIGHT:
+                    self.box_selector.handle_key_in_loop(user_input)
+                elif user_input == KEY_ESC:
                     input_mode = True
                     self.footer.activate()
                 elif user_input == KEY_ENTER:
                     self._end_curses()
                     return self.box_selector.current_selected
                 else:
-                    self.box_selector.handle_key_in_loop(user_input)
+                    input_mode = True
+                    text = chr(user_input)
+                    self.footer.activate()
+                    self.footer.write(text)
+                    self.footer.push_query(text)
 
             # if self.model.should_search_again():
             #     # search again

@@ -23,6 +23,10 @@ class Model:
     self.old_query = self.query
     self.query = query
 
+  def push_query(self, char):
+    self.old_query = self.query
+    self.query += char
+
   def find(self, query=None, score=30):
       return self.find_by_title(query, score)
 

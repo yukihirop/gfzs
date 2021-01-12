@@ -24,14 +24,19 @@ class Footer:
   def update_query(self, query):
     self.model.update_query(query)
 
+  def push_query(self, char):
+    self.model.push_query(char)
+
   def create(self):
     self._init_curses()
     self._make_footer()
 
   def activate(self):
     self._init_curses()
+    self.update_query('')
     maxy, _ = self.stdscr.getmaxyx()
     self.stdscr.move(maxy - 1, len(self.message) + 1)
+    self.stdscr.clrtoeol()
     self.stdscr.refresh()
 
   def delete_char(self):
@@ -43,16 +48,18 @@ class Footer:
     else:
       query_len = self.multibyte.get_east_asian_width_count(self.query)
       if query_len > 0:
-        # backspace = ^?
-        debug.log('query_len', query_len)
         if self.multibyte.is_full_width(self.query[-1]):
           k = 2
         else:
           k = 1
+        # backspace = ^?
         self.stdscr.delch(maxy - 1, len(self.message) + 1 + query_len - k + 2) #?
         self.stdscr.delch(maxy - 1, len(self.message) + 1 + query_len - k + 1) #^
         self.stdscr.delch(maxy - 1, len(self.message) + 1 + query_len - k)
         self.update_query(self.query[:-1])
+  
+  def write(self, text):
+    self.stdscr.addstr(text)
 
   def _wait_input_prompt(self):
     self.create()
@@ -70,15 +77,12 @@ class Footer:
     # Aable the mouse cursor.
     curses.curs_set(1)
 
-  def _finish_curses(self):
-    self._end_curses(self, False)
-
   def _end_curses(self, end = True):
     """ Terminates the curses application. """
     curses.nocbreak()
     self.stdscr.keypad(0)
-    curses.echo()
     if end:
+      curses.echo()
       curses.endwin()
 
   # stdscr.getch doesn't work when I addstr to subwin
@@ -106,7 +110,7 @@ class Footer:
           self.delete_char()
           inp = inp[:-1]
         else:
-          self.stdscr.addstr(chr(user_input))
+          self.write(chr(user_input))
           inp += chr(user_input)
           self.update_query(inp)
 

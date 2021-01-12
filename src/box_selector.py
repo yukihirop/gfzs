@@ -91,6 +91,9 @@ class BoxSelector:
   def destroy(self):
     self._delete_pad()
     self._finish_curses()
+  
+  def update_query(self, query):
+    self.model.update_query(query)
 
   def reset(self):
     self._init_curses()
@@ -125,8 +128,8 @@ class BoxSelector:
     """ Terminates the curses application. """
     curses.nocbreak()
     self.stdscr.keypad(0)
-    curses.echo()
     if end:
+      curses.echo()
       curses.endwin()
 
   def _delete_pad(self):
