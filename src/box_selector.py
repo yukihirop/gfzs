@@ -72,25 +72,28 @@ class BoxSelector:
 
   def init_properties_after_create(self):
     current_selected = 0
-    topy, _ = self._refresh_view(self.windows[0])
-    maxy, _ = self.stdscr.getmaxyx()
-    top_textbox = self.windows[0]
-    if len(self.windows) > 1:
-      last = 1
-    else:
-      last = 0
+    windows_len = len(self.windows)
 
-    self.helper.update_attributues(current_selected, last, topy, maxy, top_textbox)
+    if windows_len > 0:
+      top_textbox = self.windows[0]
+      topy, _ = self._refresh_view(top_textbox)
+      maxy, _ = self.stdscr.getmaxyx()
+      if windows_len > 1:
+        last = 1
+      else:
+        last = 0
+
+      self.helper.update_attributues(current_selected, last, topy, maxy, top_textbox)
 
   def create(self):
     self._init_curses()
     self._create_pad()
     self.windows = self._make_textboxes()
-    self._refresh_view(self.windows[0])
+    if len(self.windows) > 0:
+      self._refresh_view(self.windows[0])
 
   def destroy(self):
     self._delete_pad()
-    self._finish_curses()
   
   def update_query(self, query):
     self.model.update_query(query)
@@ -99,9 +102,11 @@ class BoxSelector:
     self._init_curses()
     self._reset_pad()
     self.windows = self._make_textboxes()
-
     if len(self.windows) > 0:
       self._refresh_view(self.windows[0])
+    else:
+      # If you don't share stdscr with footer, it works fine
+      self.stdscr.clear()
 
   def _pick(self):
     """ Just run this when you want to spawn the selection process. """
@@ -122,7 +127,7 @@ class BoxSelector:
     self.stdscr.keypad(1)
 
   def _finish_curses(self):
-    self._end_curses(self, False)
+    self._end_curses(False)
 
   def _end_curses(self, end = True):
     """ Terminates the curses application. """
@@ -134,6 +139,7 @@ class BoxSelector:
 
   def _delete_pad(self):
     self.pad.clear()
+    self.stdscr.refresh()
 
   def _reset_pad(self):
     self._delete_pad()
@@ -196,12 +202,12 @@ class BoxSelector:
     self.pad.refresh(cy, cx, 1, 2, display_limit_pos_y, display_limit_pos_x)
     return (cy, cx)
 
-  def update_view_in_loop(self):
+  def update_view_in_loop(self) -> bool:
     windows = self.windows
     windows_len = len(windows)
 
     if windows_len == 0:
-      return
+      return False
 
     current_selected = self.current_selected
     last = self.helper.last
@@ -244,7 +250,9 @@ class BoxSelector:
     self.helper.update_attributues(
         current_selected, last, refresh_topy, maxy, top_textbox)
 
-  def handle_key_in_loop(self, user_input) -> int:
+    return True
+
+  def handle_key_in_loop(self, user_input):
     windows = self.windows
     windows_len = len(windows)
 
@@ -289,16 +297,19 @@ class BoxSelector:
 
   def _loop(self):
     current_selected = 0
-    if len(self.windows) > 1:
+    windows_len = len(self.windows)
+
+    if windows_len > 1:
       last = 1
     else:
       last = 0
-    # See at the root textbox.
-    topy, _ = self._refresh_view(self.windows[0])
-    maxy, _ = self.stdscr.getmaxyx()
-    top_textbox = self.windows[0]
 
-    self.helper.update_attributues(current_selected, last, topy, maxy, top_textbox)
+    # See at the root textbox.
+    if windows_len > 0:
+      top_textbox = self.windows[0]
+      topy, _ = self._refresh_view(top_textbox)
+      maxy, _ = self.stdscr.getmaxyx()
+      self.helper.update_attributues(current_selected, last, topy, maxy, top_textbox)
 
     while True:
       if self.stop_loop:

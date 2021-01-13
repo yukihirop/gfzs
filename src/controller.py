@@ -14,7 +14,6 @@ from multibyte import Multibyte
 KEY_ENTER = 10
 KEY_ESC = 27
 
-
 class Controller:
     def __init__(self, data):
         self._init_curses()
@@ -63,12 +62,17 @@ class Controller:
 
         def search_and_refresh_display(user_input, is_init_property=False, is_init_query=True):
             self.box_selector.reset()
+
             if is_init_property:
                 self.box_selector.init_properties_after_create()
-            self.box_selector.update_view_in_loop()
+            
+            result = self.box_selector.update_view_in_loop()
+            
             if is_init_query:
                 self.box_selector.update_query('')
-            self.box_selector.handle_key_in_loop(user_input)
+            
+            if result:
+                self.box_selector.handle_key_in_loop(user_input)
 
         while True:
             if not input_mode:
@@ -115,20 +119,6 @@ class Controller:
                     text = chr(user_input)
                     self.footer.activate()
                     self.footer.write(text)
-
-            # if self.model.should_search_again():
-            #     # search again
-            #     with self.global_lock:
-            #         if not result_updating_timer is None:
-            #             # clear timer
-            #             result_updating_timer.cancel()
-            #             result_updating_timer = None
-            #         # with bounce
-            #         debug.log('bounce#query', self.model.query)
-            #         t = threading.Timer(0.05, search_and_refresh_display, [user_input])
-            #         result_updating_timer = t
-            #         t.start()
-
 
 if __name__ == '__main__':
   import signal
