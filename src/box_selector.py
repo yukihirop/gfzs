@@ -19,14 +19,12 @@ class BoxSelectorHelper:
     self.current_selected = 0
     self.last = 1
     self.topy = 1
-    self.maxy = 1
     self.top_textbox = None
 
-  def update_attributues(self, current_selected, last, topy, maxy, top_textbox):
+  def update_attributues(self, current_selected, last, topy, top_textbox):
     self.current_selected = current_selected
     self.last = last
     self.topy = topy
-    self.maxy = maxy
     self.top_textbox = top_textbox
 
 class BoxSelector:
@@ -40,10 +38,12 @@ class BoxSelector:
        a textbox.
     """
     self.stdscr = stdscr
+    self.height, self.width = stdscr.getmaxyx()
+    self.window = curses.newwin(self.height - 4, self.width, 0, 0)
     self.colors = colors
     self.model = model
     self.stop_loop = False
-    self.windows = []
+    self.textboxes = []
     self.helper = BoxSelectorHelper()
     # Element parameters. Channge them here.
     self.TEXTBOX_HEIGHT = 8
@@ -72,25 +72,24 @@ class BoxSelector:
 
   def init_properties_after_create(self):
     current_selected = 0
-    windows_len = len(self.windows)
+    textboxes_len = len(self.textboxes)
 
-    if windows_len > 0:
-      top_textbox = self.windows[0]
+    if textboxes_len > 0:
+      top_textbox = self.textboxes[0]
       topy, _ = self._refresh_view(top_textbox)
-      maxy, _ = self.stdscr.getmaxyx()
-      if windows_len > 1:
+      if textboxes_len > 1:
         last = 1
       else:
         last = 0
 
-      self.helper.update_attributues(current_selected, last, topy, maxy, top_textbox)
+      self.helper.update_attributues(current_selected, last, topy, top_textbox)
 
   def create(self):
     self._init_curses()
     self._create_pad()
-    self.windows = self._make_textboxes()
-    if len(self.windows) > 0:
-      self._refresh_view(self.windows[0])
+    self.textboxes = self._make_textboxes()
+    if len(self.textboxes) > 0:
+      self._refresh_view(self.textboxes[0])
 
   def destroy(self):
     self._delete_pad()
@@ -101,12 +100,12 @@ class BoxSelector:
   def reset(self):
     self._init_curses()
     self._reset_pad()
-    self.windows = self._make_textboxes()
-    if len(self.windows) > 0:
-      self._refresh_view(self.windows[0])
+    self.textboxes = self._make_textboxes()
+    if len(self.textboxes) > 0:
+      self._refresh_view(self.textboxes[0])
     else:
       # If you don't share stdscr with footer, it works fine
-      self.stdscr.clear()
+      self.window.clear()
 
   def _pick(self):
     """ Just run this when you want to spawn the selection process. """
@@ -124,7 +123,7 @@ class BoxSelector:
     curses.cbreak()
     # Disable the mouse cursor.
     curses.curs_set(0)
-    self.stdscr.keypad(1)
+    self.window.keypad(1)
 
   def _finish_curses(self):
     self._end_curses(False)
@@ -132,14 +131,14 @@ class BoxSelector:
   def _end_curses(self, end = True):
     """ Terminates the curses application. """
     curses.nocbreak()
-    self.stdscr.keypad(0)
+    self.window.keypad(0)
     if end:
       curses.echo()
       curses.endwin()
 
   def _delete_pad(self):
     self.pad.clear()
-    self.stdscr.refresh()
+    self.window.refresh()
 
   def _reset_pad(self):
     self._delete_pad()
@@ -149,143 +148,141 @@ class BoxSelector:
     """ Creates a big self.pad to place the textboxes in. """
     self.pad = curses.newpad(self.PAD_HEIGHT, self.PAD_WIDTH)
     self.pad.box()
+    self.window.refresh()
 
   def _make_textboxes(self):
     """ Build the textboxes in the pad center and put them in the
         horizontal middle of the pad. """
-    # Get the actual screensize.
-    maxy, maxx = self.stdscr.getmaxyx()
-
-    windows = []
+    textboxes = []
     i = 1
     data = self.model.find()
 
     for s in data:
-        window = self.pad.derwin(
+        textbox = self.pad.derwin(
             self.TEXTBOX_HEIGHT,
-            maxx - 4,
+            self.width - 4,
             i,
             2
         )
 
-        windows.append(window)
+        textboxes.append(textbox)
         i += self.TEXTBOX_HEIGHT
 
     # When all are displayed as multi-byte character strings
-    abstract_line_len = maxx//2
-    for k in range(len(windows)):
-        windows[k].box()
+    abstract_line_len = self.width//2
+    for k in range(len(textboxes)):
+        textboxes[k].box()
 
         title = data[k].get('title')
         url = data[k].get('url')
         abstract = data[k].get('abstract')
 
-        windows[k].addstr(2, 2, '%s%-3s' %
+        textboxes[k].addstr(2, 2, '%s%-3s' %
                           ('', str(k + 1) + '.'), self.colors.index)
-        windows[k].addstr(2, 6, title, self.colors.title)
-        windows[k].addstr(3, 6, url, self.colors.url)
+        textboxes[k].addstr(2, 6, title, self.colors.title)
+        textboxes[k].addstr(3, 6, url, self.colors.url)
         lines = textwrap.wrap(abstract, abstract_line_len)
         for l in range(len(lines)):
-          windows[k].addstr(4 + l, 6, lines[l], self.colors.abstract)
+          textboxes[k].addstr(4 + l, 6, lines[l], self.colors.abstract)
 
-    return windows
+    return textboxes
 
   def _refresh_view(self, window):
-    """ Refresh windows """
+    """ Refresh textboxes """
     cy, cx = window.getbegyx()
-    maxy, maxx = self.stdscr.getmaxyx()
 
-    per_page = maxy // self.TEXTBOX_HEIGHT
+    per_page = self.height // self.TEXTBOX_HEIGHT
     display_limit_pos_y = self.TEXTBOX_HEIGHT * (per_page - 1)
-    display_limit_pos_x = maxx - 1
+    display_limit_pos_x = self.width - 1
 
     self.pad.refresh(cy, cx, 1, 2, display_limit_pos_y, display_limit_pos_x)
     return (cy, cx)
 
   def update_view_in_loop(self) -> bool:
-    windows = self.windows
-    windows_len = len(windows)
+    textboxes = self.textboxes
+    textboxes_len = len(textboxes)
 
-    if windows_len == 0:
+    if textboxes_len == 0:
       return False
 
     current_selected = self.current_selected
     last = self.helper.last
     topy = self.helper.topy
-    maxy = self.helper.maxy
     top_textbox = self.helper.top_textbox
 
     # Highligth the selected one, the last selected textbox should
     # become normal again.
-    windows[current_selected].border(self.colors.highlight)
-    windows[last].border()
+    if last == current_selected == 0:
+      textboxes[current_selected].border(self.colors.highlight)
+    else:
+      textboxes[current_selected].border(self.colors.highlight)
+      textboxes[last].border()
 
     # Paging
 
     # While the textbox can be displayed on the page with the current top_textbox,
     # don't after the view. When this becomes impossible,
     # center the view to last displayable textbox on the previous view.
-    cy, cx = windows[current_selected].getbegyx()
-    per_page = maxy//self.TEXTBOX_HEIGHT
+    cy, cx = textboxes[current_selected].getbegyx()
+    per_page = self.height//self.TEXTBOX_HEIGHT
 
     # The current window is to far down. Switch the top textbox.
     # When you reach the bottom, redisplay the current box at the top
-    if ((topy + maxy - self.TEXTBOX_HEIGHT) <= cy):
-      top_textbox = windows[current_selected]
+    if ((topy + self.height - self.TEXTBOX_HEIGHT) <= cy):
+      top_textbox = textboxes[current_selected]
 
     # The current window is to far up. There is a better way though...
     # Update the top until you reach the top of the screen.
     if topy >= cy + self.TEXTBOX_HEIGHT:
       if (current_selected < per_page - 1):
-        top_textbox = windows[0]
+        top_textbox = textboxes[0]
       else:
-        top_textbox = windows[current_selected - per_page + 1]
+        top_textbox = textboxes[current_selected - per_page + 1]
 
     if last != current_selected:
       last = current_selected
 
     refresh_topy, _ = self._refresh_view(top_textbox)
 
-    self.windows = windows
+    self.textboxes = textboxes
     self.helper.update_attributues(
-        current_selected, last, refresh_topy, maxy, top_textbox)
+        current_selected, last, refresh_topy, top_textbox)
 
     return True
 
   def handle_key_in_loop(self, user_input):
-    windows = self.windows
-    windows_len = len(windows)
+    textboxes = self.textboxes
+    textboxes_len = len(textboxes)
 
-    if windows_len == 0:
+    if textboxes_len == 0:
       return
 
     current_selected = self.current_selected
-    maxy = self.helper.maxy
-    per_page = maxy//self.TEXTBOX_HEIGHT
+    per_page = self.height//self.TEXTBOX_HEIGHT
 
     # Vim like KEY_UP/KEY_DOWN with j(DOWN) and k(UP)
-    if windows_len > 1 and user_input == ARROW_DOWN:
-      if (current_selected >= windows_len-1):
+    if textboxes_len > 1 and user_input == ARROW_DOWN:
+      if (current_selected >= textboxes_len-1):
         current_selected = 0  # wrap around.
       else:
         current_selected += 1
-    elif windows_len > 1 and user_input == ARROW_UP:
+    elif textboxes_len > 1 and user_input == ARROW_UP:
         if current_selected <= 0:
-          current_selected = windows_len - 1  # wrap around.
+          current_selected = textboxes_len - 1  # wrap around.
         else:
           current_selected -= 1
-    elif windows_len > per_page and user_input == ARROW_RIGHT:
+    elif textboxes_len > per_page and user_input == ARROW_RIGHT:
         next_pagetop_index = (per_page - 1) * \
            (current_selected // (per_page - 1) + 1)
-        if (next_pagetop_index <= windows_len-1):
+        if (next_pagetop_index <= textboxes_len-1):
           current_selected = next_pagetop_index
         else:
           current_selected = 0  # wrap around.
-    elif windows_len > per_page and user_input == ARROW_LEFT:
+    elif textboxes_len > per_page and user_input == ARROW_LEFT:
         current_pagetop_index = (per_page - 1) * \
           (current_selected//(per_page - 1))
         if (current_pagetop_index == 0):
-          current_selected = windows_len - per_page + 1  # wrap around.
+          current_selected = textboxes_len - per_page + 1  # wrap around.
         else:
           current_selected = current_pagetop_index - (per_page - 1)
     elif user_input == curses.KEY_RESIZE:
@@ -297,19 +294,18 @@ class BoxSelector:
 
   def _loop(self):
     current_selected = 0
-    windows_len = len(self.windows)
+    textboxes_len = len(self.textboxes)
 
-    if windows_len > 1:
+    if textboxes_len > 1:
       last = 1
     else:
       last = 0
 
     # See at the root textbox.
-    if windows_len > 0:
-      top_textbox = self.windows[0]
+    if textboxes_len > 0:
+      top_textbox = self.textboxes[0]
       topy, _ = self._refresh_view(top_textbox)
-      maxy, _ = self.stdscr.getmaxyx()
-      self.helper.update_attributues(current_selected, last, topy, maxy, top_textbox)
+      self.helper.update_attributues(current_selected, last, topy, top_textbox)
 
     while True:
       if self.stop_loop:
@@ -318,7 +314,7 @@ class BoxSelector:
       self.update_view_in_loop()
 
       try:
-          user_input = self.stdscr.getch()
+          user_input = self.window.getch()
       except curses.error:
           continue
       except KeyboardInterrupt:
@@ -499,4 +495,4 @@ if __name__ == '__main__':
 
   choice = BoxSelector(stdscr, colors, model)._pick()
   if choice != None:
-    print(data[choice].get('title'))
+    print(model.result[choice].get('title'))
