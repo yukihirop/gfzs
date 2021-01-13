@@ -24,9 +24,6 @@ class Footer:
   def update_query(self, query):
     self.model.update_query(query)
 
-  def push_query(self, char):
-    self.model.push_query(char)
-
   def create(self):
     self._init_curses()
     self._make_footer()
@@ -60,6 +57,7 @@ class Footer:
   
   def write(self, text):
     self.stdscr.addstr(text)
+    self.model.push_query(text)
 
   def _wait_input_prompt(self):
     self.create()

@@ -61,12 +61,13 @@ class Controller:
         self.footer.create()
         self.footer.activate()
 
-        def search_and_refresh_display(user_input, is_init_property=False):
+        def search_and_refresh_display(user_input, is_init_property=False, is_init_query=True):
             self.box_selector.reset()
             if is_init_property:
                 self.box_selector.init_properties_after_create()
             self.box_selector.update_view_in_loop()
-            self.box_selector.update_query('')
+            if is_init_query:
+                self.box_selector.update_query('')
             self.box_selector.handle_key_in_loop(user_input)
 
         while True:
@@ -88,15 +89,18 @@ class Controller:
                     pass
                 elif user_input == KEY_ENTER:
                     input_mode = False
-                    search_and_refresh_display(user_input, is_init_property=True)
+                    search_and_refresh_display(user_input, is_init_property=True, is_init_query=True)
 
                 # https://www.programcreek.com/python/?code=mingrammer%2Fawesome-finder%2Fawesome-finder-master%2Fawesome%2Ftui.py
                 elif user_input in (curses.ascii.BS, curses.ascii.DEL, curses.KEY_BACKSPACE):
                     self.footer.delete_char()
+                    search_and_refresh_display(
+                        user_input, is_init_property=True, is_init_query=False)
                 else:
                     text = chr(user_input)
                     self.footer.write(text)
-                    self.footer.push_query(text)
+                    search_and_refresh_display(
+                        user_input, is_init_property=True, is_init_query=False)
             else:
                 if user_input in arrow_keys:
                     self.box_selector.handle_key_in_loop(user_input)
@@ -111,7 +115,6 @@ class Controller:
                     text = chr(user_input)
                     self.footer.activate()
                     self.footer.write(text)
-                    self.footer.push_query(text)
 
             # if self.model.should_search_again():
             #     # search again
