@@ -51,21 +51,20 @@ class Controller:
         input_mode = True
         user_input = ''
         result_updating_timer = None
+        arrow_keys = (self.box_selector.ARROW_DOWN, self.box_selector.ARROW_UP,
+                      self.box_selector.ARROW_LEFT, self.box_selector.ARROW_RIGHT)
         
         self.box_selector.create()
         self.box_selector.init_properties_after_create()
         self.box_selector.update_view_in_loop()
 
-        # debug.log('current_selected(0)', self.box_selector.current_selected)
-        # debug.log('last(0)', self.box_selector.helper.last)
-
         self.footer.create()
         self.footer.activate()
 
         def search_and_refresh_display(user_input, is_init_property=False):
+            self.box_selector.reset()
             if is_init_property:
                 self.box_selector.init_properties_after_create()
-            self.box_selector.reset()
             self.box_selector.update_view_in_loop()
             self.box_selector.update_query('')
             self.box_selector.handle_key_in_loop(user_input)
@@ -82,10 +81,7 @@ class Controller:
                 break
 
             if input_mode:
-                if user_input == self.box_selector.ARROW_DOWN or \
-                    user_input == self.box_selector.ARROW_UP or \
-                        user_input == self.box_selector.ARROW_LEFT or \
-                            user_input == self.box_selector.ARROW_RIGHT:
+                if user_input in arrow_keys:
                     input_mode = False
                     search_and_refresh_display(user_input)
                 elif user_input == KEY_ESC:
@@ -102,10 +98,7 @@ class Controller:
                     self.footer.write(text)
                     self.footer.push_query(text)
             else:
-                if user_input == self.box_selector.ARROW_DOWN or \
-                        user_input == self.box_selector.ARROW_UP or \
-                            user_input == self.box_selector.ARROW_LEFT or \
-                                user_input == self.box_selector.ARROW_RIGHT:
+                if user_input in arrow_keys:
                     self.box_selector.handle_key_in_loop(user_input)
                 elif user_input == KEY_ESC:
                     input_mode = True
