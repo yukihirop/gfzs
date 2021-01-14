@@ -11,11 +11,12 @@ KEY_ESC = 27
 
 class Footer:
   def __init__(self, stdscr, colors, model):
-    self.message = 'googler (? for help)'
+    self.message = 'QUERY>'
     self.stdscr = stdscr
+    self.parent_height, self.parent_width = stdscr.getmaxyx()
     self.colors = colors
     self.model = model
-    self.multibyte = Multibyte(self.stdscr)
+    self.multibyte = Multibyte(stdscr)
 
   @property
   def query(self):
@@ -28,20 +29,24 @@ class Footer:
     self._init_curses()
     self._make_footer()
 
+  def reset(self):
+    self._init_curses()
+    self.stdscr.erase()
+    self._make_footer()
+    self.stdscr.move(self.parent_height - 1, len(self.message) + 1)
+    self.stdscr.refresh()
+
   def activate(self):
     self._init_curses()
     self.update_query('')
-    maxy, _ = self.stdscr.getmaxyx()
-    self.stdscr.move(maxy - 1, len(self.message) + 1)
+    self.stdscr.move(self.parent_height - 1, len(self.message) + 1)
     self.stdscr.clrtoeol()
     self.stdscr.refresh()
 
   def delete_char(self):
-    maxy, _ = self.stdscr.getmaxyx()
-
     if self.query == None or self.query == '':
-      self.stdscr.delch(maxy - 1, len(self.message) + 1 + 1)  #?
-      self.stdscr.delch(maxy - 1, len(self.message) + 1) #^
+      self.stdscr.delch(self.parent_height - 1, len(self.message) + 1 + 1)  #?
+      self.stdscr.delch(self.parent_height - 1, len(self.message) + 1) #^
     else:
       query_len = self.multibyte.get_east_asian_width_count(self.query)
       if query_len > 0:
@@ -50,9 +55,9 @@ class Footer:
         else:
           k = 1
         # backspace = ^?
-        self.stdscr.delch(maxy - 1, len(self.message) + 1 + query_len - k + 2) #?
-        self.stdscr.delch(maxy - 1, len(self.message) + 1 + query_len - k + 1) #^
-        self.stdscr.delch(maxy - 1, len(self.message) + 1 + query_len - k)
+        self.stdscr.delch(self.parent_height - 1, len(self.message) + 1 + query_len - k + 2) #?
+        self.stdscr.delch(self.parent_height - 1, len(self.message) + 1 + query_len - k + 1) #^
+        self.stdscr.delch(self.parent_height - 1, len(self.message) + 1 + query_len - k)
         self.update_query(self.query[:-1])
   
   def write(self, text):
@@ -85,8 +90,8 @@ class Footer:
 
   # stdscr.getch doesn't work when I addstr to subwin
   def _make_footer(self):
-    maxy, maxx = self.stdscr.getmaxyx()
-    self.stdscr.addstr(maxy - 1, 0, self.message, self.colors.prompt)
+    self.stdscr.hline(self.parent_height - 2, 0, curses.ACS_HLINE, self.parent_width)
+    self.stdscr.addstr(self.parent_height - 1, 0, self.message, self.colors.footer)
 
   def _loop(self):
     self.activate()
@@ -107,6 +112,8 @@ class Footer:
         elif user_input in (curses.ascii.BS, curses.ascii.DEL, curses.KEY_BACKSPACE):
           self.delete_char()
           inp = inp[:-1]
+        elif user_input == curses.KEY_RESIZE:
+          self.reset()
         else:
           self.write(chr(user_input))
           inp += chr(user_input)

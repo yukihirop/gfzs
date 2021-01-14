@@ -12,7 +12,6 @@ class Colors:
     self.curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_BLACK)
     self.curses.init_pair(4, curses.COLOR_GREEN, curses.COLOR_BLACK)
     self.curses.init_pair(5, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-    self.curses.init_pair(6, curses.COLOR_WHITE, curses.COLOR_GREEN)
 
   @property
   def highlight(self):
@@ -39,8 +38,8 @@ class Colors:
     return self.curses.color_pair(2)
 
   @property
-  def prompt(self):
-    return self.curses.color_pair(6)
+  def footer(self):
+    return self.curses.color_pair(4)
 
 if __name__ == '__main__':
   import curses
