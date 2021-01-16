@@ -565,27 +565,35 @@ GOOGLER_NOT_FOUND = [
     [[96, 24], "not_found"]
 ]
 
+GOOGLE = 'Google'
+FUZZY = 'Fuzzy'
+SEARCH = 'Search'
+NOT_FOUND = 'Not Found'
+
 class NotFound:
   def __init__(self, stdscr, colors):
     self.block = "■"
     self.stdscr = stdscr
-    self.parent_height, self.parent_width = stdscr.getmaxyx()
-    # これを使って書き直す
-    self.window = curses.newwin(self.parent_height - 4, self.parent_width, 0, 0)
+    self.window = None
     self.logo_height = 24
     self.logo_width = 126
-    self.logo_begin_x = self.parent_width // 2 - self.logo_width // 2
-    self.logo_begin_y = self.parent_height // 2 - self.logo_height // 2
     self.colors = colors
 
   def create(self):
     self._init_curses()
+    self._init_layout()
     self._make_not_found()
     self.window.refresh()
 
   def destroy(self):
-    self.window.erase()
-    self.window.refresh()
+    if not self.window is None:
+      self.window.erase()
+      self.window.refresh()
+
+  def _init_layout(self):
+    self.parent_height, self.parent_width = self.stdscr.getmaxyx()
+    self.window = curses.newwin(
+        self.parent_height - 4, self.parent_width, 0, 0)
 
   def _init_curses(self):
     """ Inits the curses application """
@@ -605,8 +613,61 @@ class NotFound:
       curses.echo()
       curses.endwin()
 
-  # stdscr.getch doesn't work when I addstr to subwin
   def _make_not_found(self):
+    if self.parent_width < self.logo_width:
+      self._make_not_found_small()
+    else:
+      self._make_not_found_big()
+
+  def _make_not_found_small(self):
+    start_index = 0
+    title = "{0} {1} {2}".format(GOOGLE, FUZZY, SEARCH)
+    title_begin_y = self.parent_height // 2 - 1
+    title_begin_x = self.parent_width // 2 - len(title) // 2
+    msg_begin_y = title_begin_y + 1
+    msg_begin_x = title_begin_x + (len(title) - len(NOT_FOUND)) // 2
+
+    # Write Google
+    google = list(GOOGLE)
+    first_o = True
+    for i in range(len(google)):
+      c = google[i]
+      if c in ('G', 'g'):
+        self.window.addstr(
+          title_begin_y + 0, title_begin_x + i, c, self.colors.google_g | curses.A_BOLD)
+      elif c == 'o':
+        if first_o:
+          first_o = False
+          self.window.addstr(
+            title_begin_y + 0, title_begin_x + i, c, self.colors.google_o | curses.A_BOLD)
+        else:
+          self.window.addstr(
+            title_begin_y + 0, title_begin_x + i, c, self.colors.google_o2 | curses.A_BOLD)
+      elif c == 'l':
+        self.window.addstr(
+            title_begin_y + 0, title_begin_x + i, c, self.colors.google_l | curses.A_BOLD)
+      elif c == 'e':
+        self.window.addstr(
+            title_begin_y + 0, title_begin_x + i, c, self.colors.google_e | curses.A_BOLD)
+    
+    # Write Fuzzy
+    start_index += len(GOOGLE) + 1
+    self.window.addstr(title_begin_y + 0, title_begin_x + start_index,
+                       FUZZY, self.colors.fuzzy | curses.A_BOLD)
+
+    # Write Search
+    start_index += len(FUZZY) + 1
+    self.window.addstr(title_begin_y + 0, title_begin_x + start_index, SEARCH,
+                       self.colors.search | curses.A_BOLD)
+
+    # Write Not Found
+    self.window.addstr(msg_begin_y, msg_begin_x, NOT_FOUND, self.colors.not_found | curses.A_BOLD)
+
+  # stdscr.getch doesn't work when I addstr to subwin
+  def _make_not_found_big(self):
+    logo_begin_x = self.parent_width // 2 - self.logo_width // 2
+    logo_begin_y = self.parent_height // 2 - self.logo_height // 2
+
     for data in GOOGLER_NOT_FOUND:
       cordinate = data[0]
       color = data[1]
@@ -614,31 +675,31 @@ class NotFound:
       y = cordinate[1]
       if color in ('G', 'g'):
         self.window.addstr(
-            self.logo_begin_y + y, self.logo_begin_x + x, self.block, self.colors.google_g)
+            logo_begin_y + y, logo_begin_x + x, self.block, self.colors.google_g)
       elif color == 'o':
         self.window.addstr(
-            self.logo_begin_y + y, self.logo_begin_x + x, self.block, self.colors.google_o)
+            logo_begin_y + y, logo_begin_x + x, self.block, self.colors.google_o)
       elif color == 'o2':
         self.window.addstr(
-            self.logo_begin_y + y, self.logo_begin_x + x, self.block, self.colors.google_o2)
+            logo_begin_y + y, logo_begin_x + x, self.block, self.colors.google_o2)
       elif color == 'l':
         self.window.addstr(
-            self.logo_begin_y + y, self.logo_begin_x + x, self.block, self.colors.google_l)
+            logo_begin_y + y, logo_begin_x + x, self.block, self.colors.google_l)
       elif color == 'e':
         self.window.addstr(
-            self.logo_begin_y + y, self.logo_begin_x + x, self.block, self.colors.google_e)
+            logo_begin_y + y, logo_begin_x + x, self.block, self.colors.google_e)
       elif color == 'r':
         self.window.addstr(
-            self.logo_begin_y + y, self.logo_begin_x + x, self.block, self.colors.google_r)
+            logo_begin_y + y, logo_begin_x + x, self.block, self.colors.google_r)
       elif color == 'fuzzy':
         self.window.addstr(
-            self.logo_begin_y + y, self.logo_begin_x + x, self.block, self.colors.fuzzy)
+            logo_begin_y + y, logo_begin_x + x, self.block, self.colors.fuzzy)
       elif color == 'search':
         self.window.addstr(
-            self.logo_begin_y + y, self.logo_begin_x + x, self.block, self.colors.search)
+            logo_begin_y + y, logo_begin_x + x, self.block, self.colors.search)
       elif color == 'not_found':
         self.window.addstr(
-            self.logo_begin_y + y, self.logo_begin_x + x, self.block, self.colors.not_found)
+            logo_begin_y + y, logo_begin_x + x, self.block, self.colors.not_found)
 
   def _loop(self):
     self.create()
