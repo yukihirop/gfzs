@@ -40,10 +40,7 @@ class BoxSelector:
        a textbox.
     """
     self.stdscr = stdscr
-    self.height, self.width = stdscr.getmaxyx()
-    # 「2」 is the height of the header or footer
-    # 「4」 = header + footer height
-    self.window = curses.newwin(self.height - 4, self.width, 2, 0)
+    self._init_layout()
     self.colors = colors
     self.model = model
     self.stop_loop = False
@@ -123,6 +120,12 @@ class BoxSelector:
 
     return picked
 
+  def _init_layout(self):
+    self.height, self.width = self.stdscr.getmaxyx()
+    # 「2」 is the height of the header or footer
+    # 「4」 = header + footer height
+    self.window = curses.newwin(self.height - 4, self.width, 2, 0)
+
   def _init_curses(self):
     """ Inits the curses application """
     # turn off automatic echoing of keys to the screen
@@ -150,6 +153,7 @@ class BoxSelector:
 
   def _reset_pad(self):
     self._delete_pad()
+    self._init_layout()
     self._create_pad()
 
   def _create_pad(self):
@@ -223,7 +227,6 @@ class BoxSelector:
     last = self.helper.last
     topy = self.helper.topy
     top_textbox = self.helper.top_textbox
-    topy += self.helper.pad_begin_y
 
     # Highligth the selected one, the last selected textbox should
     # become normal again.
@@ -254,6 +257,10 @@ class BoxSelector:
       else:
         top_textbox = textboxes[current_selected - per_page + 1]
 
+    if last == 0:
+      if (current_selected > per_page):
+        top_textbox = textboxes[current_selected- per_page + 2]
+
     if last != current_selected:
       last = current_selected
 
@@ -282,7 +289,7 @@ class BoxSelector:
       else:
         current_selected += 1
     elif textboxes_len > 1 and user_input == ARROW_UP:
-        if current_selected <= 0:
+        if current_selected == 0:
           current_selected = textboxes_len - 1  # wrap around.
         else:
           current_selected -= 1
