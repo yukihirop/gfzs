@@ -53,8 +53,8 @@ class Controller:
         user_input = ''
         result_updating_timer = None
         box_select_begin_y = 2
-        arrow_keys = (self.box_selector.ARROW_DOWN, self.box_selector.ARROW_UP,
-                      self.box_selector.ARROW_LEFT, self.box_selector.ARROW_RIGHT)
+        arrow_keys = (curses.KEY_DOWN, curses.KEY_UP,
+                      curses.KEY_LEFT, curses.KEY_RIGHT)
         
         self.header.create()
         

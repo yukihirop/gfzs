@@ -10,11 +10,6 @@ import debug
 from colors import Colors
 from not_found import NotFound
 
-ARROW_DOWN = 258
-ARROW_UP = 259
-ARROW_LEFT = 260
-ARROW_RIGHT = 261
-
 class BoxSelectorHelper:
   def __init__(self):
     self.current_selected = 0
@@ -51,22 +46,6 @@ class BoxSelector:
     self.TEXTBOX_HEIGHT = 8
     self.PAD_WIDTH = 400
     self.PAD_HEIGHT = 1000
-
-  @property
-  def ARROW_DOWN(self) -> int:
-    return ARROW_DOWN
-  
-  @property
-  def ARROW_UP(self) -> int:
-    return ARROW_UP
-
-  @property
-  def ARROW_LEFT(self) -> int:
-    return ARROW_LEFT
-
-  @property
-  def ARROW_RIGHT(self) -> int:
-    return ARROW_RIGHT
 
   @property
   def current_selected(self) -> int:
@@ -283,24 +262,24 @@ class BoxSelector:
     per_page = self.height//self.TEXTBOX_HEIGHT
 
     # Vim like KEY_UP/KEY_DOWN with j(DOWN) and k(UP)
-    if textboxes_len > 1 and user_input == ARROW_DOWN:
+    if textboxes_len > 1 and user_input == curses.KEY_DOWN:
       if (current_selected >= textboxes_len-1):
         current_selected = 0  # wrap around.
       else:
         current_selected += 1
-    elif textboxes_len > 1 and user_input == ARROW_UP:
+    elif textboxes_len > 1 and user_input == curses.KEY_UP:
         if current_selected == 0:
           current_selected = textboxes_len - 1  # wrap around.
         else:
           current_selected -= 1
-    elif textboxes_len > per_page and user_input == ARROW_RIGHT:
+    elif textboxes_len > per_page and user_input == curses.KEY_RIGHT:
         next_pagetop_index = (per_page - 1) * \
            (current_selected // (per_page - 1) + 1)
         if (next_pagetop_index <= textboxes_len-1):
           current_selected = next_pagetop_index
         else:
           current_selected = 0  # wrap around.
-    elif textboxes_len > per_page and user_input == ARROW_LEFT:
+    elif textboxes_len > per_page and user_input == curses.KEY_RIGHT:
         current_pagetop_index = (per_page - 1) * \
           (current_selected//(per_page - 1))
         if (current_pagetop_index == 0):
