@@ -21,6 +21,7 @@ class BoxSelectorHelper:
     self.last = 1
     self.topy = 1
     self.top_textbox = None
+    self.pad_begin_y = 0
 
   def update_attributues(self, current_selected, last, topy, top_textbox):
     self.current_selected = current_selected
@@ -40,7 +41,9 @@ class BoxSelector:
     """
     self.stdscr = stdscr
     self.height, self.width = stdscr.getmaxyx()
-    self.window = curses.newwin(self.height - 4, self.width, 0, 0)
+    # 「2」 is the height of the header or footer
+    # 「4」 = header + footer height
+    self.window = curses.newwin(self.height - 4, self.width, 2, 0)
     self.colors = colors
     self.model = model
     self.stop_loop = False
@@ -86,7 +89,8 @@ class BoxSelector:
 
       self.helper.update_attributues(current_selected, last, topy, top_textbox)
 
-  def create(self):
+  def create(self, pad_begin_y = 0):
+    self.helper.pad_begin_y = pad_begin_y
     self._init_curses()
     self._create_pad()
     self.textboxes = self._make_textboxes()
@@ -111,9 +115,9 @@ class BoxSelector:
       self.window.refresh()
       self.not_found.create()
 
-  def _pick(self):
+  def _pick(self, pad_begin_y = 0):
     """ Just run this when you want to spawn the selection process. """
-    self.create()
+    self.create(pad_begin_y)
     picked = self._loop()
     self._end_curses()
 
@@ -168,7 +172,7 @@ class BoxSelector:
         textbox = self.pad.derwin(
             self.TEXTBOX_HEIGHT,
             self.width - 4,
-            i,
+            i + self.helper.pad_begin_y,
             2
         )
 
@@ -201,8 +205,11 @@ class BoxSelector:
     per_page = self.height // self.TEXTBOX_HEIGHT
     display_limit_pos_y = self.TEXTBOX_HEIGHT * (per_page - 1)
     display_limit_pos_x = self.width - 1
+    
+    # Since the display of the last pad is cut off, display_limit_pos_y + self.helper.pad_begin_y
+    display_limit_pos_y += self.helper.pad_begin_y
 
-    self.pad.refresh(cy, cx, 1, 2, display_limit_pos_y, display_limit_pos_x)
+    self.pad.refresh(cy, cx, 1 + self.helper.pad_begin_y, 2, display_limit_pos_y, display_limit_pos_x)
     return (cy, cx)
 
   def update_view_in_loop(self) -> bool:
@@ -216,6 +223,7 @@ class BoxSelector:
     last = self.helper.last
     topy = self.helper.topy
     top_textbox = self.helper.top_textbox
+    topy += self.helper.pad_begin_y
 
     # Highligth the selected one, the last selected textbox should
     # become normal again.
@@ -500,6 +508,6 @@ if __name__ == '__main__':
   model = Model(data)
   model.update_query('Amazon')
 
-  choice = BoxSelector(stdscr, colors, model)._pick()
+  choice = BoxSelector(stdscr, colors, model)._pick(1)
   if choice != None:
     print(model.result[choice].get('title'))
