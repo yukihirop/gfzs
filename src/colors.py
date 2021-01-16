@@ -48,6 +48,10 @@ class Colors:
     return self.curses.color_pair(4)
 
   @property
+  def header(self):
+    return self.curses.color_pair(4)
+
+  @property
   def googler_g(self):
     return self.curses.color_pair(28)
 
