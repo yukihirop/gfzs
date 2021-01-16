@@ -52,32 +52,36 @@ class Colors:
     return self.curses.color_pair(4)
 
   @property
-  def googler_g(self):
+  def google_g(self):
     return self.curses.color_pair(28)
 
   @property
-  def googler_o(self):
+  def google_o(self):
     return self.curses.color_pair(10)
   
   @property
-  def googler_o2(self):
+  def google_o2(self):
     return self.curses.color_pair(12)
 
   @property
-  def googler_e(self):
+  def google_e(self):
     return self.curses.color_pair(10)
 
   @property
-  def googler_l(self):
+  def google_l(self):
     return self.curses.color_pair(36)
-
-  @property
-  def googler_r(self):
-    return self.curses.color_pair(2)
 
   @property
   def not_found(self):
     return self.curses.color_pair(4)
+
+  @property
+  def fuzzy(self):
+    return self.curses.color_pair(12)
+
+  @property
+  def search(self):
+    return self.curses.color_pair(10)
 
   @property
   def hline(self):

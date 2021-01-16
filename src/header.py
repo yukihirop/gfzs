@@ -44,17 +44,17 @@ class Header:
     for i in range(len(google)):
       c = google[i]
       if c in ('G', 'g'):
-        self.window.addstr(0, i, c, self.colors.googler_g | curses.A_BOLD)
+        self.window.addstr(0, i, c, self.colors.google_g | curses.A_BOLD)
       elif c == 'o':
         if first_o:
           first_o = False
-          self.window.addstr(0, i, c, self.colors.googler_o | curses.A_BOLD)
+          self.window.addstr(0, i, c, self.colors.google_o | curses.A_BOLD)
         else:
-          self.window.addstr(0, i, c, self.colors.googler_o2 | curses.A_BOLD)
+          self.window.addstr(0, i, c, self.colors.google_o2 | curses.A_BOLD)
       elif c == 'l':
-        self.window.addstr(0, i, c, self.colors.googler_l | curses.A_BOLD)
+        self.window.addstr(0, i, c, self.colors.google_l | curses.A_BOLD)
       elif c == 'e':
-        self.window.addstr(0, i, c, self.colors.googler_e | curses.A_BOLD)
+        self.window.addstr(0, i, c, self.colors.google_e | curses.A_BOLD)
 
     self.window.addstr(0, self.parent_width - len(self.copyright),
                        self.copyright, self.colors.header | curses.A_BOLD)
