@@ -586,7 +586,6 @@ class NotFound:
   def destroy(self):
     self.window.erase()
     self.window.refresh()
-    self.stdscr.refresh()
 
   def _init_curses(self):
     """ Inits the curses application """
