@@ -36,7 +36,7 @@ import debug
 #
 GOOGLER_NOT_FOUND = [
     [[34, 0], "l"],
-    [[119, 0], "search"],
+    [[120, 0], "search"],
     [[3, 1], "G"],
     [[4, 1], "G"],
     [[5, 1], "G"],
