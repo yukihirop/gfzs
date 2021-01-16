@@ -82,6 +82,10 @@ class Colors:
   @property
   def search(self):
     return self.curses.color_pair(10)
+  
+  @property
+  def version(self):
+    return self.curses.color_pair(4)
 
   @property
   def hline(self):

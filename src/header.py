@@ -1,10 +1,12 @@
 import curses
 
 GOOGLE = 'Google'
+FUZZY = 'Fuzzy'
+SEARCH = 'Search'
 
 class Header:
   def __init__(self, stdscr, colors):
-    self.title = 'Google Fuzzy Search (v0.0.1)'
+    self.version = '(v0.0.1)'
     self.copyright = 'Copyright ©︎ 2021 yukihirop'
     self.stdscr = stdscr
     self.parent_height, self.parent_width = stdscr.getmaxyx()
@@ -36,9 +38,8 @@ class Header:
 
   # https://stackoverflow.com/a/53016371/9434894
   def _make_header(self):
-    self.window.addstr(0, 0, self.title, self.colors.header | curses.A_BOLD)
-    
-    # Override Google
+    start_index = 0
+    # Write Google
     google = list(GOOGLE)
     first_o = True
     for i in range(len(google)):
@@ -55,7 +56,22 @@ class Header:
         self.window.addstr(0, i, c, self.colors.google_l | curses.A_BOLD)
       elif c == 'e':
         self.window.addstr(0, i, c, self.colors.google_e | curses.A_BOLD)
+    
+    # Write Fuzzy
+    start_index += len(GOOGLE) + 1
+    self.window.addstr(0, start_index, FUZZY, self.colors.fuzzy | curses.A_BOLD)
 
+    # Write Search
+    start_index += len(FUZZY) + 1
+    self.window.addstr(0, start_index, SEARCH,
+                       self.colors.search | curses.A_BOLD)
+    
+    # Write verion
+    start_index += len(SEARCH) + 1
+    self.window.addstr(0, start_index, self.version,
+                       self.colors.version | curses.A_BOLD)
+    
+    # Write Copyright
     self.window.addstr(0, self.parent_width - len(self.copyright),
                        self.copyright, self.colors.header | curses.A_BOLD)
     self.window.hline(1, 0, curses.ACS_HLINE | self.colors.hline, self.parent_width)
