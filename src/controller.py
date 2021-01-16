@@ -79,6 +79,12 @@ class Controller:
             if result:
                 self.box_selector.handle_key_in_loop(user_input)
 
+        def resize():
+            self.header.reset()
+            self.footer.reset()
+            search_and_refresh_display(
+                user_input, is_init_property=True, is_init_query=False)
+
         while True:
             # stdscr.refresh is called in the process of updating the query of footer and disappears at that time
             self.header.create()
@@ -108,6 +114,11 @@ class Controller:
                     self.footer.delete_char()
                     search_and_refresh_display(
                         user_input, is_init_property=True, is_init_query=False)
+                elif user_input == curses.KEY_RESIZE:
+                    resize()
+                # I don't know the reason, but - 1 may come in
+                elif user_input == -1:
+                    pass
                 else:
                     text = chr(user_input)
                     self.footer.write(text)
@@ -122,6 +133,11 @@ class Controller:
                 elif user_input == KEY_ENTER:
                     self._end_curses()
                     return self.box_selector.current_selected
+                elif user_input == curses.KEY_RESIZE:
+                    resize()
+                # I don't know the reason, but - 1 may come in
+                elif user_input == -1:
+                    pass
                 else:
                     input_mode = True
                     text = chr(user_input)
@@ -279,8 +295,16 @@ if __name__ == '__main__':
       }
   ]
 
+  error_msg = ''
   controller = Controller(data)
-  choice = controller._loop()
-  result = controller.model.result
-  if not choice is None:
-    print(result[choice].get('title'))
+  try:
+    choice = controller._loop()
+    result = controller.model.result
+    if not choice is None:
+        print(result[choice].get('title'))
+  except curses.error:
+    error_msg = 'curses error'
+    controller._end_curses()
+  finally:
+    if error_msg != '':
+        print(error_msg)

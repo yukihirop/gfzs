@@ -18,6 +18,14 @@ class Header:
     self._make_header()
     self.window.refresh()
 
+  def reset(self):
+    self._init_curses()
+    self.window.erase()
+    self.parent_height, self.parent_width = self.stdscr.getmaxyx()
+    self.window = curses.newwin(2, self.parent_width, 0, 0)
+    self._make_header()
+    self.stdscr.refresh()
+
   def _init_curses(self):
     """ Inits the curses application """
     # turn off automatic echoing of keys to the screen
@@ -80,7 +88,15 @@ class Header:
     self.create()
 
     while True:
-      pass
+      try:
+          user_input = self.window.getch()
+      except curses.error:
+          continue
+      except KeyboardInterrupt:
+          break
+
+      if user_input == curses.KEY_RESIZE:
+        self.reset()
 
 
 if __name__ == '__main__':
