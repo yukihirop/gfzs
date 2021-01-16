@@ -104,6 +104,8 @@ class BoxSelector:
     # 「2」 is the height of the header or footer
     # 「4」 = header + footer height
     self.window = curses.newwin(self.height - 4, self.width, 2, 0)
+    # https://stackoverflow.com/a/17369532/9434894
+    self.window.keypad(1)
 
   def _init_curses(self):
     """ Inits the curses application """
@@ -113,7 +115,6 @@ class BoxSelector:
     curses.cbreak()
     # Disable the mouse cursor.
     curses.curs_set(0)
-    self.window.keypad(1)
 
   def _finish_curses(self):
     self._end_curses(False)
