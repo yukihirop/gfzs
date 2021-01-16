@@ -9,22 +9,24 @@ class Header:
     self.version = '(v0.0.1)'
     self.copyright = 'Copyright ©︎ 2021 yukihirop'
     self.stdscr = stdscr
-    self.parent_height, self.parent_width = stdscr.getmaxyx()
-    self.window = curses.newwin(2, self.parent_width, 0, 0)
     self.colors = colors
 
   def create(self):
     self._init_curses()
+    self._init_layout()
     self._make_header()
     self.window.refresh()
 
   def reset(self):
     self._init_curses()
     self.window.erase()
+    self._init_layout()
+    self._make_header()
+    self.window.refresh()
+
+  def _init_layout(self):
     self.parent_height, self.parent_width = self.stdscr.getmaxyx()
     self.window = curses.newwin(2, self.parent_width, 0, 0)
-    self._make_header()
-    self.stdscr.refresh()
 
   def _init_curses(self):
     """ Inits the curses application """
