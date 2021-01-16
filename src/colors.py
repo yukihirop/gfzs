@@ -79,6 +79,10 @@ class Colors:
   def not_found(self):
     return self.curses.color_pair(4)
 
+  @property
+  def hline(self):
+    return self.curses.color_pair(2)
+
 if __name__ == '__main__':
   import curses
 

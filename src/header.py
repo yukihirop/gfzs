@@ -37,7 +37,7 @@ class Header:
     self.window.addstr(0, 0, self.title, self.colors.header | curses.A_BOLD)
     self.window.addstr(0, self.parent_width - len(self.copyright),
                        self.copyright, self.colors.header | curses.A_BOLD)
-    self.window.hline(1, 0, curses.ACS_HLINE, self.parent_width)
+    self.window.hline(1, 0, curses.ACS_HLINE | self.colors.hline, self.parent_width)
 
   def _loop(self):
     self.create()
