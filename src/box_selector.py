@@ -8,6 +8,7 @@ import textwrap
 
 import debug
 from colors import Colors
+from not_found import NotFound
 
 ARROW_DOWN = 258
 ARROW_UP = 259
@@ -45,6 +46,7 @@ class BoxSelector:
     self.stop_loop = False
     self.textboxes = []
     self.helper = BoxSelectorHelper()
+    self.not_found = NotFound(stdscr, colors)
     # Element parameters. Channge them here.
     self.TEXTBOX_HEIGHT = 8
     self.PAD_WIDTH = 400
@@ -102,10 +104,12 @@ class BoxSelector:
     self._reset_pad()
     self.textboxes = self._make_textboxes()
     if len(self.textboxes) > 0:
+      self.not_found.destroy()
       self._refresh_view(self.textboxes[0])
     else:
-      # If you don't share stdscr with footer, it works fine
       self.window.clear()
+      self.window.refresh()
+      self.not_found.create()
 
   def _pick(self):
     """ Just run this when you want to spawn the selection process. """
@@ -156,6 +160,9 @@ class BoxSelector:
     textboxes = []
     i = 1
     data = self.model.find()
+
+    if len(data) == 0:
+      return textboxes
 
     for s in data:
         textbox = self.pad.derwin(
