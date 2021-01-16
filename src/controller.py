@@ -5,6 +5,7 @@ import threading
 # local
 
 import debug
+from header import Header
 from box_selector import BoxSelector
 from footer import Footer
 from colors import Colors
@@ -18,6 +19,7 @@ class Controller:
     def __init__(self, data):
         self._init_curses()
         self.model = Model(data)
+        self.header = Header(self.stdscr, self.colors)
         self.box_selector = BoxSelector(self.stdscr, self.colors, self.model)
         self.footer = Footer(self.stdscr, self.colors, self.model)
         self.multibyte = Multibyte(self.stdscr)
@@ -50,10 +52,13 @@ class Controller:
         input_mode = True
         user_input = ''
         result_updating_timer = None
+        box_select_begin_y = 2
         arrow_keys = (self.box_selector.ARROW_DOWN, self.box_selector.ARROW_UP,
                       self.box_selector.ARROW_LEFT, self.box_selector.ARROW_RIGHT)
         
-        self.box_selector.create()
+        self.header.create()
+        
+        self.box_selector.create(box_select_begin_y)
         self.box_selector.init_properties_after_create()
         self.box_selector.update_view_in_loop()
 
@@ -75,6 +80,9 @@ class Controller:
                 self.box_selector.handle_key_in_loop(user_input)
 
         while True:
+            # stdscr.refresh is called in the process of updating the query of footer and disappears at that time
+            self.header.create()
+
             if not input_mode:
                 self.box_selector.update_view_in_loop()
 
