@@ -1,6 +1,5 @@
 import curses
 import curses.ascii
-import threading
 
 # local
 
@@ -23,7 +22,6 @@ class Controller:
         self.box_selector = BoxSelector(self.stdscr, self.colors, self.model)
         self.footer = Footer(self.stdscr, self.colors, self.model)
         self.multibyte = Multibyte(self.stdscr)
-        self.global_lock = threading.Lock()
 
     def _init_curses(self):
         """ Inits the curses application """
@@ -48,10 +46,29 @@ class Controller:
         curses.echo()
         curses.endwin()
 
+
+    def _search_and_refresh_display(self, user_input, is_init_property=False, is_init_query=True):
+        self.box_selector.reset()
+
+        if is_init_property:
+            self.box_selector.init_properties_after_create()
+
+        result = self.box_selector.update_view_in_loop()
+
+        if is_init_query:
+            self.box_selector.update_query('')
+
+        if result:
+            self.box_selector.handle_key_in_loop(user_input)
+
+    def _handle_resize(self, user_input):
+        self.header.reset()
+        self.footer.reset()
+        self._search_and_refresh_display(user_input, is_init_property=True, is_init_query=False)
+
     def _loop(self) -> int:
         input_mode = True
         user_input = ''
-        result_updating_timer = None
         box_select_begin_y = 2
         arrow_keys = (curses.KEY_DOWN, curses.KEY_UP,
                       curses.KEY_LEFT, curses.KEY_RIGHT)
@@ -64,26 +81,6 @@ class Controller:
 
         self.footer.create()
         self.footer.activate()
-
-        def search_and_refresh_display(user_input, is_init_property=False, is_init_query=True):
-            self.box_selector.reset()
-
-            if is_init_property:
-                self.box_selector.init_properties_after_create()
-            
-            result = self.box_selector.update_view_in_loop()
-            
-            if is_init_query:
-                self.box_selector.update_query('')
-            
-            if result:
-                self.box_selector.handle_key_in_loop(user_input)
-
-        def resize():
-            self.header.reset()
-            self.footer.reset()
-            search_and_refresh_display(
-                user_input, is_init_property=True, is_init_query=False)
 
         while True:
             # stdscr.refresh is called in the process of updating the query of footer and disappears at that time
@@ -102,27 +99,27 @@ class Controller:
             if input_mode:
                 if user_input in arrow_keys:
                     input_mode = False
-                    search_and_refresh_display(user_input)
+                    self._search_and_refresh_display(user_input)
                 elif user_input == KEY_ESC:
                     pass
                 elif user_input == KEY_ENTER:
                     input_mode = False
-                    search_and_refresh_display(user_input, is_init_property=True, is_init_query=True)
+                    self._search_and_refresh_display(user_input, is_init_property=True, is_init_query=True)
 
                 # https://www.programcreek.com/python/?code=mingrammer%2Fawesome-finder%2Fawesome-finder-master%2Fawesome%2Ftui.py
                 elif user_input in (curses.ascii.BS, curses.ascii.DEL, curses.KEY_BACKSPACE):
                     self.footer.delete_char()
-                    search_and_refresh_display(
+                    self._search_and_refresh_display(
                         user_input, is_init_property=True, is_init_query=False)
                 elif user_input == curses.KEY_RESIZE:
-                    resize()
+                    self._handle_resize(user_input)
                 # I don't know the reason, but - 1 may come in
                 elif user_input == -1:
                     pass
                 else:
                     text = chr(user_input)
                     self.footer.write(text)
-                    search_and_refresh_display(
+                    self._search_and_refresh_display(
                         user_input, is_init_property=True, is_init_query=False)
             else:
                 if user_input in arrow_keys:
@@ -134,7 +131,7 @@ class Controller:
                     self._end_curses()
                     return self.box_selector.current_selected
                 elif user_input == curses.KEY_RESIZE:
-                    resize()
+                    self._handle_resize(user_input)
                 # I don't know the reason, but - 1 may come in
                 elif user_input == -1:
                     pass
