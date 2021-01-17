@@ -33,7 +33,7 @@ class Footer:
   def reset(self):
     self._init_curses()
     self._make_footer()
-    self.stdscr.move(self.parent_height - 1, len(self.message) + 1)
+    self.stdscr.move(self.parent_height - 1, len(self.message) + 1 + len(self.query))
     self.stdscr.refresh()
 
   def activate(self, is_init = False):
