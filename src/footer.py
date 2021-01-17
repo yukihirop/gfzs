@@ -33,12 +33,12 @@ class Footer:
   def reset(self):
     self._init_curses()
     self._make_footer()
-    self.stdscr.move(self.parent_height - 1, len(self.message) + 1 + len(self.query))
+    self.stdscr.move(self.parent_height - 1, len(self.message) + 1 + self.multibyte.get_east_asian_width_count(self.query))
     self.stdscr.refresh()
 
   def activate(self, is_init = False):
     self._init_curses()
-    self.stdscr.move(self.parent_height - 1, len(self.message) + 1 + len(self.query))
+    self.stdscr.move(self.parent_height - 1, len(self.message) + 1 + self.multibyte.get_east_asian_width_count(self.query))
     
     if is_init:
       self.stdscr.clrtoeol()
