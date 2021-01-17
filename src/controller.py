@@ -127,8 +127,7 @@ class Controller:
                 if user_input in arrow_keys:
                     self.box_selector.handle_key_in_loop(user_input)
                 elif user_input == KEY_ESC:
-                    input_mode = True
-                    self.footer.activate()
+                    pass
                 elif user_input == KEY_ENTER:
                     self._end_curses()
                     return self.box_selector.current_selected
