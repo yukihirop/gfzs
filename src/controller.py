@@ -72,6 +72,8 @@ class Controller:
         box_select_begin_y = 2
         arrow_keys = (curses.KEY_DOWN, curses.KEY_UP,
                       curses.KEY_LEFT, curses.KEY_RIGHT)
+        backspace_keys = (curses.ascii.BS, curses.ascii.DEL,
+                          curses.KEY_BACKSPACE)
         
         self.header.create()
         
@@ -107,7 +109,7 @@ class Controller:
                     self._search_and_refresh_display(user_input, is_init_property=True, is_init_query=True)
 
                 # https://www.programcreek.com/python/?code=mingrammer%2Fawesome-finder%2Fawesome-finder-master%2Fawesome%2Ftui.py
-                elif user_input in (curses.ascii.BS, curses.ascii.DEL, curses.KEY_BACKSPACE):
+                elif user_input in backspace_keys:
                     self.footer.delete_char()
                     self._search_and_refresh_display(
                         user_input, is_init_property=True, is_init_query=False)
@@ -130,6 +132,8 @@ class Controller:
                 elif user_input == KEY_ENTER:
                     self._end_curses()
                     return self.box_selector.current_selected
+                elif user_input in backspace_keys:
+                    self.footer.delete_char()
                 elif user_input == curses.KEY_RESIZE:
                     self._handle_resize(user_input)
                 # I don't know the reason, but - 1 may come in
