@@ -3,12 +3,14 @@
 import curses
 import unicodedata
 import textwrap
+import math
 
 # local
 
 import debug
 from colors import Colors
 from not_found import NotFound
+from paging import Paging
 
 class BoxSelectorHelper:
   def __init__(self):
@@ -17,12 +19,17 @@ class BoxSelectorHelper:
     self.topy = 1
     self.top_textbox = None
     self.pad_begin_y = 0
+    self.per_page = 1
+    self.change_page = False
 
   def update_attributues(self, current_selected, last, topy, top_textbox):
     self.current_selected = current_selected
     self.last = last
     self.topy = topy
     self.top_textbox = top_textbox
+
+  def update_per_page(self, value):
+    self.per_page = value
 
 class BoxSelector:
   """Display options build from a list of strings in a (unix) terminal.
@@ -35,9 +42,9 @@ class BoxSelector:
        a textbox.
     """
     self.stdscr = stdscr
-    self._init_layout()
     self.colors = colors
     self.model = model
+    self.paging = Paging(stdscr, colors, self)
     self.stop_loop = False
     self.textboxes = []
     self.helper = BoxSelectorHelper()
@@ -50,6 +57,17 @@ class BoxSelector:
   @property
   def current_selected(self) -> int:
     return self.helper.current_selected
+
+  @property
+  def per_page(self) -> int:
+    return self.helper.per_page
+
+  @property
+  def data_size(self) -> int:
+    return self.model.data_size
+
+  def update_per_page(self, value):
+    self.helper.update_per_page(value)
 
   def init_properties_after_create(self):
     current_selected = 0
@@ -68,10 +86,12 @@ class BoxSelector:
   def create(self, pad_begin_y = 0):
     self.helper.pad_begin_y = pad_begin_y
     self._init_curses()
+    self._init_layout()
     self._create_pad()
     self.textboxes = self._make_textboxes()
     if len(self.textboxes) > 0:
       self._refresh_view(self.textboxes[0])
+      self.paging.create()
 
   def destroy(self):
     self._delete_pad()
@@ -82,11 +102,14 @@ class BoxSelector:
   def reset(self):
     self._init_curses()
     self._reset_pad()
+    self._init_layout()
     self.textboxes = self._make_textboxes()
     if len(self.textboxes) > 0:
       self.not_found.destroy()
       self._refresh_view(self.textboxes[0])
+      self.paging.create()
     else:
+      self.paging.destroy()
       self.window.clear()
       self.window.refresh()
       self.not_found.create()
@@ -104,6 +127,7 @@ class BoxSelector:
     # 「2」 is the height of the header or footer
     # 「4」 = header + footer height
     self.window = curses.newwin(self.height - 4, self.width, 2, 0)
+    self.update_per_page(self.height//self.TEXTBOX_HEIGHT - 1)
     # https://stackoverflow.com/a/17369532/9434894
     self.window.keypad(1)
 
@@ -186,8 +210,8 @@ class BoxSelector:
     """ Refresh textboxes """
     cy, cx = window.getbegyx()
 
-    per_page = self.height // self.TEXTBOX_HEIGHT
-    display_limit_pos_y = self.TEXTBOX_HEIGHT * (per_page - 1)
+    per_page = self.per_page
+    display_limit_pos_y = self.TEXTBOX_HEIGHT * per_page
     display_limit_pos_x = self.width - 1
     
     # Since the display of the last pad is cut off, display_limit_pos_y + self.helper.pad_begin_y
@@ -222,7 +246,7 @@ class BoxSelector:
     # don't after the view. When this becomes impossible,
     # center the view to last displayable textbox on the previous view.
     cy, cx = textboxes[current_selected].getbegyx()
-    per_page = self.height//self.TEXTBOX_HEIGHT
+    per_page = self.per_page
 
     # The current window is to far down. Switch the top textbox.
     # When you reach the bottom, redisplay the current box at the top
@@ -232,21 +256,26 @@ class BoxSelector:
     # The current window is to far up. There is a better way though...
     # Update the top until you reach the top of the screen.
     if topy >= cy + self.TEXTBOX_HEIGHT:
-      if (current_selected < per_page - 1):
+      if (current_selected < per_page):
         top_textbox = textboxes[0]
       else:
-        top_textbox = textboxes[current_selected - per_page + 1]
+        top_textbox = textboxes[current_selected - per_page]
 
     if last == 0:
-      if (current_selected > per_page):
-        top_textbox = textboxes[current_selected- per_page + 2]
+      if (current_selected > per_page + 1):
+        top_textbox = textboxes[current_selected- per_page + 1]
 
     if last != current_selected:
       last = current_selected
 
     refresh_topy, _ = self._refresh_view(top_textbox)
 
+    if self.helper.change_page:
+      self.paging.reset()
+
     self.textboxes = textboxes
+
+    self.update_per_page(per_page)
     self.helper.update_attributues(
         current_selected, last, refresh_topy, top_textbox)
 
@@ -260,33 +289,36 @@ class BoxSelector:
       return
 
     current_selected = self.current_selected
-    per_page = self.height//self.TEXTBOX_HEIGHT
+    per_page = self.per_page
 
     # Vim like KEY_UP/KEY_DOWN with j(DOWN) and k(UP)
     if textboxes_len > 1 and user_input == curses.KEY_DOWN:
-      if (current_selected >= textboxes_len-1):
+      if (current_selected >= textboxes_len - 1):
+        self.helper.change_page = True
         current_selected = 0  # wrap around.
       else:
         current_selected += 1
     elif textboxes_len > 1 and user_input == curses.KEY_UP:
         if current_selected == 0:
+          self.helper.change_page = True
           current_selected = textboxes_len - 1  # wrap around.
         else:
           current_selected -= 1
-    elif textboxes_len > per_page and user_input == curses.KEY_RIGHT:
-        next_pagetop_index = (per_page - 1) * \
-           (current_selected // (per_page - 1) + 1)
+    elif textboxes_len > per_page + 1 and user_input == curses.KEY_RIGHT:
+        self.helper.change_page = True
+        next_pagetop_index = per_page * (math.ceil(current_selected / per_page) + 1)
+        
         if (next_pagetop_index <= textboxes_len-1):
           current_selected = next_pagetop_index
         else:
           current_selected = 0  # wrap around.
-    elif textboxes_len > per_page and user_input == curses.KEY_RIGHT:
-        current_pagetop_index = (per_page - 1) * \
-          (current_selected//(per_page - 1))
-        if (current_pagetop_index == 0):
-          current_selected = textboxes_len - per_page + 1  # wrap around.
+    elif textboxes_len > per_page + 1 and user_input == curses.KEY_LEFT:
+        self.helper.change_page = True
+        current_pagetop_index = per_page * math.floor(current_selected/per_page)
+        if (current_pagetop_index <= 0):
+          current_selected = textboxes_len - per_page  # wrap around.
         else:
-          current_selected = current_pagetop_index - (per_page - 1)
+          current_selected = current_pagetop_index - per_page
     elif user_input == curses.KEY_RESIZE:
         self.reset()
     elif user_input == ord('q'):  # Quit without selecting.
@@ -494,6 +526,7 @@ if __name__ == '__main__':
   
   model = Model(data)
   model.update_query('Amazon')
+  _ = model.find()
 
   choice = BoxSelector(stdscr, colors, model)._pick(1)
   if choice != None:

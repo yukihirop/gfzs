@@ -1,71 +1,95 @@
-from fuzzywuzzy import process as fuzzyprocess
-from itertools import groupby
+import curses
+import math
 
-class Model:
-  # e.g.) collection = [{ title, url, abstract }, ...]
-  def __init__(self, collection):
-    self.collection = collection
-    self.result = []
-    self.query = self.old_query = None
-  
-  @property
-  def summary_count(self):
-    return len(self.collection)
+GOOGLE = 'Google'
+FUZZY = 'Fuzzy'
+SEARCH = 'Search'
 
-  @property
-  def data_size(self):
-    return len(self.result)
+class Paging:
+  def __init__(self, stdscr, colors, view):
+    self.stdscr = stdscr
+    self.colors = colors
+    self.view = view
 
-  def should_search_again(self):
-    return self.query != self.old_query
+  def create(self):
+    self._init_curses()
+    self._init_layout()
+    self._make_paging()
+    self.window.refresh()
 
-  def update_query(self, query):
-    self.old_query = self.query
-    self.query = query
+  def reset(self):
+    self.destroy()
+    self._init_layout()
+    self._make_paging()
+    self.window.refresh()
 
-  def push_query(self, char):
-    self.old_query = self.query
-    self.query += char
+  def destroy(self):
+    self._init_curses()
+    self.window.erase()
 
-  def find(self, query=None, score=30):
-      return self.find_by_title(query, score)
+  def _init_layout(self):
+    self.parent_height, self.parent_width = self.stdscr.getmaxyx()
+    self.window = curses.newwin(2, self.parent_width, self.parent_height - 4, 0)
 
-  # e.g.) data = { title: { title, url, abstract }, ...}
-  def find_by_title(self, query=None, score=30):
-    if query != None and query != '':
-        self.update_query(query)
-        
-    if self.query != None and self.query != '':
-        data = self._collection_nested_by_title()
-        titles = data.keys()
-        fuzzysorted = fuzzyprocess.extract(self.query, titles, limit=len(titles))
+  def _init_curses(self):
+    """ Inits the curses application """
+    # turn off automatic echoing of keys to the screen
+    curses.noecho()
+    # Buffering off
+    # https://docs.python.org/ja/3/library/curses.html#curses.cbreak
+    curses.cbreak()
+    # Aable the mouse cursor.
+    curses.curs_set(0)
 
-        # fuzzysorted reutrns an array of tuples: [('one', 45), ('three', 45), ('two', 0)]
-        self.result = []
-        for item in fuzzysorted:
-            if item[1] > score:
-                self.result.append(data.get(item[0]))
-    else:
-        self.result = self.collection
+  def _end_curses(self, end=True):
+    """ Terminates the curses application. """
+    curses.nocbreak()
+    self.window.keypad(0)
+    if end:
+      curses.echo()
+      curses.endwin()
 
-    return self.result
-  
-  def can_search_again(self):
-      return self.query != self.old_query
-  
-  def _collection_nested_by_title(self):
-    data = {}
-    
-    for c in self.collection:
-      title = c['title']
-      data[title] = c
+  # https://stackoverflow.com/a/53016371/9434894
+  def _make_paging(self):
+    begin_x = self.parent_width // 2 - 1
+    current_selected = self.view.current_selected
+    per_page = self.view.per_page
+    data_size = self.view.data_size
+    paging = "{0}/{1}".format((current_selected//per_page + 1), math.ceil(data_size/per_page))
+    self.window.addstr(0, begin_x, paging,
+                       self.colors.version | curses.A_BOLD)
 
-    return data
+  def _loop(self):
+    self.create()
+
+    while True:
+      try:
+          user_input = self.window.getch()
+      except curses.error:
+          continue
+      except KeyboardInterrupt:
+          break
+
+      if user_input == curses.KEY_RESIZE:
+        self.reset()
 
 
 if __name__ == '__main__':
+  import curses
   import signal
+
+  # local
+
+  from colors import Colors
+  from model import Model
+  from box_selector import BoxSelector
+
   signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+  # initscr() returns a window object representing the entire screen.
+  stdscr = curses.initscr()
+  colors = Colors(curses)
+  stdscr.bkgd(colors.normal)
 
   data = [
       {
@@ -215,8 +239,11 @@ if __name__ == '__main__':
   ]
 
   model = Model(data)
-  result = model.find_by_title('Amazon', 30)
-  
-  print('Search (query=Amazon, score=30):  %d / %d' % (model.data_size, model.summary_count))
-  for i in range(len(result)):
-    print(result[i]['title'])
+  model.update_query('')
+  _ = model.find()
+
+  view = BoxSelector(stdscr, colors, model)
+  view.helper.current_selected = 1
+  view.helper.per_page = 5
+
+  Paging(stdscr, colors, view)._loop()
