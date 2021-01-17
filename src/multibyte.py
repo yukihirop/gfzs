@@ -23,7 +23,7 @@ BYTE4_END = 0xff
 
 
 class Multibyte:
-    def __init__(self, stdscr):
+    def __init__(self, stdscr = None):
         self.stdscr = stdscr
 
     # https://note.nkmk.me/python-unicodedata-east-asian-width-count/
@@ -38,6 +38,16 @@ class Multibyte:
 
     def is_full_width(self, c):
         return unicodedata.east_asian_width(c) in 'FWA'
+
+    def marked_full_width(self, text, mark="\0") -> str:
+        result = ''
+        for c in text:
+            if self.is_full_width(c):
+                result += "%s%s" % (c, mark)
+            else:
+                result += c
+
+        return result
 
     def getch(self):
         key = self.stdscr.getch()

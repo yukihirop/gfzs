@@ -11,6 +11,7 @@ import debug
 from colors import Colors
 from not_found import NotFound
 from paging import Paging
+from markup import Markup
 
 class BoxSelectorHelper:
   def __init__(self):
@@ -49,6 +50,7 @@ class BoxSelector:
     self.textboxes = []
     self.helper = BoxSelectorHelper()
     self.not_found = NotFound(stdscr, colors)
+    self.markup = Markup(colors)
     # Element parameters. Channge them here.
     self.TEXTBOX_HEIGHT = 8
     self.PAD_WIDTH = 400
@@ -203,6 +205,16 @@ class BoxSelector:
         lines = textwrap.wrap(abstract, abstract_line_len)
         for l in range(len(lines)):
           textboxes[k].addstr(4 + l, 6, lines[l], self.colors.abstract)
+
+        # Markup Search Query for title
+        markup_data = self.markup.parse(title, self.model.query)
+        for search_text in markup_data:
+          for item in markup_data[search_text]:
+            offset_x = item["half_width"]["start_index"]
+            color = item["color"]
+            match_text = item["match"]
+            textboxes[k].addstr(
+                2, 6 + offset_x, match_text, color | curses.A_BOLD)
 
     return textboxes
 

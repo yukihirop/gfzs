@@ -132,7 +132,10 @@ class Controller:
                     self._end_curses()
                     return self.box_selector.current_selected
                 elif user_input in backspace_keys:
+                    self.footer.activate()
                     self.footer.delete_char()
+                    self._search_and_refresh_display(
+                        user_input, is_init_property=True, is_init_query=False)
                 elif user_input == curses.KEY_RESIZE:
                     self._handle_resize(user_input)
                 # I don't know the reason, but - 1 may come in
