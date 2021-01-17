@@ -27,6 +27,7 @@ class Footer:
 
   def create(self):
     self._init_curses()
+    self.update_query('')
     self._make_footer()
 
   def reset(self):
@@ -35,11 +36,13 @@ class Footer:
     self.stdscr.move(self.parent_height - 1, len(self.message) + 1)
     self.stdscr.refresh()
 
-  def activate(self):
+  def activate(self, is_init = False):
     self._init_curses()
-    self.update_query('')
-    self.stdscr.move(self.parent_height - 1, len(self.message) + 1)
-    self.stdscr.clrtoeol()
+    self.stdscr.move(self.parent_height - 1, len(self.message) + 1 + len(self.query))
+    
+    if is_init:
+      self.stdscr.clrtoeol()
+    
     self.stdscr.refresh()
 
   def delete_char(self):
@@ -93,7 +96,7 @@ class Footer:
     self.stdscr.addstr(self.parent_height - 1, 0, self.message, self.colors.footer)
 
   def _loop(self):
-    self.activate()
+    self.activate(is_init=True)
 
     inp = ''
     while True:

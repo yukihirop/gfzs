@@ -32,7 +32,7 @@ class Controller:
         # Enable non-blocking mode. keys are read directly, without hitting enter.
         curses.cbreak()
         # Disable the mouse cursor.
-        curses.curs_set(0)
+        curses.curs_set(1)
         self.stdscr.keypad(1)
         # Enable colorous output.
         self.colors = Colors(curses)
@@ -82,7 +82,7 @@ class Controller:
         self.box_selector.update_view_in_loop()
 
         self.footer.create()
-        self.footer.activate()
+        self.footer.activate(is_init=True)
 
         while True:
             # stdscr.refresh is called in the process of updating the query of footer and disappears at that time
@@ -101,13 +101,9 @@ class Controller:
             if input_mode:
                 if user_input in arrow_keys:
                     input_mode = False
-                    self._search_and_refresh_display(user_input)
-                elif user_input == KEY_ESC:
+                    self._search_and_refresh_display(user_input, is_init_query=False)
+                elif user_input in (KEY_ESC, KEY_ENTER):
                     pass
-                elif user_input == KEY_ENTER:
-                    input_mode = False
-                    self._search_and_refresh_display(user_input, is_init_property=True, is_init_query=True)
-
                 # https://www.programcreek.com/python/?code=mingrammer%2Fawesome-finder%2Fawesome-finder-master%2Fawesome%2Ftui.py
                 elif user_input in backspace_keys:
                     self.footer.delete_char()
@@ -132,6 +128,7 @@ class Controller:
                     self._end_curses()
                     return self.box_selector.current_selected
                 elif user_input in backspace_keys:
+                    input_mode = True
                     self.footer.activate()
                     self.footer.delete_char()
                     self._search_and_refresh_display(

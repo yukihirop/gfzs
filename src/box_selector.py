@@ -333,6 +333,8 @@ class BoxSelector:
           current_selected = current_pagetop_index - per_page
     elif user_input == curses.KEY_RESIZE:
         self.reset()
+    elif user_input in (curses.ascii.BS, curses.ascii.DEL, curses.KEY_BACKSPACE):
+        self.reset()
     elif user_input == ord('q'):  # Quit without selecting.
         self.stop_loop = True
 
