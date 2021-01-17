@@ -26,18 +26,17 @@ class Footer:
     self.model.update_query(query)
 
   def create(self):
-    self._init_curses()
     self.update_query('')
     self._make_footer()
 
   def reset(self):
-    self._init_curses()
     self._make_footer()
     self.stdscr.move(self.parent_height - 1, len(self.message) + 1 + self.multibyte.get_east_asian_width_count(self.query))
     self.stdscr.refresh()
 
-  def activate(self, is_init = False):
-    self._init_curses()
+  def activate(self, is_init=False):
+    # Able mouse cursor
+    curses.curs_set(1)
     self.stdscr.move(self.parent_height - 1, len(self.message) + 1 + self.multibyte.get_east_asian_width_count(self.query))
     
     if is_init:
@@ -71,16 +70,6 @@ class Footer:
     inp = self._loop()
     self._end_curses()
     return inp
-
-  def _init_curses(self):
-    """ Inits the curses application """
-    # turn off automatic echoing of keys to the screen
-    curses.noecho()
-    # Buffering off
-    # https://docs.python.org/ja/3/library/curses.html#curses.cbreak
-    curses.cbreak()
-    # Aable the mouse cursor.
-    curses.curs_set(1)
 
   def _end_curses(self, end = True):
     """ Terminates the curses application. """
@@ -134,6 +123,15 @@ if __name__ == '__main__':
 
   # initscr() returns a window object representing the entire screen.
   stdscr = curses.initscr()
+
+  # turn off automatic echoing of keys to the screen
+  curses.noecho()
+  # Buffering off
+  # https://docs.python.org/ja/3/library/curses.html#curses.cbreak
+  curses.cbreak()
+  # Aable the mouse cursor.
+  curses.curs_set(1)
+
   colors = Colors(curses)
   stdscr.bkgd(colors.normal)
   model = Model([])

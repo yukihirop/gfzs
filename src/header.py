@@ -12,13 +12,11 @@ class Header:
     self.colors = colors
 
   def create(self):
-    self._init_curses()
     self._init_layout()
     self._make_header()
     self.window.refresh()
 
   def reset(self):
-    self._init_curses()
     self.window.erase()
     self._init_layout()
     self._make_header()
@@ -27,16 +25,6 @@ class Header:
   def _init_layout(self):
     self.parent_height, self.parent_width = self.stdscr.getmaxyx()
     self.window = curses.newwin(2, self.parent_width, 0, 0)
-
-  def _init_curses(self):
-    """ Inits the curses application """
-    # turn off automatic echoing of keys to the screen
-    curses.noecho()
-    # Buffering off
-    # https://docs.python.org/ja/3/library/curses.html#curses.cbreak
-    curses.cbreak()
-    # Aable the mouse cursor.
-    curses.curs_set(0)
 
   def _end_curses(self, end=True):
     """ Terminates the curses application. """
@@ -114,6 +102,15 @@ if __name__ == '__main__':
 
   # initscr() returns a window object representing the entire screen.
   stdscr = curses.initscr()
+
+  # turn off automatic echoing of keys to the screen
+  curses.noecho()
+  # Buffering off
+  # https://docs.python.org/ja/3/library/curses.html#curses.cbreak
+  curses.cbreak()
+  # Disable the mouse cursor.
+  curses.curs_set(0)
+
   colors = Colors(curses)
   stdscr.bkgd(colors.normal)
 

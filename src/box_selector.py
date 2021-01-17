@@ -87,7 +87,6 @@ class BoxSelector:
 
   def create(self, pad_begin_y = 0):
     self.helper.pad_begin_y = pad_begin_y
-    self._init_curses()
     self._init_layout()
     self._create_pad()
     self.textboxes = self._make_textboxes()
@@ -102,7 +101,6 @@ class BoxSelector:
     self.model.update_query(query)
 
   def reset(self):
-    self._init_curses()
     self._reset_pad()
     self._init_layout()
     self.textboxes = self._make_textboxes()
@@ -112,8 +110,7 @@ class BoxSelector:
       self.paging.create()
     else:
       self.paging.destroy()
-      self.window.clear()
-      self.window.refresh()
+      self.destroy()
       self.not_found.create()
 
   def _pick(self, pad_begin_y = 0):
@@ -132,15 +129,6 @@ class BoxSelector:
     self.update_per_page(self.height//self.TEXTBOX_HEIGHT - 1)
     # https://stackoverflow.com/a/17369532/9434894
     self.window.keypad(1)
-
-  def _init_curses(self):
-    """ Inits the curses application """
-    # turn off automatic echoing of keys to the screen
-    curses.noecho()
-    # Enable non-blocking mode. keys are read directly, without hitting enter.
-    curses.cbreak()
-    # Disable the mouse cursor.
-    curses.curs_set(0)
 
   def _finish_curses(self):
     self._end_curses(False)
@@ -534,6 +522,14 @@ if __name__ == '__main__':
 
   # initscr() returns a window object representing the entire screen.
   stdscr = curses.initscr()
+
+  # turn off automatic echoing of keys to the screen
+  curses.noecho()
+  # Enable non-blocking mode. keys are read directly, without hitting enter.
+  curses.cbreak()
+  # Disable the mouse cursor.
+  curses.curs_set(0)
+
   colors = Colors(curses)
   stdscr.bkgd(colors.normal)
   stdscr.refresh()
