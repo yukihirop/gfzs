@@ -82,7 +82,7 @@ class Footer:
   # stdscr.getch doesn't work when I addstr to subwin
   def _make_footer(self):
     self.stdscr.hline(self.parent_height - 2, 0, curses.ACS_HLINE | self.colors.hline, self.parent_width)
-    self.stdscr.addstr(self.parent_height - 1, 0, self.message, self.colors.footer)
+    self.stdscr.addstr(self.parent_height - 1, 0, self.message, self.colors.footer | curses.A_BOLD)
 
   def _loop(self):
     self.activate(is_init=True)
