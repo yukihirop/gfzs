@@ -127,9 +127,11 @@ class Controller:
                     pass
                 else:
                     text = chr(user_input)
-                    self.footer.write(text)
-                    self._search_and_refresh_display(
-                        user_input, is_init_property=True, is_init_query=False)
+                    will_query = self.model.query + text
+                    if self.model.validate(will_query):
+                        self.footer.write(text)
+                        self._search_and_refresh_display(
+                            user_input, is_init_property=True, is_init_query=False)
             else:
                 if user_input in arrow_keys:
                     self.box_selector.handle_key_in_loop(user_input)
@@ -158,6 +160,10 @@ class Controller:
 if __name__ == '__main__':
   import signal
   signal.signal(signal.SIGINT, signal.SIG_DFL)
+  
+  # https://note.nkmk.me/python-warnings-ignore-warning/
+  import warnings
+  warnings.simplefilter('ignore', FutureWarning)
 
   data = [
       {

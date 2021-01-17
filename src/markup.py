@@ -51,7 +51,7 @@ class Markup:
                 "end_index": span[1]
             },
             "color": self.colors.markup_partial,
-            "match": search_text,
+            "match": self.multibyte.unmarked_full_width(m.group()),
             "_type": "partial",
         })
     
@@ -105,17 +105,17 @@ if __name__ == '__main__':
     result = markup.parse(text, search_text)
     print('Char: ', result)
 
-    # search_text = None
-    # result = markup.parse(text, search_text)
-    # print('None: ', result)
+    search_text = None
+    result = markup.parse(text, search_text)
+    print('None: ', result)
 
-    # search_text = ''
-    # result = markup.parse(text, search_text)
-    # print('Blank: ', result)
+    search_text = ''
+    result = markup.parse(text, search_text)
+    print('Blank: ', result)
 
-    # search_text = '\0'
-    # result = markup.parse(text, search_text)
-    # print('Null: ', result)
+    search_text = '\0'
+    result = markup.parse(text, search_text)
+    print('Null: ', result)
 
   finally:
     curses.endwin()

@@ -49,6 +49,9 @@ class Multibyte:
 
         return result
 
+    def unmarked_full_width(self, text, mark="\0") -> str:
+        return text.replace(mark, '')
+
     def getch(self):
         key = self.stdscr.getch()
         text_pool = [key]
