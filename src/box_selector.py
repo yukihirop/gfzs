@@ -199,7 +199,7 @@ class BoxSelector:
         textboxes[k].addstr(2, 2, '%s%-3s' %
                           ('', str(k + 1) + '.'), self.colors.index)
         textboxes[k].addstr(2, 6, title, self.colors.title | curses.A_BOLD)
-        textboxes[k].addstr(3, 6, url, self.colors.url | curses.A_BLINK)
+        textboxes[k].addstr(3, 6, url, self.colors.url | curses.A_UNDERLINE)
         lines = textwrap.wrap(abstract, abstract_line_len)
         for l in range(len(lines)):
           textboxes[k].addstr(4 + l, 6, lines[l], self.colors.abstract)
