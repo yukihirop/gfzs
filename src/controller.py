@@ -115,9 +115,11 @@ class Controller:
                         user_input, is_init_query=False)
                 # https://www.programcreek.com/python/?code=mingrammer%2Fawesome-finder%2Fawesome-finder-master%2Fawesome%2Ftui.py
                 elif user_input in backspace_keys:
-                    self.footer.delete_char()
-                    self._search_and_refresh_display(
-                        user_input, is_init_property=True, is_init_query=False)
+                    if self.model.query == '':
+                        pass
+                    else:
+                        self.footer.delete_char()
+                        self._search_and_refresh_display(user_input, is_init_property=True, is_init_query=False)
                 elif user_input == curses.KEY_RESIZE:
                     self._handle_resize(user_input)
                 # I don't know the reason, but - 1 may come in
