@@ -26,6 +26,12 @@ or
 $ cat fixtures/rust.json | python3 -m gfzs
 ```
 
+or
+
+```bash
+$ cat fixtures/rust.json | bin/gfzs
+```
+
 ## Check
 
 ### box_selector

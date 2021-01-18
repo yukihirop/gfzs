@@ -1,0 +1,16 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# Copy from https://github.com/mooz/percol/blob/master/bin/percol
+
+import os
+import sys
+
+# add load path
+if __name__ == '__main__':
+    libdir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    if os.path.exists(os.path.join(libdir, "gfzs")):
+        sys.path.insert(0, libdir)
+
+from gfzs import main
+main()
