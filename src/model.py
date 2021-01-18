@@ -18,6 +18,7 @@ class Model:
         self.code_regex = re.compile(
             '[!"#$%&\'\\\\()*+,-./:;<=>?@[\\]^_`{|}~「」〔〕“”〈〉『』【】＆＊・（）＄＃＠。、？！｀＋￥％]')
         self.space_regex = re.compile(r'^[ 　]')
+        self._result_nested_by_url = self._collection_nested_by("url")
 
     @property
     def summary_count(self):
@@ -40,7 +41,7 @@ class Model:
 
     def validate(self, query=None) -> bool:
         def fn(q):
-            if q is None:
+            if q is None or q is '\0':
                 return False
 
             trimed = self.code_regex.sub('', q)
@@ -64,24 +65,11 @@ class Model:
             return fn(query)
 
     def find(self, query=None, score=30):
-        return self.find_by_title(query, score)
-
-    # e.g.) data = { title: { title, url, abstract }, ...}
-    def find_by_title(self, query=None, score=30):
         if query != None and query != '':
             self.update_query(query)
 
         if self.validate():
-            data = self._collection_nested_by_title()
-            titles = data.keys()
-            fuzzysorted = fuzzyprocess.extract(
-                self.query, titles, limit=len(titles))
-
-            # fuzzysorted reutrns an array of tuples: [('one', 45), ('three', 45), ('two', 0)]
-            self.result = []
-            for item in fuzzysorted:
-                if item[1] > score:
-                    self.result.append(data.get(item[0]))
+            self.result = self._make_result_from_scored(score)
         else:
             self.result = self.collection
 
@@ -90,12 +78,78 @@ class Model:
     def can_search_again(self):
         return self.query != self.old_query
 
-    def _collection_nested_by_title(self):
+    def _make_result_from_scored(self, score) -> list:
+        result = []
+
+        # From title
+        scored_result_at_title = self._make_scored_result('title', score)
+        # From abstract
+        scored_result_at_abstract = self._make_scored_result('abstract', score)
+
+        all_urls = list(set(scored_result_at_title.keys())) + list(set(scored_result_at_abstract.keys()))
+
+        added = []
+        for url in all_urls:
+            score_at_title = 0
+            score_at_abstract = 0
+            title_len = 1
+            abstract_len = 1
+
+            if url in scored_result_at_title:
+                data_at_title = scored_result_at_title[url]
+                score_at_title = data_at_title["score"]
+                title_len = len(data_at_title["data"]["title"])
+
+            if url in scored_result_at_abstract:
+                data_at_abstract = scored_result_at_abstract[url]
+                score_at_abstract = data_at_abstract["score"]
+                abstract_len = len(data_at_abstract["data"]["abstract"])
+
+            score = (title_len / (title_len + abstract_len)) * score_at_title + (abstract_len / (title_len + abstract_len)) * score_at_abstract
+            
+            added.append({
+                "score": score,
+                "url": url
+            })
+        
+        added = sorted(added, key=lambda x: x["score"], reverse=True)
+        for item in added:
+            url = item["url"]
+            result.append(self._result_nested_by_url[url])
+
+        return result
+
+
+    def _make_scored_result(self, key, score) -> dict:
+        result = {}
+
+        # From key
+        data_grouped_by_key = self._collection_nested_by(key)
+        keys = data_grouped_by_key.keys()
+        fuzzysorted = fuzzyprocess.extract(
+            self.query, keys, limit=len(keys))
+
+        # fuzzysorted reutrns an array of tuples: [('one', 45), ('three', 45), ('two', 0)]
+        for item in fuzzysorted:
+            if item[1] > score:
+                scored = {}
+
+                match_data = data_grouped_by_key.get(item[0])
+                url = match_data["url"]
+                result[url] = {
+                    "data": match_data,
+                    "score": item[1]
+                }
+        
+        return result
+
+
+    def _collection_nested_by(self, key) -> dict:
         data = {}
 
         for c in self.collection:
-            title = c['title']
-            data[title] = c
+            key_data = c[key]
+            data[key_data] = c
 
         return data
 
@@ -252,14 +306,14 @@ if __name__ == '__main__':
     ]
 
     model = Model(data)
-    result = model.find_by_title('Amazon', 30)
+    result = model.find('Amazon', 30)
 
     print('Search (query=Amazon, score=30):  %d / %d' %
           (model.data_size, model.summary_count))
     for i in range(len(result)):
         print(result[i]['title'])
 
-    result = model.find_by_title('\0', 30)
+    result = model.find('\0', 30)
     print('Search (query=\0, score=30):  %d / %d' %
           (model.data_size, model.summary_count))
     for i in range(len(result)):
