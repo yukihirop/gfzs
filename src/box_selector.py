@@ -203,6 +203,16 @@ class BoxSelector:
             match_text = item["match"]
             textboxes[k].addstr(
                 2, 6 + offset_x, match_text, color | curses.A_BOLD)
+        
+        # Markup Search Query for abstract
+        for l in range(len(lines)):
+          markup_data = self.markup.parse(lines[l], self.model.query)
+          for search_text in markup_data:
+            for item in markup_data[search_text]:
+              offset_x = item["half_width"]["start_index"]
+              color = item["color"]
+              match_text = item["match"]
+              textboxes[k].addstr(4 + l, 6 + offset_x, match_text, color | curses.A_BOLD)
 
     return textboxes
 
