@@ -51,7 +51,7 @@ def main() -> None:
   ttyname = tty.get_ttyname()
 
   with open_tty(ttyname) as tty_f:
-    descriptors = tty.reconnect_descriptors(tty_f)
+    _ = tty.reconnect_descriptors(tty_f)
 
     try:
       json_str = sys.stdin.read()
@@ -69,10 +69,7 @@ def main() -> None:
 
     controller = Controller(data)
     try:
-      choice = controller.run()
-      result = controller.model.result
-      if not choice is None:
-          webbrowser.open(result[choice].get('url'), new=2)
+      _ = controller.run()
     except curses.error as e:
       error = e
     except Exception as e:

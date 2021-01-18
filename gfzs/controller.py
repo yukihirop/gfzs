@@ -1,5 +1,6 @@
 import curses
 import curses.ascii
+import webbrowser
 
 # local
 
@@ -78,6 +79,10 @@ class Controller:
         self.footer.reset()
         self._search_and_refresh_display(user_input, is_init_property=True, is_init_query=False)
 
+    def execute_when_enter(self, current_selected):
+        result = self.model.result
+        webbrowser.open(result[current_selected].get('url'), new=2)
+
     def run(self) -> int:
         input_mode = True
         user_input = ''
@@ -110,6 +115,7 @@ class Controller:
             except curses.error:
                 continue
             except KeyboardInterrupt:
+                self._end_curses()
                 break
 
             if input_mode:
@@ -147,8 +153,7 @@ class Controller:
                 elif user_input == KEY_ESC:
                     pass
                 elif user_input == KEY_ENTER:
-                    self._end_curses()
-                    return self.box_selector.current_selected
+                    self.execute_when_enter(self.box_selector.current_selected)
                 elif user_input in backspace_keys:
                     input_mode = True
                     self.footer.activate()
