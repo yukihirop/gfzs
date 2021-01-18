@@ -69,7 +69,7 @@ class Controller:
         self.footer.reset()
         self._search_and_refresh_display(user_input, is_init_property=True, is_init_query=False)
 
-    def _loop(self) -> int:
+    def run(self) -> int:
         input_mode = True
         user_input = ''
         box_select_begin_y = 2
@@ -315,7 +315,7 @@ if __name__ == '__main__':
   error_msg = ''
   controller = Controller(data)
   try:
-    choice = controller._loop()
+    choice = controller.run()
     result = controller.model.result
     if not choice is None:
         print(result[choice].get('title'))
