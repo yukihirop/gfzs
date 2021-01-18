@@ -20,6 +20,12 @@ $ source .venv/bin/activate
 $ python3 gfzs/controller.py
 ```
 
+or
+
+```bash
+$ cat fixtures/rust.json | python3 -m gfzs
+```
+
 ## Check
 
 ### box_selector
