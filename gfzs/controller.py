@@ -3,13 +3,22 @@ import curses.ascii
 
 # local
 
-import debug
-from header import Header
-from box_selector import BoxSelector
-from footer import Footer
-from colors import Colors
-from model import Model
-from multibyte import Multibyte
+try:
+    from gfzs import debug
+    from gfzs.header import Header
+    from gfzs.box_selector import BoxSelector
+    from gfzs.footer import Footer
+    from gfzs.colors import Colors
+    from gfzs.model import Model
+    from gfzs.multibyte import Multibyte
+except:
+    import debug
+    from header import Header
+    from box_selector import BoxSelector
+    from footer import Footer
+    from colors import Colors
+    from model import Model
+    from multibyte import Multibyte
 
 KEY_ENTER = 10
 KEY_ESC = 27

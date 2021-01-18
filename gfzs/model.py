@@ -4,9 +4,11 @@ import re
 
 # local
 
-import debug
-
-
+try:
+    from gfzs import debug
+except:
+    import debug
+    
 class Model:
     # e.g.) collection = [{ title, url, abstract }, ...]
     def __init__(self, collection):

@@ -3,8 +3,12 @@ import curses.ascii
 
 # local
 
-import debug
-from multibyte import Multibyte
+try:
+  from gfzs import debug
+  from gfzs.multibyte import Multibyte
+except:
+  import debug
+  from multibyte import Multibyte
 
 KEY_ENTER = 10
 KEY_ESC = 27

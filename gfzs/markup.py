@@ -2,8 +2,12 @@ import re
 
 # local
 
-import debug
-from multibyte import Multibyte
+try:
+  from gfzs import debug
+  from gfzs.multibyte import Multibyte
+except:
+  import debug
+  from multibyte import Multibyte
 
 class Markup:
   def __init__(self, colors):

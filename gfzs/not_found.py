@@ -3,7 +3,10 @@ import curses.ascii
 
 # local
 
-import debug
+try:
+    from gfzs import debug
+except:
+    import debug
 #
 # Generate by https://lazesoftware.com/tool/hugeaagen/
 #                                  ■                              

@@ -4,7 +4,10 @@ import unicodedata
 
 # from local
 
-import debug
+try:
+    from gfzs import debug
+except:
+    import debug
 
 
 # https://seiai.ed.jp/sys/text/cs/mcodes/ucodeutf8.html

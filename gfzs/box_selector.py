@@ -7,11 +7,18 @@ import math
 
 # local
 
-import debug
-from colors import Colors
-from not_found import NotFound
-from paging import Paging
-from markup import Markup
+try:
+  from gfzs import debug
+  from gfzs.colors import Colors
+  from gfzs.not_found import NotFound
+  from gfzs.paging import Paging
+  from gfzs.markup import Markup
+except:
+  import debug
+  from colors import Colors
+  from not_found import NotFound
+  from paging import Paging
+  from markup import Markup
 
 class BoxSelectorHelper:
   def __init__(self):
