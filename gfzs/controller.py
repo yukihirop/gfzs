@@ -11,7 +11,7 @@ try:
     from gfzs.utils.colors import Colors
     from gfzs.utils.multibyte import Multibyte
     from gfzs.views.header import Header
-    from gfzs.views.box_selector import BoxSelector
+    from gfzs.views.search_result import BoxSelector
     from gfzs.views.footer import Footer
 
 # need when 「python3 gfzs/controller.py」
@@ -21,7 +21,7 @@ except ModuleNotFoundError:
     from utils.colors import Colors
     from utils.multibyte import Multibyte
     from views.header import Header
-    from views.box_selector import BoxSelector
+    from views.search_result import BoxSelector
     from views.footer import Footer
 
 KEY_ENTER = 10
@@ -32,7 +32,7 @@ class Controller:
         self._init_curses()
         self.model = Model(data)
         self.header = Header(self.stdscr, self.colors)
-        self.box_selector = BoxSelector(self.stdscr, self.colors, self.model)
+        self.search_result = BoxSelector(self.stdscr, self.colors, self.model)
         self.footer = Footer(self.stdscr, self.colors, self.model)
         self.multibyte = Multibyte(self.stdscr)
 
@@ -64,18 +64,18 @@ class Controller:
         # Disable mouse cursor
         curses.curs_set(0)
 
-        self.box_selector.reset()
+        self.search_result.reset()
 
         if is_init_property:
-            self.box_selector.init_properties_after_create()
+            self.search_result.init_properties_after_create()
 
-        result = self.box_selector.update_view_in_loop()
+        result = self.search_result.update_view_in_loop()
 
         if is_init_query:
-            self.box_selector.update_query('')
+            self.search_result.update_query('')
 
         if result:
-            self.box_selector.handle_key_in_loop(user_input)
+            self.search_result.handle_key_in_loop(user_input)
 
     def _handle_resize(self, user_input):
         self.header.reset()
@@ -97,9 +97,9 @@ class Controller:
         
         self.header.create()
         
-        self.box_selector.create(box_select_begin_y)
-        self.box_selector.init_properties_after_create()
-        self.box_selector.update_view_in_loop()
+        self.search_result.create(box_select_begin_y)
+        self.search_result.init_properties_after_create()
+        self.search_result.update_view_in_loop()
 
         self.footer.create()
         self.footer.activate(is_init=True)
@@ -111,7 +111,7 @@ class Controller:
             if input_mode:
                 self.footer.activate()
             else:
-                self.box_selector.update_view_in_loop()
+                self.search_result.update_view_in_loop()
 
             try:
                 user_input = self.multibyte.getch()
@@ -152,11 +152,11 @@ class Controller:
                             user_input, is_init_property=True, is_init_query=False)
             else:
                 if user_input in arrow_keys:
-                    self.box_selector.handle_key_in_loop(user_input)
+                    self.search_result.handle_key_in_loop(user_input)
                 elif user_input == KEY_ESC:
                     pass
                 elif user_input == KEY_ENTER:
-                    self.execute_when_enter(self.box_selector.current_selected)
+                    self.execute_when_enter(self.search_result.current_selected)
                 elif user_input in backspace_keys:
                     input_mode = True
                     self.footer.activate()

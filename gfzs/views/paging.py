@@ -75,7 +75,7 @@ if __name__ == '__main__':
     import utils
     from utils.colors import Colors
     from model import Model
-    from box_selector import BoxSelector
+    from search_result import BoxSelector
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 

@@ -34,10 +34,10 @@ $ cat fixtures/rust.json | bin/gfzs
 
 ## Check
 
-### box_selector
+### search_result
 
 ```bash
-$ python3 gfzs/views/box_selector.py
+$ python3 gfzs/views/search_result.py
 ```
 
 ![image](https://user-images.githubusercontent.com/11146767/104927269-8e50af00-59e4-11eb-8fcf-8b18f4db4420.png)
