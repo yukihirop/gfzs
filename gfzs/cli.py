@@ -50,7 +50,7 @@ def open_tty(ttyname):
 
 def parse_args():
   parser = argparse.ArgumentParser(description='Google Fuzzy Search')
-  parser.add_argument('--version', action='version', version=info.__version__)
+  parser.add_argument('--version', '-v', action='version', version=info.__version__)
   parser.add_argument('--score', '-s', type=int, default=30, help="fuzzywuzzy's score")
   
   return parser.parse_args()
