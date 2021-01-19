@@ -49,9 +49,13 @@ def open_tty(ttyname):
     return open(ttyname, "wb+", buffering=0)
 
 def parse_args():
-  parser = argparse.ArgumentParser(description='Google Fuzzy Search')
+  parser = argparse.ArgumentParser(
+      prog='gfzs',
+      description="Google Fuzzy Search. Pipe the search result(json) of googler and use it"
+      )
   parser.add_argument('--version', '-v', action='version', version=info.__version__)
-  parser.add_argument('--score', '-s', type=int, default=30, help="fuzzywuzzy's score")
+  parser.add_argument('--score', '-s', type=int, default=Config.default_score,
+                      help="fuzzywuzzy's score. please see https://github.com/seatgeek/fuzzywuzzy")
   
   return parser.parse_args()
 

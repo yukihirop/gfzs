@@ -178,17 +178,14 @@ class Model:
 if __name__ == '__main__':
     import json
     import signal
-    import argparse
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     from config import Config
 
     json_str = open('fixtures/rust.json', 'r').read()
     data = json.loads(json_str)
-
-    args = argparse.Namespace()
-    args.score = 40
-    config = Config.get_instance(args)
+    
+    config = Config.get_instance()
     model = Model(data)
     result = model.find('Amazon')
 
