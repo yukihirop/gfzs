@@ -14,14 +14,13 @@ try:
   from gfzs import tty, info
   from gfzs.utils import debug
   from gfzs.controller import Controller
-  from gfzs.config import Config
+  from gfzs.config.runtime import RuntimeConfig
 
 # need when 「cat fixtures/rust.json | python -m gfzs」
 except ModuleNotFoundError:
   from utils import debug
   from controller import Controller
-  from config import Config
-
+  from config.runtime import RuntimeConfig
 
 def validate(data):
   data = []
@@ -54,7 +53,7 @@ def parse_args():
       description="Google Fuzzy Search. Pipe the search result(json) of googler and use it"
       )
   parser.add_argument('--version', '-v', action='version', version=info.__version__)
-  parser.add_argument('--score', '-s', type=int, default=Config.default_score,
+  parser.add_argument('--score', '-s', type=int, default=RuntimeConfig.default_score,
                       help="fuzzywuzzy's score. please see https://github.com/seatgeek/fuzzywuzzy")
   
   return parser.parse_args()
@@ -69,7 +68,7 @@ def main() -> None:
   error = None
 
   args = parse_args()
-  _ = Config.get_instance(args)
+  _ = RuntimeConfig.get_instance(args)
   ttyname = tty.get_ttyname()
 
   with open_tty(ttyname) as tty_f:

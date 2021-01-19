@@ -10,7 +10,7 @@ default_args = argparse.Namespace(
 
 class Singleton(object):
     @classmethod
-    def get_instance(cls, args = default_args):
+    def get_instance(cls, args=default_args):
         if not hasattr(cls, "_instance"):
             cls._instance = cls(args)
         else:
@@ -19,9 +19,10 @@ class Singleton(object):
 
         return cls._instance
 
-class Config(Singleton):
+
+class RuntimeConfig(Singleton):
     """A class that reads and manages the options passed in the runtime"""
-  
+
     """fuzzywuzzy's score. please see https://github.com/seatgeek/fuzzywuzzy"""
     default_score = DEFAULT_SCORE
 
@@ -30,4 +31,4 @@ class Config(Singleton):
 
     @property
     def score(self):
-      return self.args.score or Config.default_score
+      return self.args.score or RuntimeConfig.default_score
