@@ -63,11 +63,15 @@ class Paging:
 
 
 if __name__ == '__main__':
+  import os, sys
   import curses
   import signal
 
   # local
 
+  # https://codechacha.com/ja/how-to-import-python-files/
+  sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+  import colors, model, box_selector
   from colors import Colors
   from model import Model
   from box_selector import BoxSelector

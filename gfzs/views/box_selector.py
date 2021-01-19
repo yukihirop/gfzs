@@ -4,21 +4,39 @@ import curses
 import unicodedata
 import textwrap
 import math
+import os,sys
 
 # local
 
 try:
-  from gfzs import debug
-  from gfzs.colors import Colors
-  from gfzs.not_found import NotFound
-  from gfzs.paging import Paging
-  from gfzs.markup import Markup
-except:
-  import debug
+  # need when 「python3 gfzs/views/box_selector.py」
+  if __name__ == '__main__':
+    # https://codechacha.com/ja/how-to-import-python-files/
+    sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+    import debug, colors, markup
+
+    import not_found, paging
+    from colors import Colors
+    from markup import Markup
+    from not_found import NotFound
+    from paging import Paging
+  # need when 「cat fixtures/rust.json | python -m gfzs」
+  # need when 「cat fixtures/rust.json | bin/gfzs」
+  else:
+    from gfzs import debug
+    from gfzs.colors import Colors
+    from gfzs.markup import Markup
+    from gfzs.views.not_found import NotFound
+    from gfzs.views.paging import Paging
+except ModuleNotFoundError:
+  # need when 「python3 gfzs/controller.py」
+  sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname('../'))))
+  import debug, colors, markup, views
+  
   from colors import Colors
-  from not_found import NotFound
-  from paging import Paging
   from markup import Markup
+  from views.not_found import NotFound
+  from views.paging import Paging
 
 class BoxSelectorHelper:
   def __init__(self):
@@ -382,9 +400,13 @@ class BoxSelector:
 if __name__ == '__main__':
   import curses
   import signal
+  import os,sys
 
   # local
 
+  # https://codechacha.com/ja/how-to-import-python-files/
+  sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+  import colors, model
   from colors import Colors
   from model import Model
 

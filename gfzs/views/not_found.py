@@ -1,12 +1,23 @@
+import sys, os
 import curses
 import curses.ascii
 
 # local
 
 try:
-    from gfzs import debug
-except:
+    # need when 「python3 gfzs/views/footer.py」
+    if __name__ == '__main__':
+      # https://codechacha.com/ja/how-to-import-python-files/
+      sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+      import debug
+    # need when 「cat fixtures/rust.json | python -m gfzs」
+    # need when 「cat fixtures/rust.json | bin/gfzs」
+    else:
+      from gfzs import debug
+except ModuleNotFoundError:
+    # need when 「python3 gfzs/controller.py」
     import debug
+
 #
 # Generate by https://lazesoftware.com/tool/hugeaagen/
 #                                  ■                              
@@ -702,9 +713,13 @@ class NotFound:
 if __name__ == '__main__':
   import curses
   import signal
+  import sys,os
 
   # local
 
+  # https://codechacha.com/ja/how-to-import-python-files/
+  sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+  import colors, model
   from colors import Colors
   from model import Model
 

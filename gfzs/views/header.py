@@ -92,9 +92,13 @@ class Header:
 if __name__ == '__main__':
   import curses
   import signal
+  import os, sys
 
   # local
 
+  # https://codechacha.com/ja/how-to-import-python-files/
+  sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+  import colors, model
   from colors import Colors
   from model import Model
 
