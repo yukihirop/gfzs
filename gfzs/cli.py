@@ -14,11 +14,13 @@ try:
   from gfzs import tty, info
   from gfzs.utils import debug
   from gfzs.controller import Controller
+  from gfzs.config import Config
 
 # need when 「cat fixtures/rust.json | python -m gfzs」
 except ModuleNotFoundError:
   from utils import debug
   from controller import Controller
+  from config import Config
 
 
 def validate(data):
@@ -54,7 +56,6 @@ def parse_args():
   return parser.parse_args()
 
 def main() -> None:
-  args = parse_args()
 
   signal.signal(signal.SIGINT, signal.SIG_DFL)
   # https://note.nkmk.me/python-warnings-ignore-warning/
@@ -63,6 +64,8 @@ def main() -> None:
   data = None
   error = None
 
+  args = parse_args()
+  _ = Config.get_instance(args)
   ttyname = tty.get_ttyname()
 
   with open_tty(ttyname) as tty_f:
