@@ -11,15 +11,18 @@ try:
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from utils import debug
+        from config import Config
 
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs.utils import debug
+        from gfzs.config import Config
 
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
     from utils import debug
+    from config import Config
     
 class Model:
     # e.g.) collection = [{ title, url, abstract }, ...]
@@ -27,6 +30,8 @@ class Model:
         self.collection = collection
         self.result = []
         self.query = self.old_query = None
+        self.config = Config.get_instance()
+
         self.char_regex = re.compile(r'^\w|\W+')
         # https://qiita.com/ganariya/items/42fc0ed3dcebecb6b117
         self.code_regex = re.compile(
@@ -78,7 +83,9 @@ class Model:
         else:
             return fn(query)
 
-    def find(self, query=None, score=30):
+    def find(self, query=None):
+        score = self.config.score
+
         if query != None and query != '':
             self.update_query(query)
 
@@ -171,21 +178,27 @@ class Model:
 if __name__ == '__main__':
     import json
     import signal
+    import argparse
     signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+    from config import Config
 
     json_str = open('fixtures/rust.json', 'r').read()
     data = json.loads(json_str)
 
+    args = argparse.Namespace()
+    args.score = 40
+    config = Config.get_instance(args)
     model = Model(data)
-    result = model.find('Amazon', 30)
+    result = model.find('Amazon')
 
-    print('Search (query=Amazon, score=30):  %d / %d' %
-          (model.data_size, model.summary_count))
+    print('Search (query=Amazon, score=%d):  %d / %d' %
+          (config.score, model.data_size, model.summary_count))
     for i in range(len(result)):
         print(result[i]['title'])
 
-    result = model.find('\0', 30)
-    print('Search (query=\0, score=30):  %d / %d' %
-          (model.data_size, model.summary_count))
+    result = model.find('\0')
+    print('Search (query=\0, score=%d):  %d / %d' %
+          (config.score, model.data_size, model.summary_count))
     for i in range(len(result)):
         print(result[i]['title'])
