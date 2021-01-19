@@ -1,13 +1,30 @@
 import curses
+import os, sys
 
 GOOGLE = 'Google'
 FUZZY = 'Fuzzy'
 SEARCH = 'Search'
 
+try:
+  # need when 「python3 gfzs/views/header.py」
+  if __name__ == '__main__':
+    # https://codechacha.com/ja/how-to-import-python-files/
+    sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+    import info
+  
+  # need when 「cat fixtures/rust.json | python -m gfzs」
+  # need when 「cat fixtures/rust.json | bin/gfzs」
+  else:
+    from gfzs import info
+
+# need when 「python3 gfzs/controller.py」
+except ModuleNotFoundError:
+  import info
+
 class Header:
   def __init__(self, stdscr, colors):
-    self.version = '(v0.0.1)'
-    self.copyright = 'Copyright ©︎ 2021 yukihirop'
+    self.version = "(%s)" % info.__version__
+    self.copyright = info.__copyright__
     self.stdscr = stdscr
     self.colors = colors
 
