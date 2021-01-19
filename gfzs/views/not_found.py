@@ -9,14 +9,17 @@ try:
     if __name__ == '__main__':
       # https://codechacha.com/ja/how-to-import-python-files/
       sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-      import debug
+      import utils
+      from utils import debug
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
-      from gfzs import debug
+      from gfzs.utils import debug
+
+# need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
-    # need when 「python3 gfzs/controller.py」
-    import debug
+    sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname('../'))))
+    from utils import debug
 
 #
 # Generate by https://lazesoftware.com/tool/hugeaagen/
@@ -719,8 +722,8 @@ if __name__ == '__main__':
 
   # https://codechacha.com/ja/how-to-import-python-files/
   sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-  import colors, model
-  from colors import Colors
+  import utils, model
+  from utils.colors import Colors
   from model import Model
 
   signal.signal(signal.SIGINT, signal.SIG_DFL)

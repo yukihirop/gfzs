@@ -1,13 +1,25 @@
 from fuzzywuzzy import process as fuzzyprocess
 from itertools import groupby
 import re
+import os, sys
 
 # local
 
 try:
-    from gfzs import debug
-except:
-    import debug
+    # need when 「python3 gfzs/model.py」
+    if __name__ == '__main__':
+        # https://codechacha.com/ja/how-to-import-python-files/
+        sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+        from utils import debug
+
+    # need when 「cat fixtures/rust.json | python -m gfzs」
+    # need when 「cat fixtures/rust.json | bin/gfzs」
+    else:
+        from gfzs.utils import debug
+
+# need when 「python3 gfzs/controller.py」
+except ModuleNotFoundError:
+    from utils import debug
     
 class Model:
     # e.g.) collection = [{ title, url, abstract }, ...]

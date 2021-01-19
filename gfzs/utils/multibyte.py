@@ -1,13 +1,26 @@
 # copy from: https://qiita.com/t4t5u0/items/bd5270d0a7b3def35a03
 
 import unicodedata
+import os, sys
 
 # from local
 
 try:
-    from gfzs import debug
-except:
-    import debug
+    # need when「python3 gfzs/multibyte.py」
+    if __name__ == '__main__':
+        # https://codechacha.com/ja/how-to-import-python-files/
+        sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+        import debug
+    # need when 「cat fixtures/rust.json | python -m gfzs」
+    # need when 「cat fixtures/rust.json | bin/gfzs」
+    else:
+        from gfzs.utils import debug
+# need when 「python3 gfzs/controller.py」
+except ModuleNotFoundError:
+    # https://codechacha.com/ja/how-to-import-python-files/
+    sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname('../'))))
+    import utils
+    from utils import debug
 
 
 # https://seiai.ed.jp/sys/text/cs/mcodes/ucodeutf8.html

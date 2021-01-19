@@ -13,28 +13,25 @@ try:
   if __name__ == '__main__':
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-    import debug, colors, markup
+    import utils
+    from utils.colors import Colors
+    from utils.markup import Markup
 
-    import not_found, paging
-    from colors import Colors
-    from markup import Markup
     from not_found import NotFound
     from paging import Paging
   # need when 「cat fixtures/rust.json | python -m gfzs」
   # need when 「cat fixtures/rust.json | bin/gfzs」
   else:
-    from gfzs import debug
-    from gfzs.colors import Colors
-    from gfzs.markup import Markup
+    from gfzs.utils.colors import Colors
+    from gfzs.utils.markup import Markup
     from gfzs.views.not_found import NotFound
     from gfzs.views.paging import Paging
+# need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
-  # need when 「python3 gfzs/controller.py」
   sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname('../'))))
-  import debug, colors, markup, views
-  
-  from colors import Colors
-  from markup import Markup
+  import utils, views
+  from utils.colors import Colors
+  from utils.markup import Markup
   from views.not_found import NotFound
   from views.paging import Paging
 
@@ -406,8 +403,8 @@ if __name__ == '__main__':
 
   # https://codechacha.com/ja/how-to-import-python-files/
   sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-  import colors, model
-  from colors import Colors
+  import utils, model
+  from utils.colors import Colors
   from model import Model
 
   signal.signal(signal.SIGINT, signal.SIG_DFL)

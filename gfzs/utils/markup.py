@@ -1,13 +1,28 @@
 import re
+import os, sys
 
 # local
 
 try:
-  from gfzs import debug
-  from gfzs.multibyte import Multibyte
-except:
-  import debug
-  from multibyte import Multibyte
+  # need when 「python3 gfzs/markup.py」
+  if __name__ == '__main__':
+    # https://codechacha.com/ja/how-to-import-python-files/
+    sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+    import debug
+    from multibyte import Multibyte
+
+  # need when 「cat fixtures/rust.json | python -m gfzs」
+  # need when 「cat fixtures/rust.json | bin/gfzs」
+  else:
+    from gfzs.utils import debug
+    from gfzs.utils.multibyte import Multibyte
+# need when 「python3 gfzs/controller.py」
+except ModuleNotFoundError:
+  # https://codechacha.com/ja/how-to-import-python-files/
+  sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname('../'))))
+  import utils
+  from utils import debug
+  from utils.multibyte import Multibyte
 
 class Markup:
   def __init__(self, colors):

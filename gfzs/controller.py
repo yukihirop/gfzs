@@ -7,19 +7,19 @@ import webbrowser
 try:
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
-    from gfzs import debug
-    from gfzs.colors import Colors
     from gfzs.model import Model
-    from gfzs.multibyte import Multibyte
+    from gfzs.utils.colors import Colors
+    from gfzs.utils.multibyte import Multibyte
     from gfzs.views.header import Header
     from gfzs.views.box_selector import BoxSelector
     from gfzs.views.footer import Footer
+
+# need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
-    # need when 「python3 gfzs/controller.py」
-    import debug, views
-    from colors import Colors
+    import views, utils
     from model import Model
-    from multibyte import Multibyte
+    from utils.colors import Colors
+    from utils.multibyte import Multibyte
     from views.header import Header
     from views.box_selector import BoxSelector
     from views.footer import Footer

@@ -9,10 +9,14 @@ import curses
 # local
 
 try:
-  from gfzs import debug, tty
+  # need when 「cat fixtures/rust.json | bin/gfzs」
+  from gfzs import tty
+  from gfzs.utils import debug
   from gfzs.controller import Controller
-except:
-  import debug
+
+# need when 「cat fixtures/rust.json | python -m gfzs」
+except ModuleNotFoundError:
+  from utils import debug
   from controller import Controller
 
 def validate(data):

@@ -98,8 +98,8 @@ if __name__ == '__main__':
 
   # https://codechacha.com/ja/how-to-import-python-files/
   sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-  import colors, model
-  from colors import Colors
+  import utils, model
+  from utils.colors import Colors
   from model import Model
 
   signal.signal(signal.SIGINT, signal.SIG_DFL)
