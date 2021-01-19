@@ -75,7 +75,7 @@ if __name__ == '__main__':
     import utils
     from utils.colors import Colors
     from model import Model
-    from search_result import BoxSelector
+    from search_result import SearchResult
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -100,7 +100,7 @@ if __name__ == '__main__':
     model.update_query('')
     _ = model.find()
 
-    view = BoxSelector(stdscr, colors, model)
+    view = SearchResult(stdscr, colors, model)
     view.helper.current_selected = 1
     view.helper.per_page = 5
 

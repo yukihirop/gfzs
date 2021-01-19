@@ -11,7 +11,7 @@ try:
     from gfzs.utils.colors import Colors
     from gfzs.utils.multibyte import Multibyte
     from gfzs.views.header import Header
-    from gfzs.views.search_result import BoxSelector
+    from gfzs.views.search_result import SearchResult
     from gfzs.views.footer import Footer
 
 # need when 「python3 gfzs/controller.py」
@@ -21,7 +21,7 @@ except ModuleNotFoundError:
     from utils.colors import Colors
     from utils.multibyte import Multibyte
     from views.header import Header
-    from views.search_result import BoxSelector
+    from views.search_result import SearchResult
     from views.footer import Footer
 
 KEY_ENTER = 10
@@ -32,7 +32,7 @@ class Controller:
         self._init_curses()
         self.model = Model(data)
         self.header = Header(self.stdscr, self.colors)
-        self.search_result = BoxSelector(self.stdscr, self.colors, self.model)
+        self.search_result = SearchResult(self.stdscr, self.colors, self.model)
         self.footer = Footer(self.stdscr, self.colors, self.model)
         self.multibyte = Multibyte(self.stdscr)
 

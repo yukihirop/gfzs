@@ -35,7 +35,7 @@ except ModuleNotFoundError:
   from views.not_found import NotFound
   from views.paging import Paging
 
-class BoxSelectorHelper:
+class SearchResultHelper:
   def __init__(self):
     self.current_selected = 0
     self.last = 1
@@ -54,13 +54,13 @@ class BoxSelectorHelper:
   def update_per_page(self, value):
     self.per_page = value
 
-class BoxSelector:
+class SearchResult:
   """Display options build from a list of strings in a (unix) terminal.
      The user can browser though the textboxes and select one with enter.
   """
 
   def __init__(self, stdscr, colors, model):
-    """Create a BoxSelector object.
+    """Create a SearchResult object.
        'data' is list of string. Each string is used to build
        a textbox.
     """
@@ -70,7 +70,7 @@ class BoxSelector:
     self.paging = Paging(stdscr, colors, self)
     self.stop_loop = False
     self.textboxes = []
-    self.helper = BoxSelectorHelper()
+    self.helper = SearchResultHelper()
     self.not_found = NotFound(stdscr, colors)
     self.markup = Markup(colors)
     # Element parameters. Channge them here.
@@ -431,6 +431,6 @@ if __name__ == '__main__':
   model.update_query('Amazon')
   _ = model.find()
 
-  choice = BoxSelector(stdscr, colors, model)._pick(1)
+  choice = SearchResult(stdscr, colors, model)._pick(1)
   if choice != None:
     print(model.result[choice].get('title'))
