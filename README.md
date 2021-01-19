@@ -75,3 +75,11 @@ $ python3 gfzs/views/paging.py
 
 ![image](https://user-images.githubusercontent.com/11146767/104927802-36667800-59e5-11eb-9afb-2b3386c4d8c6.png)
 
+## 📚 Reference
+
+I really referred to the implementation of the following repository.
+
+- [mooz/percol](https://github.com/mooz/percol)
+- [mingrammer/awesome-finder](https://github.com/mingrammer/awesome-finder)
+- [frankdice/fuzzyui](https://github.com/frankdice/fuzzyui)
+- [NikolaiT/Scripts](https://github.com/NikolaiT/Scripts/blob/master/scripts/python/curses/text_selector.py)
