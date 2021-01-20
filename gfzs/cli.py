@@ -15,12 +15,14 @@ try:
   from gfzs.utils import debug
   from gfzs.controller import Controller
   from gfzs.config.runtime import RuntimeConfig
+  import gfzs.cmd as cmd
 
 # need when 「cat fixtures/rust.json | python -m gfzs」
 except ModuleNotFoundError:
   from utils import debug
   from controller import Controller
   from config.runtime import RuntimeConfig
+  import cmd
 
 def validate(data):
   data = []
@@ -47,16 +49,31 @@ def open_tty(ttyname):
     # See https://github.com/stefanholek/term/issues/1
     return open(ttyname, "wb+", buffering=0)
 
-def parse_args():
+def init_parser():
   parser = argparse.ArgumentParser(
       prog='gfzs',
       description="Google Fuzzy Search. Pipe the search result(json) of googler and use it"
-      )
-  parser.add_argument('--version', '-v', action='version', version=info.__version__)
+  )
+
+  parser.add_argument('--version', '-v', action='version',
+                      version=info.__version__)
   parser.add_argument('--score', '-s', type=int, default=RuntimeConfig.default_score,
                       help="fuzzywuzzy's score. please see https://github.com/seatgeek/fuzzywuzzy")
-  
-  return parser.parse_args()
+
+  subparsers = parser.add_subparsers(title="SubCommands", dest="command")
+  subparsers.required = False
+
+  subparsers.add_parser('init', help="Initialize gfzs")
+  subparsers.add_parser('edit', help="Edit config")
+
+  return parser
+
+
+def exec_subcommand(parser, argv=sys.argv[1:]) -> None:
+    args = parser.parse_args(argv)
+
+    if    args.command == "init": cmd.init.main()
+    elif  args.command == "edit": cmd.edit.main()
 
 def main() -> None:
 
@@ -64,10 +81,13 @@ def main() -> None:
   # https://note.nkmk.me/python-warnings-ignore-warning/
   warnings.simplefilter('ignore', FutureWarning)
 
+  parser = init_parser()
+  exec_subcommand(parser)
+
   data = None
   error = None
 
-  args = parse_args()
+  args = parser.parse_args()
   _ = RuntimeConfig.get_instance(args)
   ttyname = tty.get_ttyname()
 

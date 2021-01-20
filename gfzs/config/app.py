@@ -25,69 +25,17 @@ except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname('../'))))
     from utils import debug
 
-DEFAULT_CONFIG_PATH = "~/.gfzsrc"
-# {
-#     "view": {
-#         "footer": {
-#             "message": "QUERY>",
-#             "color": {
-#                 "message": {
-#                     "text": 2,
-#                     "background": 0,
-#                     "style": "normal"
-#                 },
-#                 "hline": {
-#                     "text": 7,
-#                     "background": 0,
-#                     "style": "normal"
-#                 }
-#             }
-#         },
-#         "header": {
-#             "color": {
-#                 "hline": {
-#                     "text": 7,
-#                     "background": 0,
-#                     "style": "normal"
-#                 }
-#             }
-#         },
-#         "search_result": {
-#             "color": {
-#                 "index": {
-#                     "text": 6,
-#                     "background": 0,
-#                     "style": "normal"
-#                 },
-#                 "title": {
-#                     "text": 2,
-#                     "background": 0,
-#                     "style": "bold"
-#                 },
-#                 "url": {
-#                     "text": 3,
-#                     "background": 0,
-#                     "style": "link"
-#                 },
-#                 "abstract": {
-#                     "text": 7,
-#                     "background": 0,
-#                     "style": "normal"
-#                 }
-#             }
-#         },
-#         "paging": {
-#             "color": {
-#                 "common": {
-#                     "text": 2,
-#                     "background": 0,
-#                     "style": "bold"
-#                 }
-#             }
-#         }
-#     }
-# }
+# ~/.gfzsrc
+DEFAULT_CONFIG_PATH = "%s/.gfzsrc" % os.path.expanduser("~")
 
+# 0: curses.COLOR_BLACK
+# 1: curses.COLOR_RED
+# 2: curses.COLOR_GREEN
+# 3: curses.COLOR_YELLOW
+# 4: curses.COLOR_BLUE
+# 5: curses.COLOR_MAGENTA
+# 6: curses.COLOR_CYAN
+# 7: curses.COLOR_WHITE
 DEFAULT_CONFIG = {
     "view": {
         "footer": {
@@ -175,9 +123,14 @@ class AppConfig(Singleton):
 
     def __init__(self):
         self.data = self._create_data()
+        
+    @property
+    def config_path(self):
+        return DEFAULT_CONFIG_PATH
 
-    def _create_data(self, config_path=DEFAULT_CONFIG_PATH) -> dict:
+    def _create_data(self) -> dict:
         """Load the app settings. If the config file does not exist, it will load the default config."""
+        config_path = self.config_path
 
         data = dict
         if os.path.exists(config_path):
