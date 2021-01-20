@@ -5,6 +5,7 @@
 import sys
 import os
 
+
 def get_ttyname():
     for f in sys.stdin, sys.stdout, sys.stderr:
         if f.isatty():

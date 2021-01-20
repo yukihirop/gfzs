@@ -25,6 +25,7 @@ except ModuleNotFoundError:
 KEY_ENTER = 10
 KEY_ESC = 27
 
+
 class Controller:
     def __init__(self, data):
         self._init_curses()
@@ -55,8 +56,9 @@ class Controller:
         curses.echo()
         curses.endwin()
 
-
-    def _search_and_refresh_display(self, user_input, is_init_property=False, is_init_query=True):
+    def _search_and_refresh_display(
+        self, user_input, is_init_property=False, is_init_query=True
+    ):
         # Disable mouse cursor
         curses.curs_set(0)
 
@@ -68,7 +70,7 @@ class Controller:
         result = self.search_result.update_view_in_loop()
 
         if is_init_query:
-            self.search_result.update_query('')
+            self.search_result.update_query("")
 
         if result:
             self.search_result.handle_key_in_loop(user_input)
@@ -76,23 +78,23 @@ class Controller:
     def _handle_resize(self, user_input):
         self.header.reset()
         self.footer.reset()
-        self._search_and_refresh_display(user_input, is_init_property=True, is_init_query=False)
+        self._search_and_refresh_display(
+            user_input, is_init_property=True, is_init_query=False
+        )
 
     def execute_when_enter(self, current_selected):
         result = self.model.result
-        webbrowser.open(result[current_selected].get('url'), new=2)
+        webbrowser.open(result[current_selected].get("url"), new=2)
 
     def run(self) -> int:
         input_mode = True
-        user_input = ''
+        user_input = ""
         box_select_begin_y = 2
-        arrow_keys = (curses.KEY_DOWN, curses.KEY_UP,
-                      curses.KEY_LEFT, curses.KEY_RIGHT)
-        backspace_keys = (curses.ascii.BS, curses.ascii.DEL,
-                          curses.KEY_BACKSPACE)
-        
+        arrow_keys = (curses.KEY_DOWN, curses.KEY_UP, curses.KEY_LEFT, curses.KEY_RIGHT)
+        backspace_keys = (curses.ascii.BS, curses.ascii.DEL, curses.KEY_BACKSPACE)
+
         self.header.create()
-        
+
         self.search_result.create(box_select_begin_y)
         self.search_result.init_properties_after_create()
         self.search_result.update_view_in_loop()
@@ -125,15 +127,16 @@ class Controller:
                     pass
                 elif user_input == KEY_ENTER:
                     input_mode = False
-                    self._search_and_refresh_display(
-                        user_input, is_init_query=False)
+                    self._search_and_refresh_display(user_input, is_init_query=False)
                 # https://www.programcreek.com/python/?code=mingrammer%2Fawesome-finder%2Fawesome-finder-master%2Fawesome%2Ftui.py
                 elif user_input in backspace_keys:
-                    if self.model.query == '':
+                    if self.model.query == "":
                         pass
                     else:
                         self.footer.delete_char()
-                        self._search_and_refresh_display(user_input, is_init_property=True, is_init_query=False)
+                        self._search_and_refresh_display(
+                            user_input, is_init_property=True, is_init_query=False
+                        )
                 elif user_input == curses.KEY_RESIZE:
                     self._handle_resize(user_input)
                 # I don't know the reason, but - 1 may come in
@@ -145,7 +148,8 @@ class Controller:
                     if self.model.validate(will_query):
                         self.footer.write(text)
                         self._search_and_refresh_display(
-                            user_input, is_init_property=True, is_init_query=False)
+                            user_input, is_init_property=True, is_init_query=False
+                        )
             else:
                 if user_input in arrow_keys:
                     self.search_result.handle_key_in_loop(user_input)
@@ -158,7 +162,8 @@ class Controller:
                     self.footer.activate()
                     self.footer.delete_char()
                     self._search_and_refresh_display(
-                        user_input, is_init_property=True, is_init_query=False)
+                        user_input, is_init_property=True, is_init_query=False
+                    )
                 elif user_input == curses.KEY_RESIZE:
                     self._handle_resize(user_input)
                 # I don't know the reason, but - 1 may come in
@@ -170,17 +175,20 @@ class Controller:
                     self.footer.activate()
                     self.footer.write(text)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import json
     import os, sys
     import signal
+
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-    
+
     # https://note.nkmk.me/python-warnings-ignore-warning/
     import warnings
-    warnings.simplefilter('ignore', FutureWarning)
 
-    json_str = open('fixtures/rust.json', 'r').read()
+    warnings.simplefilter("ignore", FutureWarning)
+
+    json_str = open("fixtures/rust.json", "r").read()
     data = json.loads(json_str)
 
     error = None
@@ -189,7 +197,7 @@ if __name__ == '__main__':
         choice = controller.run()
         result = controller.model.result
         if not choice is None:
-            print(result[choice].get('title'))
+            print(result[choice].get("title"))
     except curses.error as e:
         error = str(e)
     finally:
