@@ -11,16 +11,15 @@ try:
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from utils import debug
         from utils.multibyte import Multibyte
-        from utils.color import Color
-        from config.app import AppConfig
+
+        from base import Base
 
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs.utils import debug
         from gfzs.utils.multibyte import Multibyte
-        from gfzs.utils.color import Color
-        from gfzs.config.app import AppConfig
+        from gfzs.views.base import Base
 
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
@@ -28,23 +27,16 @@ except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from utils import debug
     from utils.multibyte import Multibyte
-    from utils.color import Color
-    from config.app import AppConfig
+    from views.base import Base
 
 KEY_ENTER = 10
 KEY_ESC = 27
 
 
-class Footer:
+class Footer(Base):
     def __init__(self, stdscr, model):
-        self.stdscr = stdscr
-        self.parent_height, self.parent_width = stdscr.getmaxyx()
-        self.model = model
+        super().__init__(stdscr, model, "footer")
         self.multibyte = Multibyte(stdscr)
-        self.app_config = AppConfig.get_instance()
-        self.color = Color.get_instance()
-        self.color_data = self.app_config.data["view"]["footer"]["color"]
-        self.colors = self._create_colors(self.app_config, self.color_data)
 
     @property
     def query(self):
@@ -112,13 +104,6 @@ class Footer:
     def write(self, text):
         self.stdscr.addstr(text)
         self.model.push_query(text)
-
-    def _create_colors(self, app_config, color_data) -> dict:
-        result = {}
-        for view_name in color_data:
-            result[view_name] = self.color.use(color_data[view_name])
-
-        return result
 
     def _wait_input_prompt(self):
         self.create()

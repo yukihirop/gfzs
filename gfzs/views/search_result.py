@@ -13,30 +13,27 @@ try:
     if __name__ == "__main__":
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-        from utils.color import Color
         from utils.markup import Markup
-        from config.app import AppConfig
 
         from not_found import NotFound
         from paging import Paging
+        from base import Base
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
-        from gfzs.utils.color import Color
         from gfzs.utils.markup import Markup
-        from gfzs.config.app import AppConfig
 
         from gfzs.views.not_found import NotFound
         from gfzs.views.paging import Paging
+        from gfzs.views.base import Base
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
-    from utils.color import Color
     from utils.markup import Markup
-    from config.app import AppConfig
 
     from views.not_found import NotFound
     from views.paging import Paging
+    from views.base import Base
 
 
 class SearchResultHelper:
@@ -59,7 +56,7 @@ class SearchResultHelper:
         self.per_page = value
 
 
-class SearchResult:
+class SearchResult(Base):
     """Display options build from a list of strings in a (unix) terminal.
     The user can browser though the textboxes and select one with enter.
     """
@@ -69,18 +66,13 @@ class SearchResult:
         'data' is list of string. Each string is used to build
         a textbox.
         """
-        self.stdscr = stdscr
-        self.model = model
+        super().__init__(stdscr, model, "search_result")
         self.paging = Paging(stdscr, self)
         self.stop_loop = False
         self.textboxes = []
         self.helper = SearchResultHelper()
         self.not_found = NotFound(stdscr)
         self.markup = Markup()
-        self.app_config = AppConfig.get_instance()
-        self.color_data = self.app_config.data["view"]["search_result"]["color"]
-        self.color = Color.get_instance()
-        self.colors = self._create_colors(self.app_config, self.color_data)
 
         # Element parameters. Channge them here.
         self.TEXTBOX_HEIGHT = 8
@@ -143,13 +135,6 @@ class SearchResult:
             self.paging.destroy()
             self.destroy()
             self.not_found.create()
-
-    def _create_colors(self, app_config, color_data) -> dict:
-        result = {}
-        for view_name in color_data:
-            result[view_name] = self.color.use(color_data[view_name])
-
-        return result
 
     def _pick(self, pad_begin_y=0):
         """ Just run this when you want to spawn the selection process. """
