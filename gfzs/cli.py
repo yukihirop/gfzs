@@ -15,14 +15,16 @@ try:
     from gfzs.utils import debug
     from gfzs.controller import Controller
     from gfzs.config.runtime import RuntimeConfig
-    import gfzs.cmd as cmd
+    import gfzs.cmd.init as cmd_init
+    import gfzs.cmd.edit as cmd_edit
 
 # need when 「cat fixtures/rust.json | python -m gfzs」
 except ModuleNotFoundError:
     from utils import debug
     from controller import Controller
     from config.runtime import RuntimeConfig
-    import cmd
+    import cmd.init as cmd_init
+    import cmd.edit as cmd_edit
 
 
 def validate(data):
@@ -79,9 +81,9 @@ def exec_subcommand(parser, argv=sys.argv[1:]) -> None:
     args = parser.parse_args(argv)
 
     if args.command == "init":
-        cmd.init.main()
+        cmd_init.main()
     elif args.command == "edit":
-        cmd.edit.main()
+        cmd_edit.main()
 
 
 def main() -> None:
