@@ -1,4 +1,4 @@
-![gfzs](https://user-images.githubusercontent.com/11146767/105179534-cc78da80-5b6c-11eb-8340-8f39374b8a73.png)
+![gfzs](https://user-images.githubusercontent.com/11146767/105204059-25556c80-5b87-11eb-862e-828a80aa6a94.png)
 
 `Google Fuzzy Search` is a tool for fuzzy find for the result of searching with [googler](https://github.com/jarun/googler).
 
