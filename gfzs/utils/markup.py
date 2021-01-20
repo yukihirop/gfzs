@@ -10,24 +10,33 @@ try:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
     import debug
     from multibyte import Multibyte
+    from color import Color
+    from config.app import AppConfig
 
   # need when 「cat fixtures/rust.json | python -m gfzs」
   # need when 「cat fixtures/rust.json | bin/gfzs」
   else:
     from gfzs.utils import debug
     from gfzs.utils.multibyte import Multibyte
+    from gfzs.utils.color import Color
+    from gfzs.config.app import AppConfig
+
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
   # https://codechacha.com/ja/how-to-import-python-files/
   sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname('../'))))
-  import utils
   from utils import debug
   from utils.multibyte import Multibyte
+  from utils.color import Color
+  from config.app import AppConfig
 
 class Markup:
-  def __init__(self, colors):
-    self.colors = colors
+  def __init__(self):
     self.multibyte = Multibyte()
+    self.app_config = AppConfig.get_instance()
+    self.color = Color.get_instance()
+    self.color_data = self.app_config.data["view"]["search_result"]["color"]
+    self.colors = self._create_colors(self.app_config, self.color_data)
 
   def parse(self, text, search_text):
     result = {}
@@ -69,7 +78,7 @@ class Markup:
                 "start_index": span[0],
                 "end_index": span[1]
             },
-            "color": self.colors.markup_partial,
+            "color": self.colors["markup_partial"],
             "match": self.multibyte.unmarked_full_width(m.group()),
             "_type": "partial",
         })
@@ -93,10 +102,17 @@ class Markup:
                 "start_index": span[0],
                 "end_index": span[1]
             },
-            "color": self.colors.markup_char,
+            "color": self.colors["markup_char"],
             "match": m.group(),
             "_type": "char",
         })
+
+    return result
+
+  def _create_colors(self, app_config, color_data) -> dict:
+    result = {}
+    for view_name in color_data:
+      result[view_name] = self.color.use(color_data[view_name])
 
     return result
 
@@ -106,14 +122,11 @@ if __name__ == '__main__':
 
   # local
 
-  from colors import Colors
-
   try:
     # initscr() returns a window object representing the entire screen.
     stdscr = curses.initscr()
-    colors = Colors(curses)
 
-    markup = Markup(colors)
+    markup = Markup()
     text = "Rustは非常に高速でメモリ効率が高くランタイムやガベージコレクタがないため、パフォーマンス重視のサービスを実装できますし、組込み機器上で実行したり他の言語との調和も簡単にできます。 信頼性. Rustの豊かな型システムと所有権 ..."
     
     search_text = "Rust 非常 効率"

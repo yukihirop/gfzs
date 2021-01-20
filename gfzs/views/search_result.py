@@ -13,25 +13,28 @@ try:
   if __name__ == '__main__':
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-    import utils
-    from utils.colors import Colors
+    from utils.color import Color
     from utils.markup import Markup
+    from config.app import AppConfig
 
     from not_found import NotFound
     from paging import Paging
   # need when 「cat fixtures/rust.json | python -m gfzs」
   # need when 「cat fixtures/rust.json | bin/gfzs」
   else:
-    from gfzs.utils.colors import Colors
+    from gfzs.utils.color import Color
     from gfzs.utils.markup import Markup
+    from gfzs.config.app import AppConfig
+
     from gfzs.views.not_found import NotFound
     from gfzs.views.paging import Paging
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
   sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname('../'))))
-  import utils, views
-  from utils.colors import Colors
+  from utils.color import Color
   from utils.markup import Markup
+  from config.app import AppConfig
+
   from views.not_found import NotFound
   from views.paging import Paging
 
@@ -59,20 +62,24 @@ class SearchResult:
      The user can browser though the textboxes and select one with enter.
   """
 
-  def __init__(self, stdscr, colors, model):
+  def __init__(self, stdscr, model):
     """Create a SearchResult object.
        'data' is list of string. Each string is used to build
        a textbox.
     """
     self.stdscr = stdscr
-    self.colors = colors
     self.model = model
-    self.paging = Paging(stdscr, colors, self)
+    self.paging = Paging(stdscr, self)
     self.stop_loop = False
     self.textboxes = []
     self.helper = SearchResultHelper()
-    self.not_found = NotFound(stdscr, colors)
-    self.markup = Markup(colors)
+    self.not_found = NotFound(stdscr)
+    self.markup = Markup()
+    self.app_config = AppConfig.get_instance()
+    self.color_data = self.app_config.data["view"]["search_result"]["color"]
+    self.color = Color.get_instance()
+    self.colors = self._create_colors(self.app_config, self.color_data)
+
     # Element parameters. Channge them here.
     self.TEXTBOX_HEIGHT = 8
     self.PAD_WIDTH = 400
@@ -134,6 +141,13 @@ class SearchResult:
       self.paging.destroy()
       self.destroy()
       self.not_found.create()
+  
+  def _create_colors(self, app_config, color_data) -> dict:
+    result = {}
+    for view_name in color_data:
+      result[view_name] = self.color.use(color_data[view_name])
+
+    return result
 
   def _pick(self, pad_begin_y = 0):
     """ Just run this when you want to spawn the selection process. """
@@ -209,12 +223,12 @@ class SearchResult:
         abstract = data[k].get('abstract')
 
         textboxes[k].addstr(2, 2, '%s%-3s' %
-                          ('', str(k + 1) + '.'), self.colors.index)
-        textboxes[k].addstr(2, 6, title, self.colors.title | curses.A_BOLD)
-        textboxes[k].addstr(3, 6, url, self.colors.url | curses.A_UNDERLINE)
+                          ('', str(k + 1) + '.'), self.colors["index"])
+        textboxes[k].addstr(2, 6, title, self.colors["title"])
+        textboxes[k].addstr(3, 6, url, self.colors["url"])
         lines = textwrap.wrap(abstract, abstract_line_len)
         for l in range(len(lines)):
-          textboxes[k].addstr(4 + l, 6, lines[l], self.colors.abstract)
+          textboxes[k].addstr(4 + l, 6, lines[l], self.colors["abstract"])
 
         # Markup Search Query for title
         markup_data = self.markup.parse(title, self.model.query)
@@ -267,9 +281,9 @@ class SearchResult:
     # Highligth the selected one, the last selected textbox should
     # become normal again.
     if last == current_selected == 0:
-      textboxes[current_selected].border(self.colors.highlight)
+      textboxes[current_selected].border(self.color.highlight)
     else:
-      textboxes[current_selected].border(self.colors.highlight)
+      textboxes[current_selected].border(self.color.highlight)
       textboxes[last].border()
 
     # Paging
@@ -404,8 +418,6 @@ if __name__ == '__main__':
 
   # https://codechacha.com/ja/how-to-import-python-files/
   sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-  import utils, model
-  from utils.colors import Colors
   from model import Model
 
   signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -423,14 +435,12 @@ if __name__ == '__main__':
   # Disable the mouse cursor.
   curses.curs_set(0)
 
-  colors = Colors(curses)
-  stdscr.bkgd(colors.normal)
   stdscr.refresh()
   
   model = Model(data)
   model.update_query('Amazon')
   _ = model.find()
 
-  choice = SearchResult(stdscr, colors, model)._pick(1)
+  choice = SearchResult(stdscr, model)._pick(1)
   if choice != None:
     print(model.result[choice].get('title'))

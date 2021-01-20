@@ -1,15 +1,45 @@
 import curses
 import math
+import os, sys
 
 GOOGLE = 'Google'
 FUZZY = 'Fuzzy'
 SEARCH = 'Search'
 
+try:
+  # need when 「python3 gfzs/views/header.py」
+  if __name__ == '__main__':
+    # https://codechacha.com/ja/how-to-import-python-files/
+    sys.path.append(os.path.dirname(
+        os.path.abspath(os.path.dirname(__file__))))
+    from utils import debug
+    from utils.color import Color
+    from config.app import AppConfig
+
+  # need when 「cat fixtures/rust.json | python -m gfzs」
+  # need when 「cat fixtures/rust.json | bin/gfzs」
+  else:
+    from gfzs.utils import debug
+    from gfzs.utils.color import Color
+    from gfzs.config.app import AppConfig
+
+# need when 「python3 gfzs/controller.py」
+except ModuleNotFoundError:
+  # https://codechacha.com/ja/how-to-import-python-files/
+  sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname('../'))))
+  from utils import debug
+  from utils.color import Color
+  from config.app import AppConfig
+
+
 class Paging:
-  def __init__(self, stdscr, colors, view):
+  def __init__(self, stdscr, view):
     self.stdscr = stdscr
-    self.colors = colors
     self.view = view
+    self.app_config = AppConfig.get_instance()
+    self.color = Color.get_instance()
+    self.color_data = self.app_config.data["view"]["paging"]["color"]
+    self.colors = self._create_colors(self.app_config, self.color_data)
 
   def create(self):
     self._init_layout()
@@ -24,6 +54,13 @@ class Paging:
 
   def destroy(self):
     self.window.erase()
+
+  def _create_colors(self, app_config, color_data) -> dict:
+    result = {}
+    for view_name in color_data:
+      result[view_name] = self.color.use(color_data[view_name])
+
+    return result
 
   def _init_layout(self):
     self.parent_height, self.parent_width = self.stdscr.getmaxyx()
@@ -45,7 +82,7 @@ class Paging:
     data_size = self.view.data_size
     paging = "{0}/{1}".format((current_selected//per_page + 1), math.ceil(data_size/per_page))
     self.window.addstr(0, begin_x, paging,
-                       self.colors.version | curses.A_BOLD)
+                       self.colors["common"] | curses.A_BOLD)
 
   def _loop(self):
     self.create()
@@ -72,8 +109,6 @@ if __name__ == '__main__':
 
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-    import utils
-    from utils.colors import Colors
     from model import Model
     from search_result import SearchResult
 
@@ -93,15 +128,12 @@ if __name__ == '__main__':
     # Aable the mouse cursor.
     curses.curs_set(0)
 
-    colors = Colors(curses)
-    stdscr.bkgd(colors.normal)
-
     model = Model(data)
     model.update_query('')
     _ = model.find()
 
-    view = SearchResult(stdscr, colors, model)
+    view = SearchResult(stdscr, model)
     view.helper.current_selected = 1
     view.helper.per_page = 5
 
-    Paging(stdscr, colors, view)._loop()
+    Paging(stdscr, view)._loop()

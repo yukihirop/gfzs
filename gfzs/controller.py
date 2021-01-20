@@ -8,7 +8,6 @@ try:
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     from gfzs.model import Model
-    from gfzs.utils.colors import Colors
     from gfzs.utils.multibyte import Multibyte
     from gfzs.views.header import Header
     from gfzs.views.search_result import SearchResult
@@ -18,7 +17,6 @@ try:
 except ModuleNotFoundError:
     import views, utils
     from model import Model
-    from utils.colors import Colors
     from utils.multibyte import Multibyte
     from views.header import Header
     from views.search_result import SearchResult
@@ -31,9 +29,9 @@ class Controller:
     def __init__(self, data):
         self._init_curses()
         self.model = Model(data)
-        self.header = Header(self.stdscr, self.colors)
-        self.search_result = SearchResult(self.stdscr, self.colors, self.model)
-        self.footer = Footer(self.stdscr, self.colors, self.model)
+        self.header = Header(self.stdscr)
+        self.search_result = SearchResult(self.stdscr, self.model)
+        self.footer = Footer(self.stdscr, self.model)
         self.multibyte = Multibyte(self.stdscr)
 
     def _init_curses(self):
@@ -48,8 +46,6 @@ class Controller:
         curses.curs_set(1)
         self.stdscr.keypad(1)
         # Enable colorous output.
-        self.colors = Colors(curses)
-        self.stdscr.bkgd(self.colors.normal)
         self.stdscr.refresh()
 
     def _end_curses(self):

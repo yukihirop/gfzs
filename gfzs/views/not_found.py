@@ -11,15 +11,19 @@ try:
       sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
       import utils
       from utils import debug
+      from utils.color import Color
+
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
       from gfzs.utils import debug
+      from gfzs.utils.color import Color
 
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname('../'))))
     from utils import debug
+    from utils.color import Color
 
 #
 # Generate by https://lazesoftware.com/tool/hugeaagen/
@@ -588,13 +592,13 @@ SEARCH = 'Search'
 NOT_FOUND = 'Not Found'
 
 class NotFound:
-  def __init__(self, stdscr, colors):
+  def __init__(self, stdscr):
     self.block = "■"
     self.stdscr = stdscr
     self.window = None
     self.logo_height = 24
     self.logo_width = 126
-    self.colors = colors
+    self.color = Color.get_instance()
 
   def create(self):
     self._init_layout()
@@ -638,36 +642,28 @@ class NotFound:
     first_o = True
     for i in range(len(google)):
       c = google[i]
-      if c in ('G', 'g'):
-        self.window.addstr(
-          title_begin_y + 0, title_begin_x + i, c, self.colors.google_g | curses.A_BOLD)
-      elif c == 'o':
+      if c == 'o':
         if first_o:
           first_o = False
           self.window.addstr(
-            title_begin_y + 0, title_begin_x + i, c, self.colors.google_o | curses.A_BOLD)
+              title_begin_y + 0, title_begin_x + i, c, self.color.google('o'))
         else:
           self.window.addstr(
-            title_begin_y + 0, title_begin_x + i, c, self.colors.google_o2 | curses.A_BOLD)
-      elif c == 'l':
+              title_begin_y + 0, title_begin_x + i, c, self.color.google('o2'))
+      else:
         self.window.addstr(
-            title_begin_y + 0, title_begin_x + i, c, self.colors.google_l | curses.A_BOLD)
-      elif c == 'e':
-        self.window.addstr(
-            title_begin_y + 0, title_begin_x + i, c, self.colors.google_e | curses.A_BOLD)
+            title_begin_y + 0, title_begin_x + i, c, self.color.google(c))
     
     # Write Fuzzy
     start_index += len(GOOGLE) + 1
-    self.window.addstr(title_begin_y + 0, title_begin_x + start_index,
-                       FUZZY, self.colors.fuzzy | curses.A_BOLD)
+    self.window.addstr(title_begin_y + 0, title_begin_x + start_index, FUZZY, self.color.fuzzy())
 
     # Write Search
     start_index += len(FUZZY) + 1
-    self.window.addstr(title_begin_y + 0, title_begin_x + start_index, SEARCH,
-                       self.colors.search | curses.A_BOLD)
+    self.window.addstr(title_begin_y + 0, title_begin_x + start_index, SEARCH, self.color.search())
 
     # Write Not Found
-    self.window.addstr(msg_begin_y, msg_begin_x, NOT_FOUND, self.colors.not_found | curses.A_BOLD)
+    self.window.addstr(msg_begin_y, msg_begin_x, NOT_FOUND, self.color.not_found() | curses.A_BOLD)
 
   # stdscr.getch doesn't work when I addstr to subwin
   def _make_not_found_big(self):
@@ -676,36 +672,21 @@ class NotFound:
 
     for data in GOOGLER_NOT_FOUND:
       cordinate = data[0]
-      color = data[1]
+      c = data[1]
       x = cordinate[0]
       y = cordinate[1]
-      if color in ('G', 'g'):
+      if c in ('G', 'o', 'o2', 'g', 'l', 'e'):
         self.window.addstr(
-            logo_begin_y + y, logo_begin_x + x, self.block, self.colors.google_g)
-      elif color == 'o':
+            logo_begin_y + y, logo_begin_x + x, self.block, self.color.google(c, style="normal"))
+      elif c == 'fuzzy':
         self.window.addstr(
-            logo_begin_y + y, logo_begin_x + x, self.block, self.colors.google_o)
-      elif color == 'o2':
+            logo_begin_y + y, logo_begin_x + x, self.block, self.color.fuzzy(style="normal"))
+      elif c == 'search':
         self.window.addstr(
-            logo_begin_y + y, logo_begin_x + x, self.block, self.colors.google_o2)
-      elif color == 'l':
+            logo_begin_y + y, logo_begin_x + x, self.block, self.color.search(style="normal"))
+      elif c == 'not_found':
         self.window.addstr(
-            logo_begin_y + y, logo_begin_x + x, self.block, self.colors.google_l)
-      elif color == 'e':
-        self.window.addstr(
-            logo_begin_y + y, logo_begin_x + x, self.block, self.colors.google_e)
-      elif color == 'r':
-        self.window.addstr(
-            logo_begin_y + y, logo_begin_x + x, self.block, self.colors.google_r)
-      elif color == 'fuzzy':
-        self.window.addstr(
-            logo_begin_y + y, logo_begin_x + x, self.block, self.colors.fuzzy)
-      elif color == 'search':
-        self.window.addstr(
-            logo_begin_y + y, logo_begin_x + x, self.block, self.colors.search)
-      elif color == 'not_found':
-        self.window.addstr(
-            logo_begin_y + y, logo_begin_x + x, self.block, self.colors.not_found)
+            logo_begin_y + y, logo_begin_x + x, self.block, self.color.not_found(style="normal"))
 
   def _loop(self):
     self.create()
@@ -723,7 +704,6 @@ if __name__ == '__main__':
   # https://codechacha.com/ja/how-to-import-python-files/
   sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
   import utils, model
-  from utils.colors import Colors
   from model import Model
 
   signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -739,7 +719,4 @@ if __name__ == '__main__':
   # Aable the mouse cursor.
   curses.curs_set(0)
 
-  colors = Colors(curses)
-  stdscr.bkgd(colors.normal)
-
-  NotFound(stdscr, colors)._loop()
+  NotFound(stdscr)._loop()

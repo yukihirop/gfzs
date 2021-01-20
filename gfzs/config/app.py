@@ -136,6 +136,16 @@ DEFAULT_CONFIG = {
                     "background": curses.COLOR_BLACK,
                     "style": "normal"
                 },
+                "markup_partial": {
+                    "text": curses.COLOR_GREEN,
+                    "background": curses.COLOR_MAGENTA,
+                    "style": "normal",
+                },
+                "markup_char": {
+                    "text": curses.COLOR_RED,
+                    "background": curses.COLOR_BLACK,
+                    "style": "normal",
+                }
             }
         },
         "paging": {

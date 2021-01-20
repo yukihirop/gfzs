@@ -11,22 +11,36 @@ try:
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
     import info
-  
+    from utils import debug
+    from utils.color import Color
+    from config.app import AppConfig
+
   # need when 「cat fixtures/rust.json | python -m gfzs」
   # need when 「cat fixtures/rust.json | bin/gfzs」
   else:
     from gfzs import info
+    from gfzs.utils import debug
+    from gfzs.utils.color import Color
+    from gfzs.config.app import AppConfig
 
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
+  # https://codechacha.com/ja/how-to-import-python-files/
+  sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname('../'))))
   import info
+  from utils import debug
+  from utils.color import Color
+  from config.app import AppConfig
 
 class Header:
-  def __init__(self, stdscr, colors):
+  def __init__(self, stdscr):
     self.version = "(%s)" % info.__version__
     self.copyright = info.__copyright__
     self.stdscr = stdscr
-    self.colors = colors
+    self.app_config = AppConfig.get_instance()
+    self.color_data = self.app_config.data["view"]["header"]["color"]
+    self.color = Color.get_instance()
+    self.colors = self._create_colors(self.app_config, self.color_data)
 
   def create(self):
     self._init_layout()
@@ -38,6 +52,13 @@ class Header:
     self._init_layout()
     self._make_header()
     self.window.refresh()
+  
+  def _create_colors(self, app_config, color_data) -> dict:
+    result = {}
+    for view_name in color_data:
+      result[view_name] = self.color.use(color_data[view_name])
+
+    return result
 
   def _init_layout(self):
     self.parent_height, self.parent_width = self.stdscr.getmaxyx()
@@ -59,37 +80,30 @@ class Header:
     first_o = True
     for i in range(len(google)):
       c = google[i]
-      if c in ('G', 'g'):
-        self.window.addstr(0, i, c, self.colors.google_g | curses.A_BOLD)
-      elif c == 'o':
+      if c == 'o':
         if first_o:
           first_o = False
-          self.window.addstr(0, i, c, self.colors.google_o | curses.A_BOLD)
+          self.window.addstr(0, i, c, self.color.google('o'))
         else:
-          self.window.addstr(0, i, c, self.colors.google_o2 | curses.A_BOLD)
-      elif c == 'l':
-        self.window.addstr(0, i, c, self.colors.google_l | curses.A_BOLD)
-      elif c == 'e':
-        self.window.addstr(0, i, c, self.colors.google_e | curses.A_BOLD)
+          self.window.addstr(0, i, c, self.color.google('o2'))
+      else:
+        self.window.addstr(0, i, c, self.color.google(c))
     
     # Write Fuzzy
     start_index += len(GOOGLE) + 1
-    self.window.addstr(0, start_index, FUZZY, self.colors.fuzzy | curses.A_BOLD)
+    self.window.addstr(0, start_index, FUZZY, self.color.fuzzy())
 
     # Write Search
     start_index += len(FUZZY) + 1
-    self.window.addstr(0, start_index, SEARCH,
-                       self.colors.search | curses.A_BOLD)
+    self.window.addstr(0, start_index, SEARCH, self.color.search())
     
     # Write verion
     start_index += len(SEARCH) + 1
-    self.window.addstr(0, start_index, self.version,
-                       self.colors.version | curses.A_BOLD)
+    self.window.addstr(0, start_index, self.version, self.color.version())
     
     # Write Copyright
-    self.window.addstr(0, self.parent_width - len(self.copyright),
-                       self.copyright, self.colors.header | curses.A_BOLD)
-    self.window.hline(1, 0, curses.ACS_HLINE | self.colors.hline, self.parent_width)
+    self.window.addstr(0, self.parent_width - len(self.copyright), self.copyright, self.color.copy_right())
+    self.window.hline(1, 0, curses.ACS_HLINE | self.colors["hline"], self.parent_width)
 
   def _loop(self):
     self.create()
@@ -116,7 +130,6 @@ if __name__ == '__main__':
   # https://codechacha.com/ja/how-to-import-python-files/
   sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
   import utils, model
-  from utils.colors import Colors
   from model import Model
 
   signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -132,7 +145,4 @@ if __name__ == '__main__':
   # Disable the mouse cursor.
   curses.curs_set(0)
 
-  colors = Colors(curses)
-  stdscr.bkgd(colors.normal)
-
-  Header(stdscr, colors)._loop()
+  Header(stdscr)._loop()

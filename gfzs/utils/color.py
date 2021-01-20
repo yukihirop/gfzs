@@ -80,6 +80,51 @@ class Color(Singleton):
       return curses.color_pair(color_number) | curses.A_UNDERLINE
     else:
       raise Exception("[Color] Do not support style: %s" % stlye)
+
+  def google(self, c, style="bold") -> int:
+    offset = self.offset_after_builtin_color
+    color = None
+
+    if c in ('G', 'g'):
+      color = curses.color_pair(28 + offset)
+    elif c == 'o':
+      color = curses.color_pair(10 + offset)
+    elif c == 'o2':
+      color = curses.color_pair(12 + offset)
+    elif c == 'l':
+      color = curses.color_pair(36 + offset)
+    elif c == 'e':
+      color = curses.color_pair(10 + offset)
+    
+    if style == "bold":
+      return color | curses.A_BOLD
+    elif style == "normal":
+      return color
+    else:
+      raise Exception("[Color] Do not support style: %s" % stlye)
+
+  @property
+  def highlight(self) -> int:
+    data = {"text": curses.COLOR_BLACK, "background": curses.COLOR_GREEN, "style": "normal"}
+    return self.use(data)
+  
+  def fuzzy(self, style="bold") -> int:
+    return self.google('o2', style)
+
+  def search(self, style="bold") -> int:
+    return self.google('o', style)
+
+  def version(self, style="bold") -> int:
+    data = {"text": curses.COLOR_GREEN, "background": curses.COLOR_BLACK, "style": style }
+    return self.use(data)
+
+  def copy_right(self, style="bold") -> int:
+    data = {"text": curses.COLOR_GREEN, "background": curses.COLOR_BLACK, "style": style}
+    return self.use(data)
+
+  def not_found(self, style="bold") -> int:
+    data = {"text": curses.COLOR_GREEN, "background": curses.COLOR_BLACK, "style": style}
+    return self.use(data)
   
   # https://www.linuxjournal.com/content/about-ncurses-colors-0
   def _calculate_color_number(self, fg, bg):
