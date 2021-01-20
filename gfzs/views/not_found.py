@@ -6,53 +6,53 @@ import curses.ascii
 
 try:
     # need when 「python3 gfzs/views/footer.py」
-    if __name__ == '__main__':
-      # https://codechacha.com/ja/how-to-import-python-files/
-      sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-      import utils
-      from utils import debug
-      from utils.color import Color
+    if __name__ == "__main__":
+        # https://codechacha.com/ja/how-to-import-python-files/
+        sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+        import utils
+        from utils import debug
+        from utils.color import Color
 
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
-      from gfzs.utils import debug
-      from gfzs.utils.color import Color
+        from gfzs.utils import debug
+        from gfzs.utils.color import Color
 
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
-    sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname('../'))))
+    sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from utils import debug
     from utils.color import Color
 
 #
 # Generate by https://lazesoftware.com/tool/hugeaagen/
-#                                  ■                              
-#                                  ■                                                                                     ■     
-#   ■■■■■                          ■              ■■■■■■                                ■■■■                             ■     
-#  ■■   ■                          ■              ■                                    ■   ■■                            ■     
-# ■■         ■■■■    ■■■■    ■■■■  ■    ■■■■      ■      ■   ■■  ■■■■■ ■■■■■■■   ■     ■        ■■■■   ■■■   ■ ■■  ■■■■  ■ ■■■ 
+#                                  ■
+#                                  ■                                                                                     ■
+#   ■■■■■                          ■              ■■■■■■                                ■■■■                             ■
+#  ■■   ■                          ■              ■                                    ■   ■■                            ■
+# ■■         ■■■■    ■■■■    ■■■■  ■    ■■■■      ■      ■   ■■  ■■■■■ ■■■■■■■   ■     ■        ■■■■   ■■■   ■ ■■  ■■■■  ■ ■■■
 # ■         ■■  ■■  ■■  ■■  ■■  ■  ■   ■■  ■      ■      ■   ■■     ■     ■  ■   ■     ■■■     ■■  ■  ■   ■  ■■   ■■  ■  ■■  ■■
 # ■    ■■■  ■    ■  ■    ■  ■   ■  ■   ■   ■■     ■■■■■■ ■   ■■    ■     ■   ■  ■        ■■■   ■   ■■     ■  ■■   ■      ■    ■
 # ■      ■  ■    ■  ■    ■  ■■  ■  ■   ■■■■■■     ■      ■   ■■   ■■    ■■    ■ ■          ■■  ■■■■■■ ■■■■■  ■    ■      ■    ■
 # ■■     ■  ■    ■  ■    ■   ■■■   ■   ■          ■      ■   ■■   ■     ■     ■■■           ■  ■      ■   ■  ■    ■      ■    ■
 #  ■■   ■■  ■■  ■■  ■■  ■■  ■■     ■   ■■         ■      ■■  ■■  ■     ■      ■■       ■   ■■  ■■     ■  ■■  ■    ■■  ■  ■    ■
 #   ■■■■■    ■■■■    ■■■■    ■■■■  ■    ■■■■      ■       ■■■■■ ■■■■■■■■■■■■   ■        ■■■■    ■■■■  ■■■■■  ■     ■■■■  ■    ■
-#                           ■   ■■                                            ■                                                
-#                           ■■■■■                                            ■■                                                
-#                                                                                                                              
-#                                                                                                                              
-#                                                                                                                              
-#                                                                                                ■                             
-#                                 ■■    ■■                   ■■■■■■                              ■                             
-#                                 ■■■   ■■          ■        ■                                   ■                             
-#                                 ■ ■   ■■   ■■■■  ■■■■      ■       ■■■■   ■   ■■  ■ ■■■    ■■■■■                             
-#                                 ■  ■  ■■  ■■  ■■  ■        ■      ■■  ■■  ■   ■■  ■■  ■■  ■■  ■■                             
-#                                 ■  ■■ ■■  ■    ■  ■        ■■■■■■ ■    ■  ■   ■■  ■    ■  ■    ■                             
-#                                 ■   ■ ■■  ■    ■  ■        ■      ■    ■  ■   ■■  ■    ■  ■    ■                             
-#                                 ■    ■■■  ■    ■  ■        ■      ■    ■  ■   ■■  ■    ■  ■    ■                             
-#                                 ■    ■■■  ■■  ■■  ■■       ■      ■■  ■■  ■■  ■■  ■    ■  ■■  ■■                             
-#                                 ■     ■■   ■■■■    ■■      ■       ■■■■    ■■■■■  ■    ■   ■■■ ■                             
+#                           ■   ■■                                            ■
+#                           ■■■■■                                            ■■
+#
+#
+#
+#                                                                                                ■
+#                                 ■■    ■■                   ■■■■■■                              ■
+#                                 ■■■   ■■          ■        ■                                   ■
+#                                 ■ ■   ■■   ■■■■  ■■■■      ■       ■■■■   ■   ■■  ■ ■■■    ■■■■■
+#                                 ■  ■  ■■  ■■  ■■  ■        ■      ■■  ■■  ■   ■■  ■■  ■■  ■■  ■■
+#                                 ■  ■■ ■■  ■    ■  ■        ■■■■■■ ■    ■  ■   ■■  ■    ■  ■    ■
+#                                 ■   ■ ■■  ■    ■  ■        ■      ■    ■  ■   ■■  ■    ■  ■    ■
+#                                 ■    ■■■  ■    ■  ■        ■      ■    ■  ■   ■■  ■    ■  ■    ■
+#                                 ■    ■■■  ■■  ■■  ■■       ■      ■■  ■■  ■■  ■■  ■    ■  ■■  ■■
+#                                 ■     ■■   ■■■■    ■■      ■       ■■■■    ■■■■■  ■    ■   ■■■ ■
 #
 #
 GOOGLER_NOT_FOUND = [
@@ -583,140 +583,166 @@ GOOGLER_NOT_FOUND = [
     [[92, 24], "not_found"],
     [[93, 24], "not_found"],
     [[94, 24], "not_found"],
-    [[96, 24], "not_found"]
+    [[96, 24], "not_found"],
 ]
 
-GOOGLE = 'Google'
-FUZZY = 'Fuzzy'
-SEARCH = 'Search'
-NOT_FOUND = 'Not Found'
+GOOGLE = "Google"
+FUZZY = "Fuzzy"
+SEARCH = "Search"
+NOT_FOUND = "Not Found"
+
 
 class NotFound:
-  def __init__(self, stdscr):
-    self.block = "■"
-    self.stdscr = stdscr
-    self.window = None
-    self.logo_height = 24
-    self.logo_width = 126
-    self.color = Color.get_instance()
+    def __init__(self, stdscr):
+        self.block = "■"
+        self.stdscr = stdscr
+        self.window = None
+        self.logo_height = 24
+        self.logo_width = 126
+        self.color = Color.get_instance()
 
-  def create(self):
-    self._init_layout()
-    self._make_not_found()
-    self.window.refresh()
+    def create(self):
+        self._init_layout()
+        self._make_not_found()
+        self.window.refresh()
 
-  def destroy(self):
-    if not self.window is None:
-      self.window.erase()
-      self.window.refresh()
+    def destroy(self):
+        if not self.window is None:
+            self.window.erase()
+            self.window.refresh()
 
-  def _init_layout(self):
-    self.parent_height, self.parent_width = self.stdscr.getmaxyx()
-    self.window = curses.newwin(
-        self.parent_height - 4, self.parent_width, 0, 0)
+    def _init_layout(self):
+        self.parent_height, self.parent_width = self.stdscr.getmaxyx()
+        self.window = curses.newwin(self.parent_height - 4, self.parent_width, 0, 0)
 
-  def _end_curses(self, end=True):
-    """ Terminates the curses application. """
-    curses.nocbreak()
-    self.window.keypad(0)
-    if end:
-      curses.echo()
-      curses.endwin()
+    def _end_curses(self, end=True):
+        """ Terminates the curses application. """
+        curses.nocbreak()
+        self.window.keypad(0)
+        if end:
+            curses.echo()
+            curses.endwin()
 
-  def _make_not_found(self):
-    if self.parent_width < self.logo_width:
-      self._make_not_found_small()
-    else:
-      self._make_not_found_big()
-
-  def _make_not_found_small(self):
-    start_index = 0
-    title = "{0} {1} {2}".format(GOOGLE, FUZZY, SEARCH)
-    title_begin_y = self.parent_height // 2 - 1
-    title_begin_x = self.parent_width // 2 - len(title) // 2
-    msg_begin_y = title_begin_y + 1
-    msg_begin_x = title_begin_x + (len(title) - len(NOT_FOUND)) // 2
-
-    # Write Google
-    google = list(GOOGLE)
-    first_o = True
-    for i in range(len(google)):
-      c = google[i]
-      if c == 'o':
-        if first_o:
-          first_o = False
-          self.window.addstr(
-              title_begin_y + 0, title_begin_x + i, c, self.color.google('o'))
+    def _make_not_found(self):
+        if self.parent_width < self.logo_width:
+            self._make_not_found_small()
         else:
-          self.window.addstr(
-              title_begin_y + 0, title_begin_x + i, c, self.color.google('o2'))
-      else:
+            self._make_not_found_big()
+
+    def _make_not_found_small(self):
+        start_index = 0
+        title = "{0} {1} {2}".format(GOOGLE, FUZZY, SEARCH)
+        title_begin_y = self.parent_height // 2 - 1
+        title_begin_x = self.parent_width // 2 - len(title) // 2
+        msg_begin_y = title_begin_y + 1
+        msg_begin_x = title_begin_x + (len(title) - len(NOT_FOUND)) // 2
+
+        # Write Google
+        google = list(GOOGLE)
+        first_o = True
+        for i in range(len(google)):
+            c = google[i]
+            if c == "o":
+                if first_o:
+                    first_o = False
+                    self.window.addstr(
+                        title_begin_y + 0, title_begin_x + i, c, self.color.google("o")
+                    )
+                else:
+                    self.window.addstr(
+                        title_begin_y + 0, title_begin_x + i, c, self.color.google("o2")
+                    )
+            else:
+                self.window.addstr(
+                    title_begin_y + 0, title_begin_x + i, c, self.color.google(c)
+                )
+
+        # Write Fuzzy
+        start_index += len(GOOGLE) + 1
         self.window.addstr(
-            title_begin_y + 0, title_begin_x + i, c, self.color.google(c))
-    
-    # Write Fuzzy
-    start_index += len(GOOGLE) + 1
-    self.window.addstr(title_begin_y + 0, title_begin_x + start_index, FUZZY, self.color.fuzzy())
+            title_begin_y + 0, title_begin_x + start_index, FUZZY, self.color.fuzzy()
+        )
 
-    # Write Search
-    start_index += len(FUZZY) + 1
-    self.window.addstr(title_begin_y + 0, title_begin_x + start_index, SEARCH, self.color.search())
-
-    # Write Not Found
-    self.window.addstr(msg_begin_y, msg_begin_x, NOT_FOUND, self.color.not_found() | curses.A_BOLD)
-
-  # stdscr.getch doesn't work when I addstr to subwin
-  def _make_not_found_big(self):
-    logo_begin_x = self.parent_width // 2 - self.logo_width // 2
-    logo_begin_y = self.parent_height // 2 - self.logo_height // 2
-
-    for data in GOOGLER_NOT_FOUND:
-      cordinate = data[0]
-      c = data[1]
-      x = cordinate[0]
-      y = cordinate[1]
-      if c in ('G', 'o', 'o2', 'g', 'l', 'e'):
+        # Write Search
+        start_index += len(FUZZY) + 1
         self.window.addstr(
-            logo_begin_y + y, logo_begin_x + x, self.block, self.color.google(c, style="normal"))
-      elif c == 'fuzzy':
+            title_begin_y + 0, title_begin_x + start_index, SEARCH, self.color.search()
+        )
+
+        # Write Not Found
         self.window.addstr(
-            logo_begin_y + y, logo_begin_x + x, self.block, self.color.fuzzy(style="normal"))
-      elif c == 'search':
-        self.window.addstr(
-            logo_begin_y + y, logo_begin_x + x, self.block, self.color.search(style="normal"))
-      elif c == 'not_found':
-        self.window.addstr(
-            logo_begin_y + y, logo_begin_x + x, self.block, self.color.not_found(style="normal"))
+            msg_begin_y, msg_begin_x, NOT_FOUND, self.color.not_found() | curses.A_BOLD
+        )
 
-  def _loop(self):
-    self.create()
+    # stdscr.getch doesn't work when I addstr to subwin
+    def _make_not_found_big(self):
+        logo_begin_x = self.parent_width // 2 - self.logo_width // 2
+        logo_begin_y = self.parent_height // 2 - self.logo_height // 2
 
-    while True:
-      pass
+        for data in GOOGLER_NOT_FOUND:
+            cordinate = data[0]
+            c = data[1]
+            x = cordinate[0]
+            y = cordinate[1]
+            if c in ("G", "o", "o2", "g", "l", "e"):
+                self.window.addstr(
+                    logo_begin_y + y,
+                    logo_begin_x + x,
+                    self.block,
+                    self.color.google(c, style="normal"),
+                )
+            elif c == "fuzzy":
+                self.window.addstr(
+                    logo_begin_y + y,
+                    logo_begin_x + x,
+                    self.block,
+                    self.color.fuzzy(style="normal"),
+                )
+            elif c == "search":
+                self.window.addstr(
+                    logo_begin_y + y,
+                    logo_begin_x + x,
+                    self.block,
+                    self.color.search(style="normal"),
+                )
+            elif c == "not_found":
+                self.window.addstr(
+                    logo_begin_y + y,
+                    logo_begin_x + x,
+                    self.block,
+                    self.color.not_found(style="normal"),
+                )
 
-if __name__ == '__main__':
-  import curses
-  import signal
-  import sys,os
+    def _loop(self):
+        self.create()
 
-  # local
+        while True:
+            pass
 
-  # https://codechacha.com/ja/how-to-import-python-files/
-  sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-  import utils, model
-  from model import Model
 
-  signal.signal(signal.SIGINT, signal.SIG_DFL)
+if __name__ == "__main__":
+    import curses
+    import signal
+    import sys, os
 
-  # initscr() returns a window object representing the entire screen.
-  stdscr = curses.initscr()
+    # local
 
-  # turn off automatic echoing of keys to the screen
-  curses.noecho()
-  # Buffering off
-  # https://docs.python.org/ja/3/library/curses.html#curses.cbreak
-  curses.cbreak()
-  # Aable the mouse cursor.
-  curses.curs_set(0)
+    # https://codechacha.com/ja/how-to-import-python-files/
+    sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+    import utils, model
+    from model import Model
 
-  NotFound(stdscr)._loop()
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+    # initscr() returns a window object representing the entire screen.
+    stdscr = curses.initscr()
+
+    # turn off automatic echoing of keys to the screen
+    curses.noecho()
+    # Buffering off
+    # https://docs.python.org/ja/3/library/curses.html#curses.cbreak
+    curses.cbreak()
+    # Aable the mouse cursor.
+    curses.curs_set(0)
+
+    NotFound(stdscr)._loop()

@@ -4,9 +4,8 @@ import argparse
 
 DEFAULT_SCORE = 30
 
-default_args = argparse.Namespace(
-    score=DEFAULT_SCORE
-)
+default_args = argparse.Namespace(score=DEFAULT_SCORE)
+
 
 class Singleton(object):
     @classmethod
@@ -15,7 +14,7 @@ class Singleton(object):
             cls._instance = cls(args)
         else:
             if args != None:
-              cls._instance.args = args
+                cls._instance.args = args
 
         return cls._instance
 
@@ -31,4 +30,4 @@ class RuntimeConfig(Singleton):
 
     @property
     def score(self):
-      return self.args.score or RuntimeConfig.default_score
+        return self.args.score or RuntimeConfig.default_score

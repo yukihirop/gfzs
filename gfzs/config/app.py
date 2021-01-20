@@ -9,10 +9,9 @@ import json
 
 try:
     # need when 「python3 gfzs/config/app.py」
-    if __name__ == '__main__':
+    if __name__ == "__main__":
         # https://codechacha.com/ja/how-to-import-python-files/
-        sys.path.append(os.path.dirname(
-            os.path.abspath(os.path.dirname(__file__))))
+        sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from utils import debug
 
     # need when 「cat fixtures/rust.json | python -m gfzs」
@@ -22,7 +21,7 @@ try:
 
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
-    sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname('../'))))
+    sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from utils import debug
 
 # ~/.gfzsrc
@@ -49,16 +48,16 @@ DEFAULT_CONFIG = {
                 "hline": {
                     "text": curses.COLOR_WHITE,
                     "background": curses.COLOR_BLACK,
-                    "style": "normal"
+                    "style": "normal",
                 },
-            }
+            },
         },
         "header": {
             "color": {
                 "hline": {
                     "text": curses.COLOR_WHITE,
                     "background": curses.COLOR_BLACK,
-                    "style": "normal"
+                    "style": "normal",
                 },
             }
         },
@@ -67,22 +66,22 @@ DEFAULT_CONFIG = {
                 "index": {
                     "text": curses.COLOR_CYAN,
                     "background": curses.COLOR_BLACK,
-                    "style": "normal"
+                    "style": "normal",
                 },
                 "title": {
                     "text": curses.COLOR_GREEN,
                     "background": curses.COLOR_BLACK,
-                    "style": "bold"
+                    "style": "bold",
                 },
                 "url": {
                     "text": curses.COLOR_YELLOW,
                     "background": curses.COLOR_BLACK,
-                    "style": "link"
+                    "style": "link",
                 },
                 "abstract": {
                     "text": curses.COLOR_WHITE,
                     "background": curses.COLOR_BLACK,
-                    "style": "normal"
+                    "style": "normal",
                 },
                 "markup_partial": {
                     "text": curses.COLOR_GREEN,
@@ -93,7 +92,7 @@ DEFAULT_CONFIG = {
                     "text": curses.COLOR_RED,
                     "background": curses.COLOR_BLACK,
                     "style": "normal",
-                }
+                },
             }
         },
         "paging": {
@@ -101,10 +100,10 @@ DEFAULT_CONFIG = {
                 "common": {
                     "text": curses.COLOR_GREEN,
                     "background": curses.COLOR_BLACK,
-                    "style": "bold"
+                    "style": "bold",
                 }
             }
-        }
+        },
     }
 }
 
@@ -123,7 +122,7 @@ class AppConfig(Singleton):
 
     def __init__(self):
         self.data = self._create_data()
-        
+
     @property
     def config_path(self):
         return DEFAULT_CONFIG_PATH
@@ -145,7 +144,7 @@ class AppConfig(Singleton):
         return data
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     config = AppConfig.get_instance()
     print(config.data)
