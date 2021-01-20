@@ -160,11 +160,11 @@ class SearchResult:
         return picked
 
     def _init_layout(self):
-        self.height, self.width = self.stdscr.getmaxyx()
+        self.parent_height, self.parent_width = self.stdscr.getmaxyx()
         # 「2」 is the height of the header or footer
         # 「4」 = header + footer height
-        self.window = curses.newwin(self.height - 4, self.width, 2, 0)
-        self.update_per_page(self.height // self.TEXTBOX_HEIGHT - 1)
+        self.window = curses.newwin(self.parent_height - 4, self.parent_width, 2, 0)
+        self.update_per_page(self.parent_height // self.TEXTBOX_HEIGHT - 1)
         # https://stackoverflow.com/a/17369532/9434894
         self.window.keypad(1)
 
@@ -206,14 +206,17 @@ class SearchResult:
 
         for s in data:
             textbox = self.pad.derwin(
-                self.TEXTBOX_HEIGHT, self.width - 4, i + self.helper.pad_begin_y, 2
+                self.TEXTBOX_HEIGHT,
+                self.parent_width - 4,
+                i + self.helper.pad_begin_y,
+                2,
             )
 
             textboxes.append(textbox)
             i += self.TEXTBOX_HEIGHT
 
         # When all are displayed as multi-byte character strings
-        abstract_line_len = self.width // 2
+        abstract_line_len = self.parent_width // 2
         for k in range(len(textboxes)):
             textboxes[k].box()
 
@@ -261,7 +264,7 @@ class SearchResult:
 
         per_page = self.per_page
         display_limit_pos_y = self.TEXTBOX_HEIGHT * per_page
-        display_limit_pos_x = self.width - 1
+        display_limit_pos_x = self.parent_width - 1
 
         # Since the display of the last pad is cut off, display_limit_pos_y + self.helper.pad_begin_y
         display_limit_pos_y += self.helper.pad_begin_y
@@ -306,7 +309,7 @@ class SearchResult:
 
         # The current window is to far down. Switch the top textbox.
         # When you reach the bottom, redisplay the current box at the top
-        if (topy + self.height - self.TEXTBOX_HEIGHT) <= cy:
+        if (topy + self.parent_height - self.TEXTBOX_HEIGHT) <= cy:
             top_textbox = textboxes[current_selected]
 
         # The current window is to far up. There is a better way though...
