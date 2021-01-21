@@ -51,14 +51,6 @@ class Paging(Base):
         self.parent_height, self.parent_width = self.stdscr.getmaxyx()
         self.window = curses.newwin(2, self.parent_width, self.parent_height - 4, 0)
 
-    def _end_curses(self, end=True):
-        """ Terminates the curses application. """
-        curses.nocbreak()
-        self.window.keypad(0)
-        if end:
-            curses.echo()
-            curses.endwin()
-
     # https://stackoverflow.com/a/53016371/9434894
     def _make_paging(self):
         begin_x = self.parent_width // 2 - 1
@@ -70,19 +62,26 @@ class Paging(Base):
         )
         self.window.addstr(0, begin_x, paging, self.colors["common"] | curses.A_BOLD)
 
-    def _loop(self):
-        self.create()
 
-        while True:
-            try:
-                user_input = self.window.getch()
-            except curses.error:
-                continue
-            except KeyboardInterrupt:
-                break
+if __name__ == "__main__":
 
-            if user_input == curses.KEY_RESIZE:
-                self.reset()
+    class TestPaging(Paging):
+        def run(self):
+            self._loop()
+
+        def _loop(self):
+            self.create()
+
+            while True:
+                try:
+                    user_input = self.window.getch()
+                except curses.error:
+                    continue
+                except KeyboardInterrupt:
+                    break
+
+                if user_input == curses.KEY_RESIZE:
+                    self.reset()
 
 
 if __name__ == "__main__":
@@ -122,4 +121,4 @@ if __name__ == "__main__":
     view.helper.current_selected = 1
     view.helper.per_page = 5
 
-    Paging(stdscr, view)._loop()
+    TestPaging(stdscr, view).run()

@@ -136,14 +136,6 @@ class SearchResult(Base):
             self.destroy()
             self.not_found.create()
 
-    def _pick(self, pad_begin_y=0):
-        """ Just run this when you want to spawn the selection process. """
-        self.create(pad_begin_y)
-        picked = self._loop()
-        self._end_curses()
-
-        return picked
-
     def _init_layout(self):
         self.parent_height, self.parent_width = self.stdscr.getmaxyx()
         # 「2」 is the height of the header or footer
@@ -152,17 +144,6 @@ class SearchResult(Base):
         self.update_per_page(self.parent_height // self.TEXTBOX_HEIGHT - 1)
         # https://stackoverflow.com/a/17369532/9434894
         self.window.keypad(1)
-
-    def _finish_curses(self):
-        self._end_curses(False)
-
-    def _end_curses(self, end=True):
-        """ Terminates the curses application. """
-        curses.nocbreak()
-        self.window.keypad(0)
-        if end:
-            curses.echo()
-            curses.endwin()
 
     def _delete_pad(self):
         self.pad.clear()
@@ -373,38 +354,58 @@ class SearchResult(Base):
 
         self.helper.current_selected = current_selected
 
-    def _loop(self):
-        current_selected = 0
-        textboxes_len = len(self.textboxes)
 
-        if textboxes_len > 1:
-            last = 1
-        else:
-            last = 0
+if __name__ == "__main__":
 
-        # See at the root textbox.
-        if textboxes_len > 0:
-            top_textbox = self.textboxes[0]
-            topy, _ = self._refresh_view(top_textbox)
-            self.helper.update_attributues(current_selected, last, topy, top_textbox)
+    class TestSearchResult(SearchResult):
+        def run(self, pad_begin_y=0):
+            """ Just run this when you want to spawn the selection process. """
+            self.create(pad_begin_y)
+            picked = self._loop()
+            self._end_curses()
+            return picked
 
-        while True:
-            if self.stop_loop:
-                break
+        def _end_curses(self):
+            """ Terminates the curses application. """
+            curses.nocbreak()
+            self.window.keypad(0)
+            curses.echo()
+            curses.endwin()
 
-            self.update_view_in_loop()
+        def _loop(self):
+            current_selected = 0
+            textboxes_len = len(self.textboxes)
 
-            try:
-                user_input = self.window.getch()
-            except curses.error:
-                continue
-            except KeyboardInterrupt:
-                break
+            if textboxes_len > 1:
+                last = 1
+            else:
+                last = 0
 
-            if user_input == curses.KEY_ENTER or user_input == 10:
-                return int(self.current_selected)
+            # See at the root textbox.
+            if textboxes_len > 0:
+                top_textbox = self.textboxes[0]
+                topy, _ = self._refresh_view(top_textbox)
+                self.helper.update_attributues(
+                    current_selected, last, topy, top_textbox
+                )
 
-            self.handle_key_in_loop(user_input)
+            while True:
+                if self.stop_loop:
+                    break
+
+                self.update_view_in_loop()
+
+                try:
+                    user_input = self.window.getch()
+                except curses.error:
+                    continue
+                except KeyboardInterrupt:
+                    break
+
+                if user_input == curses.KEY_ENTER or user_input == 10:
+                    return int(self.current_selected)
+
+                self.handle_key_in_loop(user_input)
 
 
 if __name__ == "__main__":
@@ -440,6 +441,6 @@ if __name__ == "__main__":
     model.update_query("Amazon")
     _ = model.find()
 
-    choice = SearchResult(stdscr, model)._pick(1)
+    choice = TestSearchResult(stdscr, model).run(pad_begin_y=1)
     if choice != None:
         print(model.result[choice].get("title"))

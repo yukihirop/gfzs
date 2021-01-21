@@ -52,14 +52,6 @@ class Header(Base):
         self.parent_height, self.parent_width = self.stdscr.getmaxyx()
         self.window = curses.newwin(2, self.parent_width, 0, 0)
 
-    def _end_curses(self, end=True):
-        """ Terminates the curses application. """
-        curses.nocbreak()
-        self.window.keypad(0)
-        if end:
-            curses.echo()
-            curses.endwin()
-
     # https://stackoverflow.com/a/53016371/9434894
     def _make_header(self):
         start_index = 0
@@ -100,19 +92,33 @@ class Header(Base):
             1, 0, curses.ACS_HLINE | self.colors["hline"], self.parent_width
         )
 
-    def _loop(self):
-        self.create()
 
-        while True:
-            try:
-                user_input = self.window.getch()
-            except curses.error:
-                continue
-            except KeyboardInterrupt:
-                break
+if __name__ == "__main__":
 
-            if user_input == curses.KEY_RESIZE:
-                self.reset()
+    class TestHeader(Header):
+        def run(self):
+            self._loop()
+
+        def _end_curses(self):
+            """ Terminates the curses application. """
+            curses.nocbreak()
+            self.window.keypad(0)
+            curses.echo()
+            curses.endwin()
+
+        def _loop(self):
+            self.create()
+
+            while True:
+                try:
+                    user_input = self.window.getch()
+                except curses.error:
+                    continue
+                except KeyboardInterrupt:
+                    break
+
+                if user_input == curses.KEY_RESIZE:
+                    self.reset()
 
 
 if __name__ == "__main__":
@@ -140,4 +146,4 @@ if __name__ == "__main__":
     # Disable the mouse cursor.
     curses.curs_set(0)
 
-    Header(stdscr)._loop()
+    TestHeader(stdscr).run()

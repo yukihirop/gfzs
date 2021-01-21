@@ -615,14 +615,6 @@ class NotFound:
         self.parent_height, self.parent_width = self.stdscr.getmaxyx()
         self.window = curses.newwin(self.parent_height - 4, self.parent_width, 0, 0)
 
-    def _end_curses(self, end=True):
-        """ Terminates the curses application. """
-        curses.nocbreak()
-        self.window.keypad(0)
-        if end:
-            curses.echo()
-            curses.endwin()
-
     def _make_not_found(self):
         if self.parent_width < self.logo_width:
             self._make_not_found_small()
@@ -713,11 +705,18 @@ class NotFound:
                     self.color.not_found(style="normal"),
                 )
 
-    def _loop(self):
-        self.create()
 
-        while True:
-            pass
+if __name__ == "__main__":
+
+    class TestNotFound(NotFound):
+        def run(self):
+            self._loop()
+
+        def _loop(self):
+            self.create()
+
+            while True:
+                pass
 
 
 if __name__ == "__main__":
@@ -745,4 +744,4 @@ if __name__ == "__main__":
     # Aable the mouse cursor.
     curses.curs_set(0)
 
-    NotFound(stdscr)._loop()
+    TestNotFound(stdscr).run()

@@ -105,20 +105,6 @@ class Footer(Base):
         self.stdscr.addstr(text)
         self.model.push_query(text)
 
-    def _wait_input_prompt(self):
-        self.create()
-        inp = self._loop()
-        self._end_curses()
-        return inp
-
-    def _end_curses(self, end=True):
-        """ Terminates the curses application. """
-        curses.nocbreak()
-        self.stdscr.keypad(0)
-        if end:
-            curses.echo()
-            curses.endwin()
-
     # stdscr.getch doesn't work when I addstr to subwin
     def _make_footer(self):
         self.stdscr.hline(
@@ -131,35 +117,52 @@ class Footer(Base):
             self.parent_height - 1, 0, self.message, self.colors["message"]
         )
 
-    def _loop(self):
-        self.activate(is_init=True)
 
-        inp = ""
-        while True:
-            try:
-                user_input = self.multibyte.getch()
-            except curses.error:
-                continue
-            except KeyboardInterrupt:
-                break
+if __name__ == "__main__":
 
-            # Ah hitting enter, return the index of the selected list element.
-            if user_input == curses.KEY_ENTER or user_input == KEY_ENTER:
-                return inp
-            # https://www.programcreek.com/python/?code=mingrammer%2Fawesome-finder%2Fawesome-finder-master%2Fawesome%2Ftui.py
-            elif user_input in (
-                curses.ascii.BS,
-                curses.ascii.DEL,
-                curses.KEY_BACKSPACE,
-            ):
-                self.delete_char()
-                inp = inp[:-1]
-            elif user_input == curses.KEY_RESIZE:
-                self.reset()
-            else:
-                self.write(chr(user_input))
-                inp += chr(user_input)
-                self.update_query(inp)
+    class TestFooter(Footer):
+        def run(self):
+            self.create()
+            inp = self._loop()
+            self._end_curses()
+            return inp
+
+        def _end_curses(self):
+            """ Terminates the curses application. """
+            curses.nocbreak()
+            self.stdscr.keypad(0)
+            curses.echo()
+            curses.endwin()
+
+        def _loop(self):
+            self.activate(is_init=True)
+
+            inp = ""
+            while True:
+                try:
+                    user_input = self.multibyte.getch()
+                except curses.error:
+                    continue
+                except KeyboardInterrupt:
+                    break
+
+                # Ah hitting enter, return the index of the selected list element.
+                if user_input == curses.KEY_ENTER or user_input == KEY_ENTER:
+                    return inp
+                # https://www.programcreek.com/python/?code=mingrammer%2Fawesome-finder%2Fawesome-finder-master%2Fawesome%2Ftui.py
+                elif user_input in (
+                    curses.ascii.BS,
+                    curses.ascii.DEL,
+                    curses.KEY_BACKSPACE,
+                ):
+                    self.delete_char()
+                    inp = inp[:-1]
+                elif user_input == curses.KEY_RESIZE:
+                    self.reset()
+                else:
+                    self.write(chr(user_input))
+                    inp += chr(user_input)
+                    self.update_query(inp)
 
 
 if __name__ == "__main__":
@@ -187,6 +190,6 @@ if __name__ == "__main__":
     curses.curs_set(1)
 
     model = Model([])
-    inp = Footer(stdscr, model)._wait_input_prompt()
+    inp = TestFooter(stdscr, model).run()
     print("query:", model.query)
     print("result:", inp)
