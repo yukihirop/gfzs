@@ -104,7 +104,7 @@ class Model:
         )
 
         added = []
-        for url in all_urls:
+        for url in set(all_urls):
             score_at_title = 0
             score_at_abstract = 0
             title_len = 1
@@ -183,8 +183,8 @@ if __name__ == "__main__":
 
     config = RuntimeConfig.get_instance()
     model = TestModel(data)
-    result = model.find("Amazon")
 
+    result = model.find("Amazon")
     print(
         "Search (query=Amazon, score=%d):  %d / %d"
         % (config.score, model.data_size, model.summary_count)
@@ -193,6 +193,14 @@ if __name__ == "__main__":
         print(result[i]["title"])
 
     result = model.find("\0")
+    print(
+        "Search (query=\0, score=%d):  %d / %d"
+        % (config.score, model.data_size, model.summary_count)
+    )
+    for i in range(len(result)):
+        print(result[i]["title"])
+
+    result = model.find("a")
     print(
         "Search (query=\0, score=%d):  %d / %d"
         % (config.score, model.data_size, model.summary_count)
