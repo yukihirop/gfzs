@@ -27,26 +27,32 @@ except ModuleNotFoundError:
     import cmd.edit as cmd_edit
 
 
-def validate(data):
-    data = []
+def validate_json(data) -> bool:
+    result = []
+
     for item in data:
         if "url" in item:
-            data.append(True)
+            result.append(True)
         else:
-            data.append(False)
+            result.append(False)
 
         if "abstract" in item:
-            data.append(True)
+            result.append(True)
         else:
-            data.append(False)
+            result.append(False)
 
         if "url" in item:
-            data.append(True)
+            result.append(True)
         else:
-            data.append(False)
+            result.append(False)
 
-    return all(data)
+    return all(result)
 
+def validate_blank(data) -> bool:
+    if len(data) != 0:
+        return True
+    else:
+        return False
 
 def open_tty(ttyname):
     # See https://github.com/stefanholek/term/issues/1
@@ -108,15 +114,23 @@ def main() -> None:
         try:
             json_str = sys.stdin.read()
             data = json.loads(json_str)
-            if not validate(data):
-                raise Exception("Invalid JSON Format.")
+
+            if not validate_json(data):
+                error = Exception("Invalid json format. Please pass in an array of json that keeps `title`, `url` and `abstract` as keys.")
+            elif not validate_blank(data):
+                error = Exception("The result passed was empty.")
         except json.decoder.JSONDecodeError as e:
             error = e
         except Exception as e:
             error = e
         finally:
             if error != None:
-                print(error)
+                print('Error: %s' % error)
+                printable_len = 100
+                if len(json_str) <= printable_len:
+                    print('Input data: %s' % json_str)
+                else:
+                    print('Input data (100 chars): %s ...' % json_str[:printable_len])
                 sys.exit(1)
 
         controller = Controller(data)
