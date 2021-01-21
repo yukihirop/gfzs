@@ -104,6 +104,13 @@ class SearchResult(Base):
     def data_size(self) -> int:
         return self.model.data_size
 
+    @property
+    def current_page(self) -> int:
+        return (self.current_selected // self.per_page + 1)
+
+    def current_page_from(self, current_selected) -> int:
+        return (current_selected // self.per_page + 1)
+
     def update_per_page(self, value):
         self.helper.update_per_page(value)
 
@@ -320,14 +327,14 @@ class SearchResult(Base):
         # The current window is to far up. There is a better way though...
         # Update the top until you reach the top of the screen.
         if topy >= cy + self.TEXTBOX_HEIGHT:
-            if current_selected < per_page:
-                top_textbox = textboxes[0]
-            else:
-                top_textbox = textboxes[current_selected]
+            top_textbox = textboxes[current_selected]
 
         if last == 0:
             if current_selected > per_page + 1:
                 top_textbox = textboxes[current_selected - per_page + 1]
+
+        if self.helper.change_page:
+            top_textbox = textboxes[current_selected]
 
         if last != current_selected:
             last = current_selected
@@ -347,6 +354,8 @@ class SearchResult(Base):
         return True
 
     def handle_key_in_loop(self, user_input):
+        self.helper.change_page = False
+        old_current_page = self.current_page
         textboxes = self.textboxes
         textboxes_len = len(textboxes)
 
@@ -363,12 +372,16 @@ class SearchResult(Base):
                 current_selected = 0  # wrap around.
             else:
                 current_selected += 1
+                if self.current_page_from(current_selected) != old_current_page:
+                    self.helper.change_page = True
         elif textboxes_len > 1 and user_input == curses.KEY_UP:
             if current_selected == 0:
                 self.helper.change_page = True
                 current_selected = textboxes_len - 1  # wrap around.
             else:
                 current_selected -= 1
+                if self.current_page_from(current_selected) != old_current_page:
+                    self.helper.change_page = True
         elif textboxes_len > per_page + 1 and user_input == curses.KEY_RIGHT:
             self.helper.change_page = True
             next_pagetop_index = per_page * (math.ceil(current_selected / per_page) + 1)
