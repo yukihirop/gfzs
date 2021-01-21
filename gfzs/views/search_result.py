@@ -14,6 +14,7 @@ try:
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from utils.markup import Markup
+        from utils.multibyte import Multibyte
 
         from not_found import NotFound
         from paging import Paging
@@ -25,10 +26,12 @@ try:
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs.utils.markup import Markup
+        from gfzs.utils.multibyte import Multibyte
 
         from gfzs.views.not_found import NotFound
         from gfzs.views.paging import Paging
         from gfzs.views.base import Base
+
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -36,6 +39,7 @@ try:
 except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from utils.markup import Markup
+    from utils.multibyte import Multibyte
 
     from views.not_found import NotFound
     from views.paging import Paging
@@ -82,6 +86,7 @@ class SearchResult(Base):
         self.helper = SearchResultHelper()
         self.not_found = NotFound(stdscr)
         self.markup = Markup()
+        self.multibyte = Multibyte()
 
         # Element parameters. Channge them here.
         self.TEXTBOX_HEIGHT = 8
@@ -191,7 +196,8 @@ class SearchResult(Base):
             i += self.TEXTBOX_HEIGHT
 
         # When all are displayed as multi-byte character strings
-        abstract_line_len = self.parent_width // 2
+        gap = 6 # 4 = 1 (Frame border) + 3(padding) + 2(margin)
+        abstract_line_len = self.parent_width // 2 - gap
         for k in range(len(textboxes)):
             textboxes[k].box()
 
@@ -227,9 +233,22 @@ class SearchResult(Base):
                         offset_x = item["half_width"]["start_index"]
                         color = item["color"]
                         match_text = item["match"]
-                        textboxes[k].addstr(
-                            4 + l, 6 + offset_x, match_text, color | curses.A_BOLD
-                        )
+
+                        match_text_byte_len = self.multibyte.get_east_asian_width_count(match_text)
+                        if offset_x + 6 + match_text_byte_len <= self.parent_width - 1:
+                            textboxes[k].addstr(
+                                4 + l, 6 + offset_x, match_text, color | curses.A_BOLD
+                            )
+                        # Wrap display
+                        else:
+                            match_text_before = match_text[:(self.parent_width - offset_x)]
+                            byte_len = self.multibyte.get_east_asian_width_count(match_text_before)
+                            gap = 6 # 4 = 1 (Frame border) + 3(padding) + 2(margin)
+                            textboxes[k].addstr(4 + l, self.parent_width - byte_len - gap, match_text_before, color)
+
+                            match_text_after = match_text[(self.parent_width - offset_x):]
+                            textboxes[k].addstr(5 + l, 6, match_text_after, color)
+
 
         return textboxes
 
