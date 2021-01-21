@@ -14,6 +14,8 @@ try:
 
         from base import Base
 
+        if os.environ.get("DEBUG"):
+            import utils.debug as debug
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
@@ -21,6 +23,8 @@ try:
         from gfzs.utils.multibyte import Multibyte
         from gfzs.views.base import Base
 
+        if os.environ.get("DEBUG"):
+            import gfzs.utils.debug as debug
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
     # https://codechacha.com/ja/how-to-import-python-files/
@@ -28,6 +32,9 @@ except ModuleNotFoundError:
     from utils import debug
     from utils.multibyte import Multibyte
     from views.base import Base
+
+    if os.environ.get("DEBUG"):
+        import utils.debug as debug
 
 KEY_ENTER = 10
 KEY_ESC = 27

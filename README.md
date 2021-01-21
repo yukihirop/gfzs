@@ -197,6 +197,12 @@ The default setting is the following file, and each key can enter the following 
 |`6`|`curses.COLOR_CYAN`|
 |`7`|`curses.COLOR_WHITE`|
 
+## ⚙ Environment Variable
+
+|name|description|
+|----|-----------|
+|`DEBUG`|You will be able to use the `debug` module.|
+
 ## 💪 Development
 
 First, create a virtual environment.

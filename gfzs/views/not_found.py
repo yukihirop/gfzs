@@ -10,20 +10,26 @@ try:
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         import utils
-        from utils import debug
         from utils.color import Color
+
+        if os.environ.get("DEBUG"):
+            import utils.debug as debug
 
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
-        from gfzs.utils import debug
         from gfzs.utils.color import Color
+
+        if os.environ.get("DEBUG"):
+            import gfzs.utils.debug as debug
 
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
-    from utils import debug
     from utils.color import Color
+
+    if os.environ.get("DEBUG"):
+        import utils.debug as debug
 
 #
 # Generate by https://lazesoftware.com/tool/hugeaagen/

@@ -19,7 +19,7 @@ try:
         from paging import Paging
         from base import Base
 
-        if os.environ.get('DEBUG'):
+        if os.environ.get("DEBUG"):
             import utils.debug as debug
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
@@ -29,8 +29,8 @@ try:
         from gfzs.views.not_found import NotFound
         from gfzs.views.paging import Paging
         from gfzs.views.base import Base
-        
-        if os.environ.get('DEBUG'):
+
+        if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
@@ -41,8 +41,9 @@ except ModuleNotFoundError:
     from views.paging import Paging
     from views.base import Base
 
-    if os.environ.get('DEBUG'):
+    if os.environ.get("DEBUG"):
         import utils.debug as debug
+
 
 class SearchResultHelper:
     def __init__(self):
