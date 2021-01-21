@@ -42,15 +42,8 @@ class Model:
         self._result_nested_by_url = self._collection_nested_by("url")
 
     @property
-    def summary_count(self):
-        return len(self.collection)
-
-    @property
     def data_size(self):
         return len(self.result)
-
-    def should_search_again(self):
-        return self.query != self.old_query
 
     def update_query(self, query):
         self.old_query = self.query
@@ -97,9 +90,6 @@ class Model:
             self.result = self.collection
 
         return self.result
-
-    def can_search_again(self):
-        return self.query != self.old_query
 
     def _make_result_from_scored(self, score) -> list:
         result = []
@@ -173,6 +163,14 @@ class Model:
 
 
 if __name__ == "__main__":
+
+    class TestModel(Model):
+        @property
+        def summary_count(self):
+            return len(self.collection)
+
+
+if __name__ == "__main__":
     import json
     import signal
 
@@ -184,7 +182,7 @@ if __name__ == "__main__":
     data = json.loads(json_str)
 
     config = RuntimeConfig.get_instance()
-    model = Model(data)
+    model = TestModel(data)
     result = model.find("Amazon")
 
     print(

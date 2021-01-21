@@ -156,6 +156,9 @@ class Color(Singleton):
 if __name__ == "__main__":
 
     import curses
+    import signal
+
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     def demo(screen):
         color = Color.get_instance()
