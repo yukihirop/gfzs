@@ -441,6 +441,14 @@ if __name__ == "__main__":
     model.update_query("Amazon")
     _ = model.find()
 
-    choice = TestSearchResult(stdscr, model).run(pad_begin_y=1)
-    if choice != None:
-        print(model.result[choice].get("title"))
+    target = TestSearchResult(stdscr, model)
+    error = None
+    try:
+        choice = target.run(pad_begin_y=1)
+        if choice != None:
+            print(model.result[choice].get("title"))
+    except curses.error as e:
+        error = str(e)
+    finally:
+        if error != None:
+            print(error)

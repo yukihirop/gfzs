@@ -146,4 +146,13 @@ if __name__ == "__main__":
     # Disable the mouse cursor.
     curses.curs_set(0)
 
-    TestHeader(stdscr).run()
+    target = TestHeader(stdscr)
+    error = None
+    try:
+        target.run()
+    except curses.error as e:
+        error = str(e)
+    finally:
+        target._end_curses()
+        if error != None:
+            print(error)

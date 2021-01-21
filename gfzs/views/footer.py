@@ -190,6 +190,14 @@ if __name__ == "__main__":
     curses.curs_set(1)
 
     model = Model([])
-    inp = TestFooter(stdscr, model).run()
-    print("query:", model.query)
-    print("result:", inp)
+    target = TestFooter(stdscr, model)
+    error = None
+    try:
+        inp = target.run()
+        print("query:", model.query)
+        print("result:", inp)
+    except curses.error as e:
+        error = str(e)
+    finally:
+        if error != None:
+            print(error)

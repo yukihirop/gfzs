@@ -69,6 +69,13 @@ if __name__ == "__main__":
         def run(self):
             self._loop()
 
+        def _end_curses(self):
+            """ Terminates the curses application. """
+            curses.nocbreak()
+            self.window.keypad(0)
+            curses.echo()
+            curses.endwin()
+
         def _loop(self):
             self.create()
 
@@ -121,4 +128,13 @@ if __name__ == "__main__":
     view.helper.current_selected = 1
     view.helper.per_page = 5
 
-    TestPaging(stdscr, view).run()
+    target = TestPaging(stdscr, view)
+    error = None
+    try:
+        target.run()
+    except curses.error as e:
+        error = str(e)
+    finally:
+        target._end_curses()
+        if error != None:
+            print(error)

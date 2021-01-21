@@ -744,4 +744,13 @@ if __name__ == "__main__":
     # Aable the mouse cursor.
     curses.curs_set(0)
 
-    TestNotFound(stdscr).run()
+    target = TestNotFound(stdscr)
+    error = None
+    try:
+        target.run()
+    except curses.error as e:
+        error = str(e)
+    finally:
+        target._end_curses()
+        if error != None:
+            print(error)
