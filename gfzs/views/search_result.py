@@ -32,7 +32,6 @@ try:
         from gfzs.views.paging import Paging
         from gfzs.views.base import Base
 
-
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
 # need when 「python3 gfzs/controller.py」
@@ -196,7 +195,7 @@ class SearchResult(Base):
             i += self.TEXTBOX_HEIGHT
 
         # When all are displayed as multi-byte character strings
-        gap = 6 # 4 = 1 (Frame border) + 3(padding) + 2(margin)
+        gap = 6  # 4 = 1 (Frame border) + 3(padding) + 2(margin)
         abstract_line_len = self.parent_width // 2 - gap
         for k in range(len(textboxes)):
             textboxes[k].box()
@@ -234,21 +233,33 @@ class SearchResult(Base):
                         color = item["color"]
                         match_text = item["match"]
 
-                        match_text_byte_len = self.multibyte.get_east_asian_width_count(match_text)
+                        match_text_byte_len = self.multibyte.get_east_asian_width_count(
+                            match_text
+                        )
                         if offset_x + 6 + match_text_byte_len <= self.parent_width - 1:
                             textboxes[k].addstr(
                                 4 + l, 6 + offset_x, match_text, color | curses.A_BOLD
                             )
                         # Wrap display
                         else:
-                            match_text_before = match_text[:(self.parent_width - offset_x)]
-                            byte_len = self.multibyte.get_east_asian_width_count(match_text_before)
-                            gap = 6 # 4 = 1 (Frame border) + 3(padding) + 2(margin)
-                            textboxes[k].addstr(4 + l, self.parent_width - byte_len - gap, match_text_before, color)
+                            match_text_before = match_text[
+                                : (self.parent_width - offset_x)
+                            ]
+                            byte_len = self.multibyte.get_east_asian_width_count(
+                                match_text_before
+                            )
+                            gap = 6  # 4 = 1 (Frame border) + 3(padding) + 2(margin)
+                            textboxes[k].addstr(
+                                4 + l,
+                                self.parent_width - byte_len - gap,
+                                match_text_before,
+                                color,
+                            )
 
-                            match_text_after = match_text[(self.parent_width - offset_x):]
+                            match_text_after = match_text[
+                                (self.parent_width - offset_x) :
+                            ]
                             textboxes[k].addstr(5 + l, 6, match_text_after, color)
-
 
         return textboxes
 

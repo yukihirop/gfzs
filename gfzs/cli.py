@@ -48,11 +48,13 @@ def validate_json(data) -> bool:
 
     return all(result)
 
+
 def validate_blank(data) -> bool:
     if len(data) != 0:
         return True
     else:
         return False
+
 
 def open_tty(ttyname):
     # See https://github.com/stefanholek/term/issues/1
@@ -116,7 +118,9 @@ def main() -> None:
             data = json.loads(json_str)
 
             if not validate_json(data):
-                error = Exception("Invalid json format. Please pass in an array of json that keeps `title`, `url` and `abstract` as keys.")
+                error = Exception(
+                    "Invalid json format. Please pass in an array of json that keeps `title`, `url` and `abstract` as keys."
+                )
             elif not validate_blank(data):
                 error = Exception("The result passed was empty.")
         except json.decoder.JSONDecodeError as e:
@@ -125,12 +129,12 @@ def main() -> None:
             error = e
         finally:
             if error != None:
-                print('Error: %s' % error)
+                print("Error: %s" % error)
                 printable_len = 100
                 if len(json_str) <= printable_len:
-                    print('Input data: %s' % json_str)
+                    print("Input data: %s" % json_str)
                 else:
-                    print('Input data (100 chars): %s ...' % json_str[:printable_len])
+                    print("Input data (100 chars): %s ..." % json_str[:printable_len])
                 sys.exit(1)
 
         controller = Controller(data)
