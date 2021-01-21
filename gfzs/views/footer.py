@@ -50,8 +50,16 @@ class Footer(Base):
         return self.model.query
 
     @property
+    def query_len(self):
+        return self.multibyte.get_east_asian_width_count(self.query)
+
+    @property
     def message(self):
         return self.app_config.data["view"]["footer"]["message"]
+
+    @property
+    def message_len(self):
+        return self.multibyte.get_east_asian_width_count(self.message)
 
     def update_query(self, query):
         self.model.update_query(query)
@@ -64,9 +72,7 @@ class Footer(Base):
         self._make_footer()
         self.stdscr.move(
             self.parent_height - 1,
-            len(self.message)
-            + 1
-            + self.multibyte.get_east_asian_width_count(self.query),
+            self.message_len + 1 + self.query_len,
         )
         self.stdscr.refresh()
 
@@ -75,9 +81,7 @@ class Footer(Base):
         curses.curs_set(1)
         self.stdscr.move(
             self.parent_height - 1,
-            len(self.message)
-            + 1
-            + self.multibyte.get_east_asian_width_count(self.query),
+            self.message_len + 1 + self.query_len,
         )
 
         if is_init:
@@ -87,10 +91,10 @@ class Footer(Base):
 
     def delete_char(self):
         if self.query == None or self.query == "":
-            self.stdscr.delch(self.parent_height - 1, len(self.message) + 1 + 1)  # ?
-            self.stdscr.delch(self.parent_height - 1, len(self.message) + 1)  # ^
+            self.stdscr.delch(self.parent_height - 1, self.message_len + 1 + 1)  # ?
+            self.stdscr.delch(self.parent_height - 1, self.message_len + 1)  # ^
         else:
-            query_len = self.multibyte.get_east_asian_width_count(self.query)
+            query_len = self.query_len
             if query_len > 0:
                 if self.multibyte.is_full_width(self.query[-1]):
                     k = 2
@@ -98,13 +102,13 @@ class Footer(Base):
                     k = 1
                 # backspace = ^?
                 self.stdscr.delch(
-                    self.parent_height - 1, len(self.message) + 1 + query_len - k + 2
+                    self.parent_height - 1, self.message_len + 1 + query_len - k + 2
                 )  # ?
                 self.stdscr.delch(
-                    self.parent_height - 1, len(self.message) + 1 + query_len - k + 1
+                    self.parent_height - 1, self.message_len + 1 + query_len - k + 1
                 )  # ^
                 self.stdscr.delch(
-                    self.parent_height - 1, len(self.message) + 1 + query_len - k
+                    self.parent_height - 1, self.message_len + 1 + query_len - k
                 )
                 self.update_query(self.query[:-1])
 
