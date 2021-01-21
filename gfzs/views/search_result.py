@@ -18,6 +18,9 @@ try:
         from not_found import NotFound
         from paging import Paging
         from base import Base
+
+        if os.environ.get('DEBUG'):
+            import utils.debug as debug
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
@@ -26,6 +29,9 @@ try:
         from gfzs.views.not_found import NotFound
         from gfzs.views.paging import Paging
         from gfzs.views.base import Base
+        
+        if os.environ.get('DEBUG'):
+            import gfzs.utils.debug as debug
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
@@ -35,6 +41,8 @@ except ModuleNotFoundError:
     from views.paging import Paging
     from views.base import Base
 
+    if os.environ.get('DEBUG'):
+        import utils.debug as debug
 
 class SearchResultHelper:
     def __init__(self):
@@ -284,7 +292,7 @@ class SearchResult(Base):
             if current_selected < per_page:
                 top_textbox = textboxes[0]
             else:
-                top_textbox = textboxes[current_selected - per_page]
+                top_textbox = textboxes[current_selected]
 
         if last == 0:
             if current_selected > per_page + 1:
