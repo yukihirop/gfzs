@@ -2,6 +2,7 @@
 
 import unicodedata
 import os, sys
+import curses
 
 # from local
 
@@ -77,8 +78,10 @@ class Multibyte:
             # e.g.) ascii
             pass
         elif INVALID_BYTE_START <= key <= INVALID_BYTE_END:
-            raise "Invalid Byte: %s" % key
-            exit(1)
+            self._end_curses()
+            e = Exception("[Multibyte] Invalid Byte: %s" % key)
+            print("Error: %s" % str(e))
+            sys.exit(1)
         elif BYTE2_START <= key <= BYTE2_END:
             # e.g.) Umlaut
             text_pool.append(self.stdscr.getch())
@@ -113,3 +116,9 @@ class Multibyte:
             pass
 
         return codepoint
+
+    def _end_curses(self):
+        """ Terminates the curses application. """
+        curses.nocbreak()
+        curses.echo()
+        curses.endwin()

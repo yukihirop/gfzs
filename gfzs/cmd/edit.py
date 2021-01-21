@@ -33,15 +33,20 @@ def main():
     app_config = AppConfig.get_instance()
     config_path = app_config.config_path
 
-    if os.path.exists(config_path):
-        if os.environ["EDITOR"] != "":
-            subprocess.call([os.environ["EDITOR"], config_path])
+    try:
+        if os.path.exists(config_path):
+            if os.environ["EDITOR"] != "":
+                try:
+                    subprocess.call([os.environ["EDITOR"], config_path])
+                except Exception:
+                    raise Exception("Set the command to launch the editor in 'EDITOR'.")
+            else:
+                raise Exception("Set the environment variable 'EDITOR'")
         else:
-            print("Set the environment variable 'EDITOR'")
-    else:
-        print("Config does not exist in %s" % config_path)
-
-    sys.exit(0)
+            raise Exception("Config does not exist in %s" % config_path)
+    except Exception as e:
+        print("Error: %s" % str(e))
+        sys.exit(1)
 
 
 if __name__ == "__main__":

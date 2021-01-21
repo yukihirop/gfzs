@@ -137,11 +137,18 @@ class AppConfig(Singleton):
                 json_str = open(config_path).read()
                 data = json.loads(json_str)
             except json.decoder.JSONDecodeError as e:
+                self._end_curses()
                 raise e
         else:
             data = DEFAULT_CONFIG
 
         return data
+
+    def _end_curses(self):
+        """ Terminates the curses application. """
+        curses.nocbreak()
+        curses.echo()
+        curses.endwin()
 
 
 if __name__ == "__main__":

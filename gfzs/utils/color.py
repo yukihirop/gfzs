@@ -75,44 +75,52 @@ class Color(Singleton):
         j = data["background"]
         style = data["style"]
 
-        if j == -1:
-            offset = self.offset_after_builtin_color
-            color_number = i + 1 + offset
-        else:
-            color_number = self._calculate_color_number(i, j)
+        try:
+            if j == -1:
+                offset = self.offset_after_builtin_color
+                color_number = i + 1 + offset
+            else:
+                color_number = self._calculate_color_number(i, j)
 
-        if style == "normal":
-            return curses.color_pair(color_number)
-        elif style == "bold":
-            return curses.color_pair(color_number) | curses.A_BOLD
-        elif style == "link":
-            return curses.color_pair(color_number) | curses.A_UNDERLINE
-        else:
+            if style == "normal":
+                return curses.color_pair(color_number)
+            elif style == "bold":
+                return curses.color_pair(color_number) | curses.A_BOLD
+            elif style == "link":
+                return curses.color_pair(color_number) | curses.A_UNDERLINE
+            else:
+                raise Exception("[Color] Do not support style: %s" % style)
+        except Exception as e:
             self._end_curses()
-            raise Exception("[Color] Do not support style: %s" % style)
+            print("Error: %s" % str(e))
+            sys.exit(1)
 
     def google(self, c, style="bold") -> int:
         offset = self.offset_after_builtin_color
         color = None
 
-        if c in ("G", "g"):
-            color = curses.color_pair(28 + offset)
-        elif c == "o":
-            color = curses.color_pair(10 + offset)
-        elif c == "o2":
-            color = curses.color_pair(12 + offset)
-        elif c == "l":
-            color = curses.color_pair(36 + offset)
-        elif c == "e":
-            color = curses.color_pair(10 + offset)
+        try:
+            if c in ("G", "g"):
+                color = curses.color_pair(28 + offset)
+            elif c == "o":
+                color = curses.color_pair(10 + offset)
+            elif c == "o2":
+                color = curses.color_pair(12 + offset)
+            elif c == "l":
+                color = curses.color_pair(36 + offset)
+            elif c == "e":
+                color = curses.color_pair(10 + offset)
 
-        if style == "bold":
-            return color | curses.A_BOLD
-        elif style == "normal":
-            return color
-        else:
+            if style == "bold":
+                return color | curses.A_BOLD
+            elif style == "normal":
+                return color
+            else:
+                raise Exception("[Color] Do not support style: %s" % style)
+        except Exception as e:
             self._end_curses()
-            raise Exception("[Color] Do not support style: %s" % style)
+            print("Error: %s" % str(e))
+            sys.exit(1)
 
     @property
     def highlight(self) -> int:
