@@ -64,6 +64,12 @@ class Color(Singleton):
         curses.init_pair(12 + offset, 11, -1)  # o color of Google
         curses.init_pair(36 + offset, 35, -1)  # l color of Google
 
+    def _end_curses(self):
+        """ Terminates the curses application. """
+        curses.nocbreak()
+        curses.echo()
+        curses.endwin()
+
     def use(self, data) -> int:
         i = data["text"]
         j = data["background"]
@@ -82,7 +88,8 @@ class Color(Singleton):
         elif style == "link":
             return curses.color_pair(color_number) | curses.A_UNDERLINE
         else:
-            raise Exception("[Color] Do not support style: %s" % stlye)
+            self._end_curses()
+            raise Exception("[Color] Do not support style: %s" % style)
 
     def google(self, c, style="bold") -> int:
         offset = self.offset_after_builtin_color
@@ -104,7 +111,8 @@ class Color(Singleton):
         elif style == "normal":
             return color
         else:
-            raise Exception("[Color] Do not support style: %s" % stlye)
+            self._end_curses()
+            raise Exception("[Color] Do not support style: %s" % style)
 
     @property
     def highlight(self) -> int:
