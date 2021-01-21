@@ -59,7 +59,7 @@ setup(
   author_email=info.__author_email__,
   url=info.__url__,
   licence=info.__license__,
-  keywords='google googler fuzzy-finder finder curses tui pipe',
+  keywords='google fuzzy-finder finder curses tui',
   packages=["gfzs"],
   scripts=["bin/gfzs"],
   install_requires=requires_from_file("requirements.txt"),

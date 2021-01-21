@@ -2,7 +2,7 @@
 
 __name__ = "gfzs"
 __description__ = "Google Fuzzy Search"
-__version__ = "v0.0.1"
+__version__ = "0.1.0"
 __copyright__ = "Copyright ©︎ 2021 yukihirop"
 __url__ = "https://github.com/yukihirop/gfzs"
 __author__ = "yukihirop"

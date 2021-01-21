@@ -19,8 +19,8 @@ brew install gfzs
 
 ## 🌍 Environment
 
-- python3 (over Python 3.7.4)
-- black(Formatter) (version 20.8b1)
+- python3 (over Python 3.6.1)
+- poetry
 
 ## 📖 Usage
 
@@ -102,9 +102,7 @@ googler --json --count 100 --site github.com python | gfzs -s 50
 
 The default setting is the following file, and each key can enter the following values.
 
-`.gfzsrc (default)`
-
-<details>
+`~/.gfzsrc`
 
 ```json
 {
@@ -180,8 +178,6 @@ The default setting is the following file, and each key can enter the following 
 }
 ```
 
-</details>
-
 |key|description|value|
 |---|-----------|-----|
 |<kbd>text</kbd>|curses color|`0〜7`|
@@ -207,7 +203,8 @@ First, create a virtual environment.
 
 ```bash
 $ python3 -m venv .venv
-$ source .venv/bin/activate
+$ poetry shell
+$ poetry install
 ```
 
 ```bash

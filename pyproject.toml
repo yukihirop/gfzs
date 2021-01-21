@@ -4,6 +4,25 @@ version = "0.1.0"
 description = "Google Fuzzy Search"
 authors = ["yukihirop <te108186@gmail.com>"]
 license = "MIT"
+include = ["CHANGELOG.md", "README.md"]
+exclude = ["fixtures"]
+readme = "README.md"
+repository = "https://github.com/yukihirop/gfzs"
+keywords = ["google", "fuzzy-finder", "finder", "curses", "tui"]
+maintainers = ["yukihirop <te108186@gmail.com>"]
+classifiers = [
+  'License :: OSI Approved :: MIT License',
+  'Programming Language :: Python',
+  'Programming Language :: Python :: 3.6.1',
+  'Programming Language :: Python :: 3.7',
+  'Programming Language :: Python :: 3.8',
+  'Environment :: Console :: Curses',
+  'Topic :: Text Processing :: Filters',
+  'Topic :: Utilities',
+]
+
+[tool.poetry.scripts]
+gfzs = 'gfzs.cli:main'
 
 [tool.poetry.dependencies]
 python = "^3.6"
