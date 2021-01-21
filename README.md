@@ -2,19 +2,14 @@
 
 `Google Fuzzy Search` is a tool for fuzzy find for the result of searching with [googler](https://github.com/jarun/googler).
 
-![image](https://user-images.githubusercontent.com/11146767/104926910-1b473880-59e4-11eb-88d4-a2d729866bfa.png)
+![gfzs](https://user-images.githubusercontent.com/11146767/105366627-e2f16580-5c42-11eb-92ef-8cd1aa87ce77.gif)
+
+![image](https://user-images.githubusercontent.com/11146767/105366973-47142980-5c43-11eb-89d1-9e24e6a48106.png)
 
 ## 🐍 Install
 
 ```bash
 pip install gfzs
-```
-
-or
-
-```bash
-brew tap yukihirop/homebrew-tap
-brew install gfzs
 ```
 
 ## 🌍 Environment
@@ -202,6 +197,7 @@ The default setting is the following file, and each key can enter the following 
 |name|description|
 |----|-----------|
 |`DEBUG`|You will be able to use the `debug` module.|
+|`EDITOR`|Set the command to open the editor.|
 
 ## 💪 Development
 
@@ -271,6 +267,19 @@ $ python3 gfzs/views/paging.py
 ```
 
 ![image](https://user-images.githubusercontent.com/11146767/104927802-36667800-59e5-11eb-9afb-2b3386c4d8c6.png)
+
+## ⚠ Trouble Shouting
+
+![alert_tape](https://user-images.githubusercontent.com/11146767/105363618-93f60100-5c3f-11eb-8cb9-4f01ec49b486.png)
+
+If you get the following response, stop using it for a while and limit the number of googler searches to about 10.
+
+```
+Error: Expecting value: line 1 column 2 (char 1)
+Input data: [ERROR] Connection blocked due to unusual activity. THIS IS NOT A BUG, please do NOT report it as a bug unless you have specific information that may lead to the development of a workaround. You IP address is temporarily or permanently blocked by Google and requires reCAPTCHA-solving to use the service, which googler is not capable of. Possible causes include issuing too many queries in a short time frame, or operating from a shared / low reputation IP with a history of abuse. Please do NOT use googler for automated scraping.
+```
+
+![alert_tape](https://user-images.githubusercontent.com/11146767/105363618-93f60100-5c3f-11eb-8cb9-4f01ec49b486.png)
 
 ## 📚 Reference
 
