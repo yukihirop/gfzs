@@ -64,7 +64,8 @@ class Paging(Base):
         begin_x = self.parent_width // 2 - 1
         per_page = self.view.per_page
         data_size = self.view.data_size
-        paging = "{0}/{1}".format(self.view.current_page, math.ceil(data_size / per_page)
+        paging = "{0}/{1}".format(
+            self.view.current_page, math.ceil(data_size / per_page)
         )
         self.window.addstr(0, begin_x, paging, self.colors["common"] | curses.A_BOLD)
 

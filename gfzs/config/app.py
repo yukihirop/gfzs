@@ -134,26 +134,35 @@ class AppConfig(Singleton):
         return DEFAULT_CONFIG_PATH
 
     def valid(self) -> bool:
-        flatten_data = flatten(self.data, reducer="dot", keep_empty_types=(dict,str,int,list))
+        flatten_data = flatten(
+            self.data, reducer="dot", keep_empty_types=(dict, str, int, list)
+        )
         for flatten_key in flatten_data:
             # Check key
             if not flatten_key in AppConfig.SUPPORT_FLATTEN_KEYS:
-                self.error = Exception("Contains unsupported keys. key_path = '%s'." % flatten_key)
+                self.error = Exception(
+                    "Contains unsupported keys. key_path = '%s'." % flatten_key
+                )
                 return False
             # Check value
             else:
                 target_val = flatten_data[flatten_key]
                 if flatten_key.endswith("text") or flatten_key.endswith("background"):
                     if not target_val in AppConfig.SUPPORT_COLOR_NUMBERS:
-                        self.error = Exception("Contains unsupported value. (key_path, value) = (%s, %s)." % (flatten_key, target_val))
+                        self.error = Exception(
+                            "Contains unsupported value. (key_path, value) = (%s, %s)."
+                            % (flatten_key, target_val)
+                        )
                         return False
                 elif flatten_key.endswith("style"):
                     if not target_val in AppConfig.SUPPORT_STYLES:
-                        self.error = Exception("Contains unsupported value. (key_path, value) = (%s, %s)." % (flatten_key, target_val))
+                        self.error = Exception(
+                            "Contains unsupported value. (key_path, value) = (%s, %s)."
+                            % (flatten_key, target_val)
+                        )
                         return False
 
         return True
-
 
     def _create_data(self) -> dict:
         """Load the app settings. If the config file does not exist, it will load the default config."""

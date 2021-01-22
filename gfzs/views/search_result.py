@@ -106,10 +106,10 @@ class SearchResult(Base):
 
     @property
     def current_page(self) -> int:
-        return (self.current_selected // self.per_page + 1)
+        return self.current_selected // self.per_page + 1
 
     def current_page_from(self, current_selected) -> int:
-        return (current_selected // self.per_page + 1)
+        return current_selected // self.per_page + 1
 
     def update_per_page(self, value):
         self.helper.update_per_page(value)

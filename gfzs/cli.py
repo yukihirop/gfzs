@@ -142,7 +142,7 @@ def main() -> None:
                 print("Error: %s" % error)
                 printable_len = 100
 
-                if '[ERROR]' in json_str or len(json_str) <= printable_len:
+                if "[ERROR]" in json_str or len(json_str) <= printable_len:
                     print("Input data: %s" % json_str)
                 else:
                     print("Input data (100 chars): %s ..." % json_str[:printable_len])
