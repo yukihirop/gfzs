@@ -35,6 +35,7 @@ Instead, the operation is guaranteed by executing the following command and actu
 - [ ] python3 gfzs/cmd/init.py
 - [ ] python3 gfzs/cmd/edit.py
 - [ ] python3 gfzs/cmd/demo.py
+- [ ] python3 gfzs/cmd/valid.py
 - [ ] python3 gfzs/controller.py
 - [ ] python3 gfzs/model.py
 - [ ] cat fixtures/rust.json | bin/gfzs -s 20
@@ -42,4 +43,5 @@ Instead, the operation is guaranteed by executing the following command and actu
 - [ ] bin/gfzs init
 - [ ] bin/gfzs edit
 - [ ] bin/gfzs demo
+- [ ] bin/gfzs valid
 - [ ] black gfzs/**/*.py

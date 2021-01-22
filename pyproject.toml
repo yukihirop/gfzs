@@ -28,6 +28,7 @@ gfzs = 'gfzs.cli:main'
 python = "^3.6"
 fuzzywuzzy = "^0.18.0"
 python-Levenshtein = "^0.12.1"
+flatten-dict = "^0.3.0"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"

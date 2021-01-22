@@ -18,6 +18,7 @@ try:
     import gfzs.cmd.init as cmd_init
     import gfzs.cmd.edit as cmd_edit
     import gfzs.cmd.demo as cmd_demo
+    import gfzs.cmd.valid as cmd_valid
 
 # need when 「cat fixtures/rust.json | python -m gfzs」
 except ModuleNotFoundError:
@@ -27,6 +28,7 @@ except ModuleNotFoundError:
     import cmd.init as cmd_init
     import cmd.edit as cmd_edit
     import cmd.demo as cmd_demo
+    import cmd.valid as cmd_valid
 
 
 def validate_json(data) -> bool:
@@ -84,6 +86,7 @@ def init_parser():
     subparsers.add_parser("init", help="Initialize gfzs")
     subparsers.add_parser("edit", help="Edit config")
     subparsers.add_parser("demo", help="Play with Demo")
+    subparsers.add_parser("valid", help="Validate ~/.gfzsrc")
 
     return parser
 
@@ -97,6 +100,8 @@ def exec_subcommand(parser, argv=sys.argv[1:]) -> None:
         cmd_edit.main()
     elif args.command == "demo":
         cmd_demo.main()
+    elif args.command == "valid":
+        cmd_valid.main()
 
 
 def main() -> None:
