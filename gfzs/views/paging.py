@@ -110,8 +110,16 @@ if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
     from model import Model
     from search_result import SearchResult
+    from config.app import AppConfig
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+    app_config = AppConfig.get_instance()
+    if not app_config.valid():
+        print("Config is invalid.")
+        for error in app_config.errors:
+            print("Error: %s" % error)
+        sys.exit(1)
 
     json_str = open("fixtures/rust.json", "r").read()
     data = json.loads(json_str)
