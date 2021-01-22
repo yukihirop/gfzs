@@ -32,6 +32,7 @@ class Model:
         self.result = []
         self.query = self.old_query = None
         self.runtime_config = RuntimeConfig.get_instance()
+        self.errors = []
 
         self.char_regex = re.compile(r"^\w|\W+")
         # https://qiita.com/ganariya/items/42fc0ed3dcebecb6b117
@@ -53,7 +54,21 @@ class Model:
         self.old_query = self.query
         self.query += char
 
-    def validate(self, query=None) -> bool:
+    def valid(self) -> bool:
+        if not self._validate_json(self.collection):
+            self.errors.append(
+                Exception(
+                    "Invalid json format. Please pass in an array of json that keeps `title`, `url` and `abstract` as keys."
+                )
+            )
+            return False
+        elif not self._validate_blank(self.collection):
+            self.errors.append(Exception("The result passed was empty."))
+            return False
+        else:
+            return True
+
+    def validate_query(self, query=None) -> bool:
         def fn(q):
             if q is None or q is "\0":
                 return False
@@ -84,12 +99,39 @@ class Model:
         if query != None and query != "":
             self.update_query(query)
 
-        if self.validate():
+        if self.validate_query():
             self.result = self._make_result_from_scored(score)
         else:
             self.result = self.collection
 
         return self.result
+
+    def _validate_json(self, data) -> bool:
+        result = []
+
+        for item in data:
+            if "url" in item:
+                result.append(True)
+            else:
+                result.append(False)
+
+            if "abstract" in item:
+                result.append(True)
+            else:
+                result.append(False)
+
+            if "url" in item:
+                result.append(True)
+            else:
+                result.append(False)
+
+        return all(result)
+
+    def _validate_blank(self, data) -> bool:
+        if len(data) != 0:
+            return True
+        else:
+            return False
 
     def _make_result_from_scored(self, score) -> list:
         result = []

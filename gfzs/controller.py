@@ -145,7 +145,7 @@ class Controller:
                 else:
                     text = chr(user_input)
                     will_query = self.model.query + text
-                    if self.model.validate(will_query):
+                    if self.model.validate_query(will_query):
                         self.footer.write(text)
                         self._search_and_refresh_display(
                             user_input, is_init_property=True, is_init_query=False
