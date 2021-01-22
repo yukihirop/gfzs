@@ -38,6 +38,7 @@ def main():
             if os.environ["EDITOR"] != "":
                 try:
                     subprocess.call([os.environ["EDITOR"], config_path])
+                    sys.exit(0)
                 except Exception:
                     raise Exception("Set the command to launch the editor in 'EDITOR'.")
             else:
