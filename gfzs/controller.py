@@ -145,7 +145,7 @@ class Controller:
                 else:
                     text = chr(user_input)
                     will_query = self.model.query + text
-                    if self.model.validate(will_query):
+                    if self.model.validate_query(will_query):
                         self.footer.write(text)
                         self._search_and_refresh_display(
                             user_input, is_init_property=True, is_init_query=False
@@ -181,12 +181,24 @@ if __name__ == "__main__":
     import os, sys
     import signal
 
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-
     # https://note.nkmk.me/python-warnings-ignore-warning/
     import warnings
 
+    # local
+
+    # https://codechacha.com/ja/how-to-import-python-files/
+    sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+    from config.app import AppConfig
+
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
     warnings.simplefilter("ignore", FutureWarning)
+
+    app_config = AppConfig.get_instance()
+    if not app_config.valid():
+        print("Config is invalid.")
+        for error in app_config.errors:
+            print("Error: %s" % error)
+        sys.exit(1)
 
     json_str = open("fixtures/rust.json", "r").read()
     data = json.loads(json_str)

@@ -186,8 +186,16 @@ if __name__ == "__main__":
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
     from model import Model
+    from config.app import AppConfig
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+    app_config = AppConfig.get_instance()
+    if not app_config.valid():
+        print("Config is invalid.")
+        for error in app_config.errors:
+            print("Error: %s" % error)
+        sys.exit(1)
 
     # initscr() returns a window object representing the entire screen.
     stdscr = curses.initscr()

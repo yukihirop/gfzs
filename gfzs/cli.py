@@ -14,46 +14,25 @@ try:
     from gfzs import tty, info
     from gfzs.utils import debug
     from gfzs.controller import Controller
+    from gfzs.model import Model
     from gfzs.config.runtime import RuntimeConfig
+    from gfzs.config.app import AppConfig
     import gfzs.cmd.init as cmd_init
     import gfzs.cmd.edit as cmd_edit
+    import gfzs.cmd.demo as cmd_demo
+    import gfzs.cmd.valid as cmd_valid
 
 # need when 「cat fixtures/rust.json | python -m gfzs」
 except ModuleNotFoundError:
     from utils import debug
     from controller import Controller
+    from model import Model
     from config.runtime import RuntimeConfig
+    from config.app import AppConfig
     import cmd.init as cmd_init
     import cmd.edit as cmd_edit
-
-
-def validate_json(data) -> bool:
-    result = []
-
-    for item in data:
-        if "url" in item:
-            result.append(True)
-        else:
-            result.append(False)
-
-        if "abstract" in item:
-            result.append(True)
-        else:
-            result.append(False)
-
-        if "url" in item:
-            result.append(True)
-        else:
-            result.append(False)
-
-    return all(result)
-
-
-def validate_blank(data) -> bool:
-    if len(data) != 0:
-        return True
-    else:
-        return False
+    import cmd.demo as cmd_demo
+    import cmd.valid as cmd_valid
 
 
 def open_tty(ttyname):
@@ -81,6 +60,8 @@ def init_parser():
 
     subparsers.add_parser("init", help="Initialize gfzs")
     subparsers.add_parser("edit", help="Edit config")
+    subparsers.add_parser("demo", help="Play with Demo")
+    subparsers.add_parser("valid", help="Validate ~/.gfzsrc")
 
     return parser
 
@@ -92,6 +73,10 @@ def exec_subcommand(parser, argv=sys.argv[1:]) -> None:
         cmd_init.main()
     elif args.command == "edit":
         cmd_edit.main()
+    elif args.command == "demo":
+        cmd_demo.main()
+    elif args.command == "valid":
+        cmd_valid.main()
 
 
 def main() -> None:
@@ -104,7 +89,8 @@ def main() -> None:
     exec_subcommand(parser)
 
     data = None
-    error = None
+    errors = []
+    printable_len = 100
 
     args = parser.parse_args()
     _ = RuntimeConfig.get_instance(args)
@@ -116,26 +102,31 @@ def main() -> None:
         try:
             json_str = sys.stdin.read()
             data = json.loads(json_str)
+            app_config = AppConfig.get_instance()
+            validator = Model(data)
 
-            if not validate_json(data):
-                raise Exception(
-                    "Invalid json format. Please pass in an array of json that keeps `title`, `url` and `abstract` as keys."
-                )
-            elif not validate_blank(data):
-                raise Exception("The result passed was empty.")
+            if not app_config.valid():
+                print("Config is invalid.")
+                errors = app_config.errors
+                return
+            elif not validator.valid():
+                errors = validator.errors
+                return
         except json.decoder.JSONDecodeError as e:
-            error = e
-        except Exception as e:
-            error = e
-        finally:
-            if error != None:
-                print("Error: %s" % error)
-                printable_len = 100
+            print("Error: %s" % e)
+            if "[ERROR]" in json_str or len(json_str) <= printable_len:
+                print("Input data: %s" % json_str)
+            else:
+                print("Input data (100 chars): %s ..." % json_str[:printable_len])
 
-                if '[ERROR]' in json_str or len(json_str) <= printable_len:
-                    print("Input data: %s" % json_str)
-                else:
-                    print("Input data (100 chars): %s ..." % json_str[:printable_len])
+            sys.exit(1)
+        except Exception as e:
+            errors.append(e)
+        finally:
+            if errors != []:
+                for error in errors:
+                    print("Error: %s" % error)
+
                 sys.exit(1)
 
         controller = Controller(data)

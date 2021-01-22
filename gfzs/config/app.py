@@ -4,6 +4,7 @@ import curses
 import os
 import sys
 import json
+from flatten_dict import flatten
 
 # local
 
@@ -120,12 +121,55 @@ class Singleton(object):
 class AppConfig(Singleton):
     """A class that reads and manages the options passed in the runtime"""
 
+    SUPPORT_FLATTEN_KEYS = list(flatten(DEFAULT_CONFIG, reducer="dot"))
+    SUPPORT_COLOR_NUMBERS = list(range(8))
+    SUPPORT_STYLES = ["normal", "link", "bold"]
+
     def __init__(self):
         self.data = self._create_data()
+        self.errors = []
 
     @property
     def config_path(self):
         return DEFAULT_CONFIG_PATH
+
+    def valid(self) -> bool:
+        flatten_data = flatten(
+            self.data, reducer="dot", keep_empty_types=(dict, str, int, list)
+        )
+        for flatten_key in flatten_data:
+            target_val = flatten_data[flatten_key]
+            # Check key
+            if not flatten_key in AppConfig.SUPPORT_FLATTEN_KEYS:
+                self.errors.append(
+                    Exception(
+                        "Contains unsupported key.   (key_path, value) = (%s, %s)."
+                        % (flatten_key, target_val)
+                    )
+                )
+            # Check value
+            else:
+                if flatten_key.endswith("text") or flatten_key.endswith("background"):
+                    if not target_val in AppConfig.SUPPORT_COLOR_NUMBERS:
+                        self.errors.append(
+                            Exception(
+                                "Contains unsupported value. (key_path, value) = (%s, %s)."
+                                % (flatten_key, target_val)
+                            )
+                        )
+                elif flatten_key.endswith("style"):
+                    if not target_val in AppConfig.SUPPORT_STYLES:
+                        self.errors.append(
+                            Exception(
+                                "Contains unsupported value. (key_path, value) = (%s, %s)."
+                                % (flatten_key, target_val)
+                            )
+                        )
+
+        if self.errors != []:
+            return False
+        else:
+            return True
 
     def _create_data(self) -> dict:
         """Load the app settings. If the config file does not exist, it will load the default config."""
