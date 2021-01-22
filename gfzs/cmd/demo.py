@@ -124,16 +124,16 @@ def main():
     error = None
     controller = Controller(data)
     try:
-        choice = controller.run()
-        result = controller.model.result
-        if not choice is None:
-            print(result[choice].get("title"))
+        _ = controller.run()
     except curses.error as e:
-        error = str(e)
+        error = e
+    except Exception as e:
+        error = e
     finally:
         controller._end_curses()
         if error != None:
             print("Error: %s" % error)
+            sys.exit(1)
 
 
 if __name__ == "__main__":
