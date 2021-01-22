@@ -138,16 +138,17 @@ class AppConfig(Singleton):
             self.data, reducer="dot", keep_empty_types=(dict, str, int, list)
         )
         for flatten_key in flatten_data:
+            target_val = flatten_data[flatten_key]
             # Check key
             if not flatten_key in AppConfig.SUPPORT_FLATTEN_KEYS:
                 self.errors.append(
                     Exception(
-                        "Contains unsupported key. key_path = '%s'." % flatten_key
+                        "Contains unsupported key.   (key_path, value) = (%s, %s)."
+                        % (flatten_key, target_val)
                     )
                 )
             # Check value
             else:
-                target_val = flatten_data[flatten_key]
                 if flatten_key.endswith("text") or flatten_key.endswith("background"):
                     if not target_val in AppConfig.SUPPORT_COLOR_NUMBERS:
                         self.errors.append(
