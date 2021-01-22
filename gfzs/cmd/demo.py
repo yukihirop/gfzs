@@ -13,6 +13,7 @@ try:
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from controller import Controller
+        from config.app import AppConfig
 
         if os.environ.get("DEBUG"):
             import debug
@@ -21,6 +22,7 @@ try:
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs.controller import Controller
+        from gfzs.config.app import AppConfig
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -30,6 +32,7 @@ except ModuleNotFoundError:
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from controller import Controller
+    from config.app import AppConfig
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
@@ -119,8 +122,14 @@ def main():
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     warnings.simplefilter("ignore", FutureWarning)
 
-    data = RUST_JSON_DATA
+    app_config = AppConfig.get_instance()
+    if not app_config.valid():
+        print("Config is invalid.")
+        for error in app_config.errors:
+            print("Error: %s" % error)
+        sys.exit(1)
 
+    data = RUST_JSON_DATA
     error = None
     controller = Controller(data)
     try:
