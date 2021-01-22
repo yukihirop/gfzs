@@ -41,7 +41,8 @@ def main():
         print("Config is valid.")
     else:
         print("Config is invalid.")
-        print("Error: %s" % app_config.error)
+        for error in app_config.errors:
+            print("Error: %s" % error)
 
     sys.exit(0)
 
