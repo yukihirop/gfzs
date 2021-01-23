@@ -4,6 +4,7 @@ import json
 import os, sys
 import signal
 import warnings
+import curses
 
 # local
 
