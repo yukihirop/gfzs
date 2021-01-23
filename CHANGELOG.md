@@ -1,3 +1,11 @@
+## 0.2.1
+
+2021/01/23
+
+- `[Fix Bugs]` Score option is not reflected ([#8](https://github.com/yukihirop/gfzs/issues/8))
+
+Please see [milestone](https://github.com/yukihirop/gfzs/milestone/2)
+
 ## 0.2.0
 
 2021/01/23

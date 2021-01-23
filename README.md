@@ -107,6 +107,8 @@ cat data.json | gfzs
 
 ## 🚀 Practical Example (using googler)
 
+__It is recommended to use [alias](https://github.com/yukihirop/gfzs/wiki/%F0%9F%8D%96-Tips) to avoid accidentally passing the -n (--count) option to googler.__
+
 #### Search python articles on github.com
 
 ```bash
