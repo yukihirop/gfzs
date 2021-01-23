@@ -4,12 +4,10 @@ import argparse
 
 DEFAULT_SCORE = 30
 
-default_args = argparse.Namespace(score=DEFAULT_SCORE)
-
 
 class Singleton(object):
     @classmethod
-    def get_instance(cls, args=default_args):
+    def get_instance(cls, args=None):
         if not hasattr(cls, "_instance"):
             cls._instance = cls(args)
         else:
