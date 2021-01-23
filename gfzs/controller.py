@@ -1,6 +1,7 @@
 import curses
 import curses.ascii
 import webbrowser
+import os
 
 # local
 
@@ -13,14 +14,20 @@ try:
     from gfzs.views.search_result import SearchResult
     from gfzs.views.footer import Footer
 
+    if os.environ.get("DEBUG"):
+        import gfzs.utils.debug as debug
+
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
-    import views, utils
+    import utils, views
     from model import Model
     from utils.multibyte import Multibyte
     from views.header import Header
     from views.search_result import SearchResult
     from views.footer import Footer
+
+    if os.environ.get("DEBUG"):
+        from utils import debug
 
 KEY_ENTER = 10
 KEY_ESC = 27
@@ -84,7 +91,8 @@ class Controller:
 
     def execute_when_enter(self, current_selected):
         result = self.model.result
-        webbrowser.open(result[current_selected].get("url"), new=2)
+        if len(result) != 0:
+            webbrowser.open(result[current_selected].get("url"), new=2)
 
     def run(self) -> int:
         input_mode = True
