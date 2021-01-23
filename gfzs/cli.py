@@ -74,7 +74,7 @@ def exec_subcommand(parser, argv=sys.argv[1:]) -> None:
     elif args.command == "edit":
         cmd_edit.main()
     elif args.command == "demo":
-        cmd_demo.main()
+        cmd_demo.main(args)
     elif args.command == "valid":
         cmd_valid.main()
 

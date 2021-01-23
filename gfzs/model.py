@@ -215,6 +215,7 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     import json
     import signal
+    import argparse
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -223,7 +224,8 @@ if __name__ == "__main__":
     json_str = open("fixtures/rust.json", "r").read()
     data = json.loads(json_str)
 
-    config = RuntimeConfig.get_instance()
+    args = argparse.Namespace(score=30)
+    config = RuntimeConfig.get_instance(args)
     model = TestModel(data)
 
     result = model.find("Amazon")

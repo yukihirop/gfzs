@@ -15,6 +15,7 @@ try:
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from controller import Controller
         from config.app import AppConfig
+        from config.runtime import RuntimeConfig
 
         if os.environ.get("DEBUG"):
             import debug
@@ -24,6 +25,7 @@ try:
     else:
         from gfzs.controller import Controller
         from gfzs.config.app import AppConfig
+        from gfzs.config.runtime import RuntimeConfig
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -34,6 +36,7 @@ except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from controller import Controller
     from config.app import AppConfig
+    from config.runtime import RuntimeConfig
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
@@ -119,10 +122,11 @@ RUST_JSON_DATA = [
 ]
 
 
-def main():
+def main(args=None):
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     warnings.simplefilter("ignore", FutureWarning)
 
+    _ = RuntimeConfig.get_instance(args)
     app_config = AppConfig.get_instance()
     if not app_config.valid():
         print("Config is invalid.")
