@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gfzs"
-version = "0.2.1"
+version = "0.2.2"
 description = "Google Fuzzy Search"
 authors = ["yukihirop <te108186@gmail.com>"]
 license = "MIT"

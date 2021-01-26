@@ -31,6 +31,12 @@ __We are not responsible if you ignore the advice and block your IP. please note
 pip install gfzs
 ```
 
+or
+
+```bash
+pipx instal gfzs
+```
+
 ## 😎 Demo
 
 seeing is believing.  
@@ -64,35 +70,35 @@ For Example, Assuming that data.json is as follows.
 ```json
 [
   {
-    "abstract": "Rustは非常に高速でメモリ効率が高くランタイムやガベージコレクタがないため、パフォーマンス重視のサービスを実装できますし、組込み機器上で実行したり他の言語との調和も簡単にできます。 信頼性. Rustの豊かな型システムと所有権 ...",
+    "abstract": "Python is an interpreted, high-level and general-purpose programming language. Python's design philosophy emphasizes code readability with its notable use ...",
     "matches": [
       {
         "offset": 0,
-        "phrase": "Rust"
+        "phrase": "Python"
       },
       {
-        "offset": 97,
-        "phrase": "Rust"
+        "offset": 79,
+        "phrase": "Python's"
       }
     ],
-    "title": "Rustプログラミング言語",
-    "url": "https://www.rust-lang.org/ja"
+    "metadata": "Developer: Python Software Foundation | Designed by: Guido van Rossum | Filename extensions: .py,.pyi,.pyc,.pyd,.pyo ... | Typing discipline: Duck, dynamic, gradual (since ...",
+    "title": "Python (programming language) - Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Python_(programming_language)"
   },
   {
-    "abstract": "Rust（ラスト）はMozillaが支援するオープンソースのシステムプログラミング言語である。 Rust言語は速度、並行性、安全性を言語仕様として保証するC言語、C++に代わるシステムプログラミング（英語版）に適したプログラミング言語を ...",
+    "abstract": "プログラミング言語 Pythonの紹介・ダウンロードとインストール・Python入門講座など.",
     "matches": [
       {
-        "offset": 0,
-        "phrase": "Rust"
+        "offset": 10,
+        "phrase": "Python"
       },
       {
-        "offset": 48,
-        "phrase": "Rust"
+        "offset": 34,
+        "phrase": "Python"
       }
     ],
-    "metadata": "型付け： 静的型付け、強い型付け、型推論、構造... | 登場時期： 2010年7月7日 | ライセンス： Apache-2.0、MIT License | 影響を受けた言語： Alef、C++、C Sharp、Cyclon...",
-    "title": "Rust (プログラミング言語) - Wikipedia",
-    "url": "https://ja.wikipedia.org/wiki/Rust_(%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0%E8%A8%80%E8%AA%9E)"
+    "title": "プログラミング言語 Python - python.jp",
+    "url": "https://www.python.jp/"
   }
 ]
 ```
@@ -253,32 +259,16 @@ $ python3 gfzs/controller.py
 or
 
 ```bash
-$ cat fixtures/rust.json | python3 -m gfzs
+$ cat fixtures/python.json | python3 -m gfzs
 ```
 
 or
 
 ```bash
-$ cat fixtures/rust.json | bin/gfzs
+$ cat fixtures/python.json | bin/gfzs
 ```
 
-## 💪 Development (Check Partial View)
-
-### search_result
-
-```bash
-$ python3 gfzs/views/search_result.py
-```
-
-![image](https://user-images.githubusercontent.com/11146767/104927269-8e50af00-59e4-11eb-8fcf-8b18f4db4420.png)
-
-### footer
-
-```bash
-$ python3 gfzs/views/footer.py
-```
-
-![image](https://user-images.githubusercontent.com/11146767/104927398-b93b0300-59e4-11eb-99a8-5b1e85dc000d.png)
+## 💪 Development (Check Each View)
 
 ### header
 
@@ -288,14 +278,13 @@ $ python3 gfzs/views/header.py
 
 ![image](https://user-images.githubusercontent.com/11146767/104927550-ed162880-59e4-11eb-8d5c-efca84c58ea6.png)
 
-### not_found
+### search_result
 
 ```bash
-$ python3 gfzs/views/not_found.py
+$ python3 gfzs/views/search_result.py
 ```
 
-![image](https://user-images.githubusercontent.com/11146767/104927669-0d45e780-59e5-11eb-9dc8-76baec0c04ac.png)
-
+![image](https://user-images.githubusercontent.com/11146767/104927269-8e50af00-59e4-11eb-8fcf-8b18f4db4420.png)
 
 ### paging
 
@@ -304,6 +293,23 @@ $ python3 gfzs/views/paging.py
 ```
 
 ![image](https://user-images.githubusercontent.com/11146767/104927802-36667800-59e5-11eb-9afb-2b3386c4d8c6.png)
+
+### footer
+
+```bash
+$ python3 gfzs/views/footer.py
+```
+
+![image](https://user-images.githubusercontent.com/11146767/104927398-b93b0300-59e4-11eb-99a8-5b1e85dc000d.png)
+
+
+### not_found
+
+```bash
+$ python3 gfzs/views/not_found.py
+```
+
+![image](https://user-images.githubusercontent.com/11146767/104927669-0d45e780-59e5-11eb-9dc8-76baec0c04ac.png)
 
 
 ## 📚 Reference

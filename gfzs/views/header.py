@@ -140,14 +140,14 @@ if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
     import utils, model
     from model import Model
-    from config.app import AppConfig
+    from runtime.config import RuntimeConfig
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-    app_config = AppConfig.get_instance()
-    if not app_config.valid():
+    runtime_config = RuntimeConfig.get_instance()
+    if not runtime_config.valid():
         print("Config is invalid.")
-        for error in app_config.errors:
+        for error in runtime_config.errors:
             print("Error: %s" % error)
         sys.exit(1)
 
