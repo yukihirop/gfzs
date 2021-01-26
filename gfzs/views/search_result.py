@@ -67,6 +67,62 @@ class SearchResultHelper:
     def update_per_page(self, value):
         self.per_page = value
 
+    @property
+    def current_page(self) -> int:
+        return self.current_selected // self.per_page + 1
+
+    def prev_page(self, total_data_size):
+        per_page = self.per_page
+        old_current_selected = self.current_selected
+        current_pagetop_index = per_page * math.floor(old_current_selected / per_page)
+
+        self.change_page = True
+        if self.current_page == 1:
+            total_page = math.ceil(total_data_size / per_page)
+
+            if total_page >= 1:
+                self.current_selected = (total_page - 1) * per_page
+            else:
+                pass
+        else:
+            self.current_selected = current_pagetop_index - per_page
+
+    def next_page(self, total_data_size):
+        per_page = self.per_page
+        old_current_selected = self.current_selected
+        current_pagetop_index = per_page * math.floor(old_current_selected / per_page)
+        total_page = math.ceil(total_data_size / per_page)
+
+        self.change_page = True
+        if self.current_page == total_page:
+            self.current_selected = 0
+        else:
+            self.current_selected = current_pagetop_index + per_page
+
+    def down(self, total_data_size):
+        old_current_page = self.current_page
+        old_current_selected = self.current_selected
+
+        if old_current_selected >= total_data_size - 1:
+            self.change_page = True
+            self.current_selected = 0
+        else:
+            self.current_selected += 1
+            if self.current_page != old_current_page:
+                self.change_page = True
+
+    def up(self, total_data_size):
+        old_current_page = self.current_page
+        old_current_selected = self.current_selected
+
+        if old_current_selected == 0:
+            self.change_page = True
+            self.current_selected = total_data_size - 1  # wrap around.
+        else:
+            self.current_selected -= 1
+            if self.current_page != old_current_page:
+                self.change_page = True
+
 
 class SearchResult(Base):
     """Display options build from a list of strings in a (unix) terminal.
@@ -106,10 +162,7 @@ class SearchResult(Base):
 
     @property
     def current_page(self) -> int:
-        return self.current_selected // self.per_page + 1
-
-    def current_page_from(self, current_selected) -> int:
-        return current_selected // self.per_page + 1
+        return self.helper.current_page
 
     def update_per_page(self, value):
         self.helper.update_per_page(value)
@@ -355,56 +408,28 @@ class SearchResult(Base):
 
     def handle_key_in_loop(self, user_input):
         self.helper.change_page = False
-        old_current_page = self.current_page
         textboxes = self.textboxes
         textboxes_len = len(textboxes)
 
         if textboxes_len == 0:
             return
 
-        current_selected = self.current_selected
         per_page = self.per_page
 
-        # Vim like KEY_UP/KEY_DOWN with j(DOWN) and k(UP)
         if textboxes_len > 1 and user_input == curses.KEY_DOWN:
-            if current_selected >= textboxes_len - 1:
-                self.helper.change_page = True
-                current_selected = 0  # wrap around.
-            else:
-                current_selected += 1
-                if self.current_page_from(current_selected) != old_current_page:
-                    self.helper.change_page = True
+            self.helper.down(textboxes_len)
         elif textboxes_len > 1 and user_input == curses.KEY_UP:
-            if current_selected == 0:
-                self.helper.change_page = True
-                current_selected = textboxes_len - 1  # wrap around.
-            else:
-                current_selected -= 1
-                if self.current_page_from(current_selected) != old_current_page:
-                    self.helper.change_page = True
+            self.helper.up(textboxes_len)
         elif textboxes_len > per_page + 1 and user_input == curses.KEY_RIGHT:
-            self.helper.change_page = True
-            next_pagetop_index = per_page * (math.ceil(current_selected / per_page) + 1)
-
-            if next_pagetop_index <= textboxes_len - 1:
-                current_selected = next_pagetop_index
-            else:
-                current_selected = 0  # wrap around.
+            self.helper.next_page(textboxes_len)
         elif textboxes_len > per_page + 1 and user_input == curses.KEY_LEFT:
-            self.helper.change_page = True
-            current_pagetop_index = per_page * math.floor(current_selected / per_page)
-            if current_pagetop_index <= 0:
-                current_selected = textboxes_len - per_page  # wrap around.
-            else:
-                current_selected = current_pagetop_index - per_page
+            self.helper.prev_page(textboxes_len)
         elif user_input == curses.KEY_RESIZE:
             self.reset()
         elif user_input in (curses.ascii.BS, curses.ascii.DEL, curses.KEY_BACKSPACE):
             self.reset()
         elif user_input == ord("q"):  # Quit without selecting.
             self.stop_loop = True
-
-        self.helper.current_selected = current_selected
 
 
 if __name__ == "__main__":
