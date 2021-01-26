@@ -31,7 +31,7 @@ class Model:
         self.collection = collection
         self.result = []
         self.query = self.old_query = None
-        self.runtime_config = RuntimeOpts.get_instance()
+        self.runtime_opts = RuntimeOpts.get_instance()
         self.errors = []
 
         self.char_regex = re.compile(r"^\w|\W+")
@@ -94,7 +94,7 @@ class Model:
             return fn(query)
 
     def find(self, query=None):
-        score = self.runtime_config.score
+        score = self.runtime_opts.score
 
         if query != None and query != "":
             self.update_query(query)
