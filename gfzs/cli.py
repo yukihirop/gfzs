@@ -102,12 +102,12 @@ def main() -> None:
         try:
             json_str = sys.stdin.read()
             data = json.loads(json_str)
-            app_config = RuntimeConfig.get_instance()
+            runtime_config = RuntimeConfig.get_instance()
             validator = Model(data)
 
-            if not app_config.valid():
+            if not runtime_config.valid():
                 print("Config is invalid.")
-                errors = app_config.errors
+                errors = runtime_config.errors
                 return
             elif not validator.valid():
                 errors = validator.errors

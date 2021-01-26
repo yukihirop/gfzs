@@ -31,12 +31,12 @@ class Base(object):
         self.stdscr = stdscr
         self.parent_height, self.parent_width = stdscr.getmaxyx()
         self.model = model
-        self.app_config = RuntimeConfig.get_instance()
+        self.runtime_config = RuntimeConfig.get_instance()
         self.color = Color.get_instance()
-        self.color_data = self.app_config.data["view"][view_name]["color"]
-        self.colors = self._create_colors(self.app_config, self.color_data)
+        self.color_data = self.runtime_config.data["view"][view_name]["color"]
+        self.colors = self._create_colors(self.runtime_config, self.color_data)
 
-    def _create_colors(self, app_config, color_data) -> dict:
+    def _create_colors(self, runtime_config, color_data) -> dict:
         result = {}
         for view_name in color_data:
             result[view_name] = self.color.use(color_data[view_name])

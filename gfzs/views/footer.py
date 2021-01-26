@@ -55,7 +55,7 @@ class Footer(Base):
 
     @property
     def message(self):
-        return self.app_config.data["view"]["footer"]["message"]
+        return self.runtime_config.data["view"]["footer"]["message"]
 
     @property
     def message_len(self):
@@ -190,10 +190,10 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-    app_config = RuntimeConfig.get_instance()
-    if not app_config.valid():
+    runtime_config = RuntimeConfig.get_instance()
+    if not runtime_config.valid():
         print("Config is invalid.")
-        for error in app_config.errors:
+        for error in runtime_config.errors:
             print("Error: %s" % error)
         sys.exit(1)
 

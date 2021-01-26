@@ -34,10 +34,10 @@ except ModuleNotFoundError:
 class Markup:
     def __init__(self):
         self.multibyte = Multibyte()
-        self.app_config = RuntimeConfig.get_instance()
+        self.runtime_config = RuntimeConfig.get_instance()
         self.color = Color.get_instance()
-        self.color_data = self.app_config.data["view"]["search_result"]["color"]
-        self.colors = self._create_colors(self.app_config, self.color_data)
+        self.color_data = self.runtime_config.data["view"]["search_result"]["color"]
+        self.colors = self._create_colors(self.runtime_config, self.color_data)
 
     def parse(self, text, search_text):
         result = {}
@@ -108,7 +108,7 @@ class Markup:
 
         return result
 
-    def _create_colors(self, app_config, color_data) -> dict:
+    def _create_colors(self, runtime_config, color_data) -> dict:
         result = {}
         for view_name in color_data:
             result[view_name] = self.color.use(color_data[view_name])
@@ -125,10 +125,10 @@ if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
     from runtime.config import RuntimeConfig
 
-    app_config = RuntimeConfig.get_instance()
-    if not app_config.valid():
+    runtime_config = RuntimeConfig.get_instance()
+    if not runtime_config.valid():
         print("Config is invalid.")
-        for error in app_config.errors:
+        for error in runtime_config.errors:
             print("Error: %s" % error)
         sys.exit(1)
 

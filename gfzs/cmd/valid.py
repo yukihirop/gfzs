@@ -36,12 +36,12 @@ except ModuleNotFoundError:
 
 
 def main():
-    app_config = RuntimeConfig.get_instance()
-    if app_config.valid():
+    runtime_config = RuntimeConfig.get_instance()
+    if runtime_config.valid():
         print("Config is valid.")
     else:
         print("Config is invalid.")
-        for error in app_config.errors:
+        for error in runtime_config.errors:
             print("Error: %s" % error)
 
     sys.exit(0)

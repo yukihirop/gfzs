@@ -29,9 +29,9 @@ except ModuleNotFoundError:
 
 
 def main():
-    app_config = RuntimeConfig.get_instance()
-    config_path = app_config.config_path
-    data = app_config.data
+    runtime_config = RuntimeConfig.get_instance()
+    config_path = runtime_config.config_path
+    data = runtime_config.data
 
     if os.path.exists(config_path):
         print("Reinitialized existing in %s" % config_path)

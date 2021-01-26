@@ -133,10 +133,10 @@ def main(args=None):
     warnings.simplefilter("ignore", FutureWarning)
 
     _ = RuntimeOpts.get_instance(args)
-    app_config = RuntimeConfig.get_instance()
-    if not app_config.valid():
+    runtime_config = RuntimeConfig.get_instance()
+    if not runtime_config.valid():
         print("Config is invalid.")
-        for error in app_config.errors:
+        for error in runtime_config.errors:
             print("Error: %s" % error)
         sys.exit(1)
 
