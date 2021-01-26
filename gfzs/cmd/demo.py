@@ -14,7 +14,7 @@ try:
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from controller import Controller
-        from config.app import AppConfig
+        from config.app import RuntimeConfig
         from config.runtime import RuntimeOpts
 
         if os.environ.get("DEBUG"):
@@ -24,7 +24,7 @@ try:
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs.controller import Controller
-        from gfzs.config.app import AppConfig
+        from gfzs.config.app import RuntimeConfig
         from gfzs.config.runtime import RuntimeOpts
 
         if os.environ.get("DEBUG"):
@@ -35,7 +35,7 @@ except ModuleNotFoundError:
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from controller import Controller
-    from config.app import AppConfig
+    from config.app import RuntimeConfig
     from config.runtime import RuntimeOpts
 
     if os.environ.get("DEBUG"):
@@ -133,7 +133,7 @@ def main(args=None):
     warnings.simplefilter("ignore", FutureWarning)
 
     _ = RuntimeOpts.get_instance(args)
-    app_config = AppConfig.get_instance()
+    app_config = RuntimeConfig.get_instance()
     if not app_config.valid():
         print("Config is invalid.")
         for error in app_config.errors:

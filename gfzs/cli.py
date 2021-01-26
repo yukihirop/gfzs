@@ -16,7 +16,7 @@ try:
     from gfzs.controller import Controller
     from gfzs.model import Model
     from gfzs.config.runtime import RuntimeOpts
-    from gfzs.config.app import AppConfig
+    from gfzs.config.app import RuntimeConfig
     import gfzs.cmd.init as cmd_init
     import gfzs.cmd.edit as cmd_edit
     import gfzs.cmd.demo as cmd_demo
@@ -28,7 +28,7 @@ except ModuleNotFoundError:
     from controller import Controller
     from model import Model
     from config.runtime import RuntimeOpts
-    from config.app import AppConfig
+    from config.app import RuntimeConfig
     import cmd.init as cmd_init
     import cmd.edit as cmd_edit
     import cmd.demo as cmd_demo
@@ -102,7 +102,7 @@ def main() -> None:
         try:
             json_str = sys.stdin.read()
             data = json.loads(json_str)
-            app_config = AppConfig.get_instance()
+            app_config = RuntimeConfig.get_instance()
             validator = Model(data)
 
             if not app_config.valid():

@@ -12,24 +12,24 @@ try:
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         import debug
-        from config.app import AppConfig
+        from config.app import RuntimeConfig
 
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs.utils import debug
-        from gfzs.config.app import AppConfig
+        from gfzs.config.app import RuntimeConfig
 
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from utils import debug
-    from config.app import AppConfig
+    from config.app import RuntimeConfig
 
 
 def main():
-    app_config = AppConfig.get_instance()
+    app_config = RuntimeConfig.get_instance()
     config_path = app_config.config_path
     data = app_config.data
 

@@ -12,7 +12,7 @@ try:
     if __name__ == "__main__":
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-        from config.app import AppConfig
+        from config.app import RuntimeConfig
 
         if os.environ.get("DEBUG"):
             import debug
@@ -20,7 +20,7 @@ try:
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
-        from gfzs.config.app import AppConfig
+        from gfzs.config.app import RuntimeConfig
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -29,14 +29,14 @@ try:
 except ModuleNotFoundError:
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
-    from config.app import AppConfig
+    from config.app import RuntimeConfig
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
 
 
 def main():
-    app_config = AppConfig.get_instance()
+    app_config = RuntimeConfig.get_instance()
     if app_config.valid():
         print("Config is valid.")
     else:

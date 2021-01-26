@@ -118,7 +118,7 @@ class Singleton(object):
         return cls._instance
 
 
-class AppConfig(Singleton):
+class RuntimeConfig(Singleton):
     """A class that reads and manages the options passed in the runtime"""
 
     SUPPORT_FLATTEN_KEYS = list(flatten(DEFAULT_CONFIG, reducer="dot"))
@@ -140,7 +140,7 @@ class AppConfig(Singleton):
         for flatten_key in flatten_data:
             target_val = flatten_data[flatten_key]
             # Check key
-            if not flatten_key in AppConfig.SUPPORT_FLATTEN_KEYS:
+            if not flatten_key in RuntimeConfig.SUPPORT_FLATTEN_KEYS:
                 self.errors.append(
                     Exception(
                         "Contains unsupported key.   (key_path, value) = (%s, %s)."
@@ -150,7 +150,7 @@ class AppConfig(Singleton):
             # Check value
             else:
                 if flatten_key.endswith("text") or flatten_key.endswith("background"):
-                    if not target_val in AppConfig.SUPPORT_COLOR_NUMBERS:
+                    if not target_val in RuntimeConfig.SUPPORT_COLOR_NUMBERS:
                         self.errors.append(
                             Exception(
                                 "Contains unsupported value. (key_path, value) = (%s, %s)."
@@ -158,7 +158,7 @@ class AppConfig(Singleton):
                             )
                         )
                 elif flatten_key.endswith("style"):
-                    if not target_val in AppConfig.SUPPORT_STYLES:
+                    if not target_val in RuntimeConfig.SUPPORT_STYLES:
                         self.errors.append(
                             Exception(
                                 "Contains unsupported value. (key_path, value) = (%s, %s)."
@@ -197,5 +197,5 @@ class AppConfig(Singleton):
 
 if __name__ == "__main__":
 
-    config = AppConfig.get_instance()
+    config = RuntimeConfig.get_instance()
     print(config.data)
