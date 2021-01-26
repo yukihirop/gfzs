@@ -8,14 +8,14 @@ try:
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from utils import debug
         from utils.color import Color
-        from config.app import RuntimeConfig
+        from runtime.config import RuntimeConfig
 
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs.utils import debug
         from gfzs.utils.color import Color
-        from gfzs.config.app import RuntimeConfig
+        from gfzs.runtime.config import RuntimeConfig
 
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
@@ -23,7 +23,7 @@ except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from utils import debug
     from utils.color import Color
-    from config.app import RuntimeConfig
+    from runtime.config import RuntimeConfig
 
 
 class Base(object):

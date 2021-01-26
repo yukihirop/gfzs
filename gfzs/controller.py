@@ -196,7 +196,7 @@ if __name__ == "__main__":
 
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-    from config.app import RuntimeConfig
+    from runtime.config import RuntimeConfig
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     warnings.simplefilter("ignore", FutureWarning)
