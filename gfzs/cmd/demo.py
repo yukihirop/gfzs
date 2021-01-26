@@ -15,7 +15,7 @@ try:
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from controller import Controller
         from runtime.config import RuntimeConfig
-        from config.runtime import RuntimeOpts
+        from runtime.opts import RuntimeOpts
 
         if os.environ.get("DEBUG"):
             import debug
@@ -25,7 +25,7 @@ try:
     else:
         from gfzs.controller import Controller
         from gfzs.runtime.config import RuntimeConfig
-        from gfzs.config.runtime import RuntimeOpts
+        from gfzs.runtime.opts import RuntimeOpts
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -36,7 +36,7 @@ except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from controller import Controller
     from runtime.config import RuntimeConfig
-    from config.runtime import RuntimeOpts
+    from runtime.opts import RuntimeOpts
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug

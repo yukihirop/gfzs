@@ -15,7 +15,7 @@ try:
     from gfzs.utils import debug
     from gfzs.controller import Controller
     from gfzs.model import Model
-    from gfzs.config.runtime import RuntimeOpts
+    from gfzs.runtime.opts import RuntimeOpts
     from gfzs.runtime.config import RuntimeConfig
     import gfzs.cmd.init as cmd_init
     import gfzs.cmd.edit as cmd_edit
@@ -27,7 +27,7 @@ except ModuleNotFoundError:
     from utils import debug
     from controller import Controller
     from model import Model
-    from config.runtime import RuntimeOpts
+    from runtime.opts import RuntimeOpts
     from runtime.config import RuntimeConfig
     import cmd.init as cmd_init
     import cmd.edit as cmd_edit

@@ -11,18 +11,18 @@ try:
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from utils import debug
-        from config.runtime import RuntimeOpts
+        from runtime.opts import RuntimeOpts
 
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs.utils import debug
-        from gfzs.config.runtime import RuntimeOpts
+        from gfzs.runtime.opts import RuntimeOpts
 
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
     from utils import debug
-    from config.runtime import RuntimeOpts
+    from runtime.opts import RuntimeOpts
 
 
 class Model:
@@ -219,7 +219,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-    from config.runtime import RuntimeOpts
+    from runtime.opts import RuntimeOpts
 
     json_str = open("fixtures/rust.json", "r").read()
     data = json.loads(json_str)
