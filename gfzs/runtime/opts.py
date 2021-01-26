@@ -1,7 +1,5 @@
 # ref: https://qiita.com/ttsubo/items/c4af71ceba15b5b213f8
 
-import argparse
-
 DEFAULT_SCORE = 30
 
 
@@ -17,7 +15,7 @@ class Singleton(object):
         return cls._instance
 
 
-class RuntimeConfig(Singleton):
+class RuntimeOpts(Singleton):
     """A class that reads and manages the options passed in the runtime"""
 
     """fuzzywuzzy's score. please see https://github.com/seatgeek/fuzzywuzzy"""
@@ -27,5 +25,8 @@ class RuntimeConfig(Singleton):
         self.args = args
 
     @property
-    def score(self):
-        return self.args.score or RuntimeConfig.default_score
+    def score(self) -> int:
+        if self.args is None:
+            return RuntimeOpts.default_score
+        else:
+            return self.args.score

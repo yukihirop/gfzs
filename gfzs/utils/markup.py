@@ -11,7 +11,7 @@ try:
         import debug
         from multibyte import Multibyte
         from color import Color
-        from config.app import AppConfig
+        from runtime.config import RuntimeConfig
 
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
@@ -19,7 +19,7 @@ try:
         from gfzs.utils import debug
         from gfzs.utils.multibyte import Multibyte
         from gfzs.utils.color import Color
-        from gfzs.config.app import AppConfig
+        from gfzs.runtime.config import RuntimeConfig
 
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
@@ -28,16 +28,16 @@ except ModuleNotFoundError:
     from utils import debug
     from utils.multibyte import Multibyte
     from utils.color import Color
-    from config.app import AppConfig
+    from runtime.config import RuntimeConfig
 
 
 class Markup:
     def __init__(self):
         self.multibyte = Multibyte()
-        self.app_config = AppConfig.get_instance()
+        self.runtime_config = RuntimeConfig.get_instance()
         self.color = Color.get_instance()
-        self.color_data = self.app_config.data["view"]["search_result"]["color"]
-        self.colors = self._create_colors(self.app_config, self.color_data)
+        self.color_data = self.runtime_config.data["view"]["search_result"]["color"]
+        self.colors = self._create_colors(self.runtime_config, self.color_data)
 
     def parse(self, text, search_text):
         result = {}
@@ -108,7 +108,7 @@ class Markup:
 
         return result
 
-    def _create_colors(self, app_config, color_data) -> dict:
+    def _create_colors(self, runtime_config, color_data) -> dict:
         result = {}
         for view_name in color_data:
             result[view_name] = self.color.use(color_data[view_name])
@@ -123,12 +123,12 @@ if __name__ == "__main__":
 
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-    from config.app import AppConfig
+    from runtime.config import RuntimeConfig
 
-    app_config = AppConfig.get_instance()
-    if not app_config.valid():
+    runtime_config = RuntimeConfig.get_instance()
+    if not runtime_config.valid():
         print("Config is invalid.")
-        for error in app_config.errors:
+        for error in runtime_config.errors:
             print("Error: %s" % error)
         sys.exit(1)
 

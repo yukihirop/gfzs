@@ -11,18 +11,18 @@ try:
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from utils import debug
-        from config.runtime import RuntimeConfig
+        from runtime.opts import RuntimeOpts
 
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs.utils import debug
-        from gfzs.config.runtime import RuntimeConfig
+        from gfzs.runtime.opts import RuntimeOpts
 
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
     from utils import debug
-    from config.runtime import RuntimeConfig
+    from runtime.opts import RuntimeOpts
 
 
 class Model:
@@ -31,7 +31,7 @@ class Model:
         self.collection = collection
         self.result = []
         self.query = self.old_query = None
-        self.runtime_config = RuntimeConfig.get_instance()
+        self.runtime_opts = RuntimeOpts.get_instance()
         self.errors = []
 
         self.char_regex = re.compile(r"^\w|\W+")
@@ -94,7 +94,7 @@ class Model:
             return fn(query)
 
     def find(self, query=None):
-        score = self.runtime_config.score
+        score = self.runtime_opts.score
 
         if query != None and query != "":
             self.update_query(query)
@@ -219,13 +219,13 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-    from config.runtime import RuntimeConfig
+    from runtime.opts import RuntimeOpts
 
     json_str = open("fixtures/rust.json", "r").read()
     data = json.loads(json_str)
 
     args = argparse.Namespace(score=30)
-    config = RuntimeConfig.get_instance(args)
+    config = RuntimeOpts.get_instance(args)
     model = TestModel(data)
 
     result = model.find("Amazon")
