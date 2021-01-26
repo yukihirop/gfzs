@@ -17,7 +17,7 @@ class Singleton(object):
         return cls._instance
 
 
-class RuntimeConfig(Singleton):
+class RuntimeOpts(Singleton):
     """A class that reads and manages the options passed in the runtime"""
 
     """fuzzywuzzy's score. please see https://github.com/seatgeek/fuzzywuzzy"""
@@ -28,4 +28,4 @@ class RuntimeConfig(Singleton):
 
     @property
     def score(self):
-        return self.args.score or RuntimeConfig.default_score
+        return self.args.score or RuntimeOpts.default_score
