@@ -31,6 +31,7 @@ Instead, the operation is guaranteed by executing the following command and actu
 - [ ] python3 gfzs/views/search_result.py
 - [ ] python3 gfzs/utils/markup.py
 - [ ] python3 gfzs/utils/color.py
+- [ ] python3 gfzs/utils/logger.py
 - [ ] python3 gfzs/runtime/config.py
 - [ ] python3 gfzs/cmd/init.py
 - [ ] python3 gfzs/cmd/edit.py
