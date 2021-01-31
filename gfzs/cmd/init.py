@@ -4,7 +4,6 @@ import os
 import sys
 import json
 import argparse
-from typing import Optional
 
 # local
 
@@ -39,11 +38,11 @@ except ModuleNotFoundError:
         import utils.debug as debug
 
 
-def main(args: Optional[argparse.Namespace] = None):
+def main(args: argparse.Namespace):
     progname = "gfzs.cmd.init"
     properties = {
         "progname": progname,
-        "severity": args.log_level,
+        "severity": int(args.log_level),
         "log_path": args.log_path,
     }
     logger.init_properties(**properties)

@@ -5,7 +5,6 @@ import sys
 import json
 import subprocess
 import argparse
-from typing import Optional
 
 # local
 
@@ -15,7 +14,7 @@ try:
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from runtime.config import RuntimeConfig
-        from utils.logger import Logger
+        import utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import utils.debug as debug
@@ -24,7 +23,7 @@ try:
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs.runtime.config import RuntimeConfig
-        from gfzs.utils.logger import Logger
+        import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -34,17 +33,17 @@ except ModuleNotFoundError:
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from runtime.config import RuntimeConfig
-    from utils.logger import Logger
+    import utils.logger as logger
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
 
 
-def main(args: Optional[argparse.Namespace] = None):
+def main(args: argparse.Namespace):
     progname = "gfzs.cmd.edit"
     properties = {
         "progname": progname,
-        "severity": args.log_level,
+        "severity": int(args.log_level),
         "log_path": args.log_path,
     }
     logger.init_properties(**properties)

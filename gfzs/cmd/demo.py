@@ -6,7 +6,6 @@ import signal
 import warnings
 import curses
 import argparse
-from typing import Optional
 
 # local
 
@@ -133,11 +132,11 @@ DEMO_JSON_DATA = [
 ]
 
 
-def main(args: Optional[argparse.Namespace] = None):
+def main(args: argparse.Namespace):
     progname = "gfzs.cmd.demo"
     properties = {
         "progname": progname,
-        "severity": args.log_level,
+        "severity": int(args.log_level),
         "log_path": args.log_path,
     }
     logger.init_properties(**properties)
@@ -151,8 +150,8 @@ def main(args: Optional[argparse.Namespace] = None):
     signal.signal(signal.SIGINT, handle_sigint)
     warnings.simplefilter("ignore", FutureWarning)
 
-    _ = RuntimeOpts.get_instance(args)
     runtime_config = RuntimeConfig.get_instance()
+    _ = RuntimeOpts.get_instance(args)
     if not runtime_config.valid():
         logger.debug("[print] Config is invalid.")
         print("Config is invalid.")

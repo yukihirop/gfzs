@@ -117,7 +117,7 @@ NULL = 6
 SEV_LABEL = ("DEBUG", "INFO", "WARN", "ERROR", "FATAL", "NULL", "ANY")
 
 """Default Log Path"""
-DEFAULT_LOG_PATH = "~/.gfzs.log"
+DEFAULT_LOG_PATH = "~/gfzs.log"
 
 self.progname = ""
 self.log_path = DEFAULT_LOG_PATH

@@ -37,6 +37,8 @@ except ModuleNotFoundError:
 
 # ~/.gfzsrc
 DEFAULT_CONFIG_PATH = "%s/.gfzsrc" % os.path.expanduser("~")
+# ~/gfzs.log
+DEFAULT_LOG_PATH = "%s/gfzs.log" % os.path.expanduser("~")
 
 # 0: curses.COLOR_BLACK
 # 1: curses.COLOR_RED
@@ -115,7 +117,7 @@ DEFAULT_CONFIG = {
                 }
             }
         },
-    }
+    },
 }
 
 
@@ -135,13 +137,16 @@ class RuntimeConfig(Singleton):
     SUPPORT_COLOR_NUMBERS = list(range(8))
     SUPPORT_STYLES = ["normal", "link", "bold"]
 
+    default_log_path = DEFAULT_LOG_PATH
+    default_config_path = DEFAULT_CONFIG_PATH
+
     def __init__(self):
         logger.debug("[RuntimeConfig] init")
         self.data = self._create_data()
         self.errors = []
 
     @property
-    def config_path(self):
+    def config_path(self) -> str:
         return DEFAULT_CONFIG_PATH
 
     def valid(self) -> bool:
