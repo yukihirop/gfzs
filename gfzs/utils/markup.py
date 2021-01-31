@@ -10,8 +10,8 @@ try:
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from multibyte import Multibyte
         from color import Color
-        from logger import Logger
         from runtime.config import RuntimeConfig
+        import logger
 
         if os.environ.get("DEBUG"):
             import debug
@@ -21,8 +21,8 @@ try:
     else:
         from gfzs.utils.multibyte import Multibyte
         from gfzs.utils.color import Color
-        from gfzs.utils.logger import Logger
         from gfzs.runtime.config import RuntimeConfig
+        import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
             from gfzs.utils import debug
@@ -33,8 +33,8 @@ except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from utils.multibyte import Multibyte
     from utils.color import Color
-    from utils.logger import Logger
     from runtime.config import RuntimeConfig
+    import utils.logger as logger
 
     if os.environ.get("DEBUG"):
         from utils import debug
@@ -42,8 +42,7 @@ except ModuleNotFoundError:
 
 class Markup:
     def __init__(self):
-        self.logger = Logger.get_instance()
-        self.logger.debug("[Markup] init")
+        logger.debug("[Markup] init")
         self.multibyte = Multibyte()
         self.runtime_config = RuntimeConfig.get_instance()
         self.color = Color.get_instance()
@@ -51,7 +50,7 @@ class Markup:
         self.colors = self._create_colors(self.runtime_config, self.color_data)
 
     def parse(self, text, search_text):
-        self.logger.debug("[Markup] parse by search_text: %s" % search_text)
+        logger.debug("[Markup] parse by search_text: '%s'" % search_text)
         result = {}
 
         if search_text is None or search_text is "":
@@ -132,8 +131,8 @@ if __name__ == "__main__":
     import curses
 
     progname = "gfzs.utils.markup"
-    logger = Logger.get_instance(progname, "./tmp/gfzs.log")
-    logger.set_level(0)
+    properties = {"progname": progname, "severity": 0, "log_path": "./tmp/gfzs.log"}
+    logger.init_properties(**properties)
     logger.debug("start %s" % progname)
 
     runtime_config = RuntimeConfig.get_instance()

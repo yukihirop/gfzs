@@ -14,7 +14,7 @@ try:
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from runtime.config import RuntimeConfig
-        from utils.logger import Logger
+        import utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import debug
@@ -23,7 +23,7 @@ try:
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs.runtime.config import RuntimeConfig
-        from gfzs.utils.logger import Logger
+        import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -33,7 +33,7 @@ except ModuleNotFoundError:
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from runtime.config import RuntimeConfig
-    from utils.logger import Logger
+    import utils.logger as logger
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
@@ -41,8 +41,12 @@ except ModuleNotFoundError:
 
 def main(args: Optional[argparse.Namespace] = None):
     progname = "gfzs.cmd.init"
-    logger = Logger.get_instance(progname, args.log_path)
-    logger.set_level(args.log_level)
+    properties = {
+        "progname": progname,
+        "severity": args.log_level,
+        "log_path": args.log_path,
+    }
+    logger.init_properties(**properties)
     logger.debug("start %s" % progname)
 
     runtime_config = RuntimeConfig.get_instance()
@@ -64,7 +68,7 @@ def main(args: Optional[argparse.Namespace] = None):
 
 
 if __name__ == "__main__":
-    args = argparse.Namespace
+    args = argparse.Namespace()
     args.log_path = "./tmp/gfzs.log"
     args.log_level = 0
 

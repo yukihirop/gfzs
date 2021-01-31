@@ -8,6 +8,7 @@ try:
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from utils.color import Color
         from runtime.config import RuntimeConfig
+        import utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import utils.debug as debug
@@ -15,9 +16,9 @@ try:
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
-        from gfzs.utils import debug
         from gfzs.utils.color import Color
         from gfzs.runtime.config import RuntimeConfig
+        import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -28,6 +29,7 @@ except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from utils.color import Color
     from runtime.config import RuntimeConfig
+    import utils.logger as logger
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
@@ -35,6 +37,7 @@ except ModuleNotFoundError:
 
 class Base(object):
     def __init__(self, stdscr, model, view_name):
+        logger.debug("[%s] init" % view_name.capitalize())
         self.stdscr = stdscr
         self.parent_height, self.parent_width = stdscr.getmaxyx()
         self.model = model

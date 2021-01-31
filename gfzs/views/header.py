@@ -11,7 +11,7 @@ try:
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         import info
-        from utils.logger import Logger
+        import utils.logger as logger
 
         from base import Base
 
@@ -21,8 +21,8 @@ try:
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs import info
-        from gfzs.utils.logger import Logger
         from gfzs.views.base import Base
+        import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -32,8 +32,8 @@ except ModuleNotFoundError:
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     import info
-    from utils.logger import Logger
     from views.base import Base
+    import utils.logger as logger
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
@@ -41,20 +41,18 @@ except ModuleNotFoundError:
 
 class Header(Base):
     def __init__(self, stdscr):
-        self.logger = Logger.get_instance()
-        self.logger.debug("[Header] init")
         super().__init__(stdscr, None, "header")
         self.version = "(%s)" % info.__version__
         self.copyright = info.__copyright__
 
     def create(self):
-        self.logger.debug("[Header] create")
+        logger.debug("[Header] create")
         self._init_layout()
         self._make_header()
         self.window.refresh()
 
     def reset(self):
-        self.logger.debug("[Header] reset")
+        logger.debug("[Header] reset")
         self.window.erase()
         self._init_layout()
         self._make_header()
@@ -113,7 +111,7 @@ if __name__ == "__main__":
 
         def _end_curses(self):
             """ Terminates the curses application. """
-            self.logger.debug("[TestHeader] end curses")
+            logger.debug("[TestHeader] end curses")
             curses.nocbreak()
             self.window.keypad(0)
             curses.echo()
@@ -143,11 +141,10 @@ if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
     from model import Model
     from runtime.config import RuntimeConfig
-    from utils.logger import Logger
 
     progname = "gfzs.views.header"
-    logger = Logger.get_instance(progname, "./tmp/gfzs.log")
-    logger.set_level(0)
+    properties = {"progname": progname, "severity": 0, "log_path": "./tmp/gfzs.log"}
+    logger.init_properties(**properties)
     logger.debug("start %s" % progname)
 
     def handle_sigint(signum, frame):

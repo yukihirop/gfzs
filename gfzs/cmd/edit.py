@@ -42,8 +42,12 @@ except ModuleNotFoundError:
 
 def main(args: Optional[argparse.Namespace] = None):
     progname = "gfzs.cmd.edit"
-    logger = Logger.get_instance(progname, args.log_path)
-    logger.set_level(args.log_level)
+    properties = {
+        "progname": progname,
+        "severity": args.log_level,
+        "log_path": args.log_path,
+    }
+    logger.init_properties(**properties)
     logger.debug("start %s" % progname)
 
     runtime_config = RuntimeConfig.get_instance()
@@ -74,7 +78,7 @@ def main(args: Optional[argparse.Namespace] = None):
 
 
 if __name__ == "__main__":
-    args = argparse.Namespace
+    args = argparse.Namespace()
     args.log_path = "./tmp/gfzs.log"
     args.log_level = 0
 

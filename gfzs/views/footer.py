@@ -10,8 +10,8 @@ try:
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from utils.multibyte import Multibyte
-        from utils.logger import Logger
         from base import Base
+        import utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import utils.debug as debug
@@ -19,8 +19,8 @@ try:
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs.utils.multibyte import Multibyte
-        from gfzs.utils.logger import Logger
         from gfzs.views.base import Base
+        import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -29,8 +29,8 @@ except ModuleNotFoundError:
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from utils.multibyte import Multibyte
-    from utils.logger import Logger
     from views.base import Base
+    import utils.logger as logger
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
@@ -41,8 +41,6 @@ KEY_ESC = 27
 
 class Footer(Base):
     def __init__(self, stdscr, model):
-        self.logger = Logger.get_instance()
-        self.logger.debug("[Footer] init")
         super().__init__(stdscr, model, "footer")
         self.multibyte = Multibyte(stdscr)
 
@@ -63,16 +61,16 @@ class Footer(Base):
         return self.multibyte.get_east_asian_width_count(self.message)
 
     def update_query(self, query):
-        self.logger.debug("update query from '%s' to '%s'" % (self.query, query))
+        logger.debug("[Footer] update query from '%s' to '%s'" % (self.query, query))
         self.model.update_query(query)
 
     def create(self):
-        self.logger.debug("[Footer] create")
+        logger.debug("[Footer] create")
         self.update_query("")
         self._make_footer()
 
     def reset(self):
-        self.logger.debug("[Footer] reset")
+        logger.debug("[Footer] reset")
         self._make_footer()
         self.stdscr.move(
             self.parent_height - 1,
@@ -81,7 +79,7 @@ class Footer(Base):
         self.stdscr.refresh()
 
     def activate(self, is_init=False):
-        self.logger.debug("[Footer] active")
+        logger.debug("[Footer] active")
         # Able mouse cursor
         curses.curs_set(1)
         self.stdscr.move(
@@ -90,13 +88,13 @@ class Footer(Base):
         )
 
         if is_init:
-            self.logger.debug("[Footer] clean")
+            logger.debug("[Footer] clean")
             self.stdscr.clrtoeol()
 
         self.stdscr.refresh()
 
     def delete_char(self):
-        self.logger.debug("[Footer] delete char")
+        logger.debug("[Footer] delete char")
         if self.query == None or self.query == "":
             self.stdscr.delch(self.parent_height - 1, self.message_len + 1 + 1)  # ?
             self.stdscr.delch(self.parent_height - 1, self.message_len + 1)  # ^
@@ -119,10 +117,10 @@ class Footer(Base):
                 )
                 self.update_query(self.query[:-1])
 
-        self.logger.debug("[Footer] delete char. so that query is '%s'" % self.query)
+        logger.debug("[Footer] delete char. so that query is '%s'" % self.query)
 
     def write(self, text):
-        self.logger.debug("[Footer] write text: %s" % text)
+        logger.debug("[Footer] write text: %s" % text)
         self.stdscr.addstr(text)
         self.model.push_query(text)
 
@@ -150,7 +148,7 @@ if __name__ == "__main__":
 
         def _end_curses(self):
             """ Terminates the curses application. """
-            self.logger.debug("[TestFooter] end curses")
+            logger.debug("[TestFooter] end curses")
             curses.nocbreak()
             self.stdscr.keypad(0)
             curses.echo()
@@ -198,8 +196,8 @@ if __name__ == "__main__":
     from runtime.config import RuntimeConfig
 
     progname = "gfzs.views.footer"
-    logger = Logger.get_instance(progname, "./tmp/gfzs.log")
-    logger.set_level(0)
+    properties = {"progname": progname, "severity": 0, "log_path": "./tmp/gfzs.log"}
+    logger.init_properties(**properties)
     logger.debug("start %s" % progname)
 
     def handle_sigint(signum, frame):

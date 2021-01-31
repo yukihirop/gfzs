@@ -10,7 +10,7 @@ try:
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from utils.color import Color
-        from utils.logger import Logger
+        import utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import utils.debug as debug
@@ -19,7 +19,7 @@ try:
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs.utils.color import Color
-        from gfzs.utils.logger import Logger
+        import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -28,7 +28,7 @@ try:
 except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from utils.color import Color
-    from utils.logger import Logger
+    import utils.logger as logger
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
@@ -602,8 +602,7 @@ NOT_FOUND = "Not Found"
 
 class NotFound:
     def __init__(self, stdscr):
-        self.logger = Logger.get_instance()
-        self.logger.debug("[NotFound] init")
+        logger.debug("[NotFound] init")
         self.block = "■"
         self.stdscr = stdscr
         self.window = None
@@ -612,13 +611,13 @@ class NotFound:
         self.color = Color.get_instance()
 
     def create(self):
-        self.logger.debug("[NotFound] create")
+        logger.debug("[NotFound] create")
         self._init_layout()
         self._make_not_found()
         self.window.refresh()
 
     def destroy(self):
-        self.logger.debug("[NotFound] destroy")
+        logger.debug("[NotFound] destroy")
         if not self.window is None:
             self.window.erase()
             self.window.refresh()
@@ -732,7 +731,7 @@ if __name__ == "__main__":
 
         def _end_curses(self):
             """ Terminates the curses application. """
-            self.logger.debug("[TestNotFound] end curses")
+            logger.debug("[TestNotFound] end curses")
             curses.nocbreak()
             self.window.keypad(0)
             curses.echo()
@@ -747,11 +746,10 @@ if __name__ == "__main__":
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
     from model import Model
-    from utils.logger import Logger
 
     progname = "gfzs.views.not_found"
-    logger = Logger.get_instance(progname, "./tmp/gfzs.log")
-    logger.set_level(0)
+    properties = {"progname": progname, "severity": 0, "log_path": "./tmp/gfzs.log"}
+    logger.init_properties(**properties)
     logger.debug("start %s" % progname)
 
     def handle_sigint(signum, frame):

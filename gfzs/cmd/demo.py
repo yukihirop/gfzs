@@ -18,7 +18,7 @@ try:
         from controller import Controller
         from runtime.config import RuntimeConfig
         from runtime.opts import RuntimeOpts
-        from utils.logger import Logger
+        import utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import utils.debug as debug
@@ -29,7 +29,7 @@ try:
         from gfzs.controller import Controller
         from gfzs.runtime.config import RuntimeConfig
         from gfzs.runtime.opts import RuntimeOpts
-        from gfzs.utils.logger import Logger
+        import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -41,7 +41,7 @@ except ModuleNotFoundError:
     from controller import Controller
     from runtime.config import RuntimeConfig
     from runtime.opts import RuntimeOpts
-    from utils.logger import Logger
+    import utils.logger as logger
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
@@ -135,8 +135,12 @@ DEMO_JSON_DATA = [
 
 def main(args: Optional[argparse.Namespace] = None):
     progname = "gfzs.cmd.demo"
-    logger = Logger.get_instance(progname, args.log_path)
-    logger.set_level(args.log_level)
+    properties = {
+        "progname": progname,
+        "severity": args.log_level,
+        "log_path": args.log_path,
+    }
+    logger.init_properties(**properties)
     logger.debug("start %s" % progname)
 
     def handle_sigint(signum, fframe) -> None:
@@ -178,7 +182,8 @@ def main(args: Optional[argparse.Namespace] = None):
 
 
 if __name__ == "__main__":
-    args = argparse.Namespace
+    args = argparse.Namespace()
     args.log_path = "./tmp/gfzs.log"
     args.log_level = 0
+
     main(args)

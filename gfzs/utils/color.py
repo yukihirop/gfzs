@@ -8,7 +8,7 @@ try:
     if __name__ == "__main__":
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-        from utils.logger import Logger
+        import utils.logger as logger
 
         if os.environ.get("DEBUG"):
             from utils import debug
@@ -16,7 +16,7 @@ try:
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
-        from gfzs.utils.logger import Logger
+        import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -24,7 +24,7 @@ try:
 except ModuleNotFoundError:
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
-    from utils.logger import Logger
+    import utils.logger as logger
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
@@ -51,8 +51,7 @@ class Color(Singleton):
     )
 
     def __init__(self):
-        self.logger = Logger.get_instance()
-        self.logger.debug("[Color] init")
+        logger.debug("[Color] init")
         curses.start_color()
         curses.use_default_colors()
         colors_len = len(Color.COLORS)
@@ -62,7 +61,7 @@ class Color(Singleton):
         self._setup()
 
     def _setup(self):
-        self.logger.debug("[Color] setup")
+        logger.debug("[Color] setup")
         for i in Color.COLORS:
             for j in Color.COLORS:
                 color_number = self._calculate_color_number(i, j)
@@ -78,7 +77,7 @@ class Color(Singleton):
 
     def _end_curses(self):
         """ Terminates the curses application. """
-        self.logger.debug("[Color] end curses")
+        logger.debug("[Color] end curses")
         curses.nocbreak()
         curses.echo()
         curses.endwin()
@@ -104,13 +103,13 @@ class Color(Singleton):
             else:
                 raise Exception("[Color] Do not support style: %s" % style)
         except Exception as e:
-            self.logger.debug("end curses")
+            logger.debug("end curses")
             self._end_curses()
 
-            self.logger.error(e)
+            logger.error(e)
             print("Error: %s" % str(e))
 
-            self.logger.debug("exit 1")
+            logger.debug("exit 1")
             sys.exit(1)
 
     def google(self, c, style="bold") -> int:
@@ -138,10 +137,10 @@ class Color(Singleton):
         except Exception as e:
             self._end_curses()
 
-            self.logger.error(e)
+            logger.error(e)
             print("Error: %s" % str(e))
 
-            self.logger.debug("exit 1")
+            logger.debug("exit 1")
             sys.exit(1)
 
     @property
@@ -195,8 +194,12 @@ if __name__ == "__main__":
     import signal
 
     progname = "gfzs.utils.color"
-    logger = Logger.get_instance(progname, "./tmp/gfzs.log")
-    logger.set_level(0)
+    properties = {
+        "progname": progname,
+        "severity": "INFO",
+        "log_path": "./tmp/gfzs.log",
+    }
+    logger.init_properties(**properties)
     logger.debug("start %s" % progname)
 
     def handle_sigint(signum, frame):

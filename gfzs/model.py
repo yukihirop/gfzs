@@ -11,7 +11,7 @@ try:
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from runtime.opts import RuntimeOpts
-        from utils.logger import Logger
+        import utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import utils.debug as debug
@@ -20,7 +20,7 @@ try:
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs.runtime.opts import RuntimeOpts
-        from gfzs.utils.logger import Logger
+        import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -28,7 +28,7 @@ try:
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
     from runtime.opts import RuntimeOpts
-    from utils.logger import Logger
+    import utils.logger as logger
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
@@ -37,8 +37,7 @@ except ModuleNotFoundError:
 class Model:
     # e.g.) collection = [{ title, url, abstract }, ...]
     def __init__(self, collection):
-        self.logger = Logger.get_instance()
-        self.logger.debug("[Model] init")
+        logger.debug("[Model] init")
         self.collection = collection
         self.result = []
         self.query = self.old_query = None
@@ -58,9 +57,7 @@ class Model:
         return len(self.result)
 
     def update_query(self, query):
-        self.logger.debug(
-            "[Model] update query from '%s' to '%s'" % (self.query, query)
-        )
+        logger.debug("[Model] update query from '%s' to '%s'" % (self.query, query))
         self.old_query = self.query
         self.query = query
 
@@ -69,9 +66,9 @@ class Model:
         self.query += char
 
     def valid(self) -> bool:
-        self.logger.debug("[Model] validate")
+        logger.debug("[Model] validate")
         if not self._validate_json(self.collection):
-            self.logger.error("[Model] data is invalid.")
+            logger.error("[Model] data is invalid.")
             self.errors.append(
                 Exception(
                     "Invalid json format. Please pass in an array of json that keeps `title`, `url` and `abstract` as keys."
@@ -79,15 +76,15 @@ class Model:
             )
             return False
         elif not self._validate_blank(self.collection):
-            self.logger.error("[Model] data is invalid.")
+            logger.error("[Model] data is invalid.")
             self.errors.append(Exception("The result passed was empty."))
             return False
         else:
-            self.logger.debug("[Model] data is valid")
+            logger.debug("[Model] data is valid")
             return True
 
     def validate_query(self, query=None) -> bool:
-        self.logger.debug("[Model] validate query: '%s'" % query or self.query)
+        logger.debug("[Model] validate query: '%s'" % query or self.query)
 
         def fn(q):
             if q is None or q is "\0":
@@ -114,7 +111,7 @@ class Model:
             return fn(query)
 
     def find(self, query=None):
-        self.logger.debug("[Model] find with query: '%s'" % query or self.query)
+        logger.debug("[Model] find with query: '%s'" % query or self.query)
         score = self.runtime_opts.score
 
         if query != None and query != "":
@@ -241,8 +238,8 @@ if __name__ == "__main__":
     from runtime.opts import RuntimeOpts
 
     progname = "gfzs.model"
-    logger = Logger.get_instance(progname, "./tmp/gfzs.log")
-    logger.set_level(0)
+    properties = {"progname": progname, "severity": 0, "log_path": "./tmp/gfzs.log"}
+    logger.init_properties(**properties)
     logger.debug("start %s" % progname)
 
     def handle_sigint(signum, frame):

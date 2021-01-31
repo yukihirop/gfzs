@@ -9,7 +9,7 @@ try:
     if __name__ == "__main__":
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-        from utils.logger import Logger
+        import utils.logger as logger
 
         if os.environ.get("DEBUG"):
             from utils import debug
@@ -17,7 +17,7 @@ try:
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
-        from gfzs.utils.logger import Logger
+        import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -25,7 +25,7 @@ try:
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
-    from utils.logger import Logger
+    import utils.logger as logger
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
@@ -52,14 +52,15 @@ class RuntimeOpts(Singleton):
     default_score = DEFAULT_SCORE
 
     def __init__(self, args):
-        self.logger = Logger.get_instance()
-        self.logger.debug("[RuntimeOpts] init")
+        logger.debug("[RuntimeOpts] init")
         self.args = args
 
     @property
     def score(self) -> int:
         if self.args is None:
             return RuntimeOpts.default_score
+        elif self.args != None and not ("score" in self.args):
+            return RuntimeOpts.default_score
         else:
-            self.logger.debug("[RuntimeOpts] score = %d" % self.args.score)
+            logger.debug("[RuntimeOpts] score = %d" % self.args.score)
             return self.args.score

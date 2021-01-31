@@ -11,8 +11,8 @@ try:
     if __name__ == "__main__":
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-        from utils.logger import Logger
         from base import Base
+        import utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import utils.debug as debug
@@ -20,8 +20,8 @@ try:
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
-        from gfzs.utils.logger import Logger
         from gfzs.views.base import Base
+        import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -30,8 +30,8 @@ try:
 except ModuleNotFoundError:
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
-    from utils.logger import Logger
     from views.base import Base
+    import utils.logger as logger
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
@@ -39,26 +39,25 @@ except ModuleNotFoundError:
 
 class Paging(Base):
     def __init__(self, stdscr, view):
-        self.logger = Logger.get_instance()
-        self.logger.debug("[Paging] init")
+        logger.debug("[Paging] init")
         super().__init__(stdscr, None, "paging")
         self.view = view
 
     def create(self):
-        self.logger.debug("[Paging] create")
+        logger.debug("[Paging] create")
         self._init_layout()
         self._make_paging()
         self.window.refresh()
 
     def reset(self):
-        self.logger.debug("[Paging] reset")
+        logger.debug("[Paging] reset")
         self.destroy()
         self._init_layout()
         self._make_paging()
         self.window.refresh()
 
     def destroy(self):
-        self.logger.debug("[Paging] destroy")
+        logger.debug("[Paging] destroy")
         self.window.erase()
 
     def _init_layout(self):
@@ -84,7 +83,7 @@ if __name__ == "__main__":
 
         def _end_curses(self):
             """ Terminates the curses application. """
-            self.logger.debug("[TestPaging] end curses")
+            logger.debug("[TestPaging] end curses")
             curses.nocbreak()
             self.window.keypad(0)
             curses.echo()
@@ -116,11 +115,10 @@ if __name__ == "__main__":
     from model import Model
     from search_result import SearchResult
     from runtime.config import RuntimeConfig
-    from utils.logger import Logger
 
     progname = "gfzs.views.paging"
-    logger = Logger.get_instance(progname, "./tmp/gfzs.log")
-    logger.set_level(0)
+    properties = {"progname": progname, "severity": 0, "log_path": "./tmp/gfzs.log"}
+    logger.init_properties(**properties)
     logger.debug("start %s" % progname)
 
     def handle_sigint(signum, frame):

@@ -10,10 +10,10 @@ try:
     # need when 「cat fixtures/rust.json | bin/gfzs」
     from gfzs.model import Model
     from gfzs.utils.multibyte import Multibyte
-    from gfzs.utils.logger import Logger
     from gfzs.views.header import Header
     from gfzs.views.search_result import SearchResult
     from gfzs.views.footer import Footer
+    import gfzs.utils.logger as logger
 
     if os.environ.get("DEBUG"):
         import gfzs.utils.debug as debug
@@ -22,10 +22,10 @@ try:
 except ModuleNotFoundError:
     from model import Model
     from utils.multibyte import Multibyte
-    from utils.logger import Logger
     from views.header import Header
     from views.search_result import SearchResult
     from views.footer import Footer
+    import utils.logger as logger
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
@@ -36,8 +36,7 @@ KEY_ESC = 27
 
 class Controller:
     def __init__(self, data):
-        self.logger = Logger.get_instance()
-        self.logger.debug("[Controller] init")
+        logger.debug("[Controller] init")
         self._init_curses()
         self.model = Model(data)
         self.header = Header(self.stdscr)
@@ -47,7 +46,7 @@ class Controller:
 
     def _init_curses(self):
         """ Inits the curses application """
-        self.logger.debug("[Controller] init curses")
+        logger.debug("[Controller] init curses")
 
         # initscr() returns a window object representing the entire screen.
         self.stdscr = curses.initscr()
@@ -63,7 +62,7 @@ class Controller:
 
     def _end_curses(self):
         """ Terminates the curses application. """
-        self.logger.debug("[Controller] end curses")
+        logger.debug("[Controller] end curses")
 
         curses.nocbreak()
         self.stdscr.keypad(0)
@@ -84,14 +83,14 @@ class Controller:
         result = self.search_result.update_view_in_loop()
 
         if is_init_query:
-            self.logger.debug("[Controller] reset query")
+            logger.debug("[Controller] reset query")
             self.search_result.update_query("")
 
         if result:
             self.search_result.handle_key_in_loop(user_input)
 
     def _handle_resize(self, user_input):
-        self.logger.debug("[Controller] detect resize")
+        logger.debug("[Controller] detect resize")
 
         self.header.reset()
         self.footer.reset()
@@ -104,9 +103,9 @@ class Controller:
         if len(result) != 0:
             url = result[current_selected].get("url")
             webbrowser.open(url, new=2)
-            self.logger.debug("[Controller] detect Enter. open url: %s" % url)
+            logger.debug("[Controller] detect Enter. open url: %s" % url)
         else:
-            self.logger.debug("[Controller] detect Enter. but result is empty.")
+            logger.debug("[Controller] detect Enter. but result is empty.")
 
     def run(self) -> int:
         input_mode = True
@@ -151,19 +150,19 @@ class Controller:
                 break
 
             if input_mode:
-                self.logger.debug("[Controller] input mode")
+                logger.debug("[Controller] input mode")
                 if user_input in arrow_keys:
                     input_mode = False
-                    self.logger.debug(
+                    logger.debug(
                         "[Controller] keyboard input: %s" % (arrow_keys[user_input])
                     )
                     self._search_and_refresh_display(user_input, is_init_query=False)
                 elif user_input == KEY_ESC:
-                    self.logger.debug("[Controller] keyboard input: KEY_ESC (pass)")
+                    logger.debug("[Controller] keyboard input: KEY_ESC (pass)")
                     pass
                 elif user_input == KEY_ENTER:
                     input_mode = False
-                    self.logger.debug(
+                    logger.debug(
                         "[Controller] keyboard input: KEY_ENTER. query is '%s'"
                         % (self.model.query)
                     )
@@ -178,7 +177,7 @@ class Controller:
                             user_input, is_init_property=True, is_init_query=False
                         )
                 elif user_input == curses.KEY_RESIZE:
-                    self.logger.debug("[Controller] keyboard input: KEY_RESIZE")
+                    logger.debug("[Controller] keyboard input: KEY_RESIZE")
                     self._handle_resize(user_input)
                 # I don't know the reason, but - 1 may come in
                 elif user_input == -1:
@@ -192,16 +191,16 @@ class Controller:
                             user_input, is_init_property=True, is_init_query=False
                         )
             else:
-                self.logger.debug("[Controller] input mode")
+                logger.debug("[Controller] input mode")
                 if user_input in arrow_keys:
                     self.search_result.handle_key_in_loop(user_input)
                 elif user_input == KEY_ESC:
-                    self.logger.debug("[Controller] keyboard input: KEY_ESC (pass)")
+                    logger.debug("[Controller] keyboard input: KEY_ESC (pass)")
                     pass
                 elif user_input == KEY_ENTER:
                     self.execute_when_enter(self.search_result.current_selected)
                 elif user_input in backspace_keys:
-                    self.logger.debug(
+                    logger.debug(
                         "[Controller] keyboard input: %s" % backspace_keys[user_input]
                     )
                     input_mode = True
@@ -214,7 +213,7 @@ class Controller:
                     self._handle_resize(user_input)
                 # I don't know the reason, but - 1 may come in
                 elif user_input == -1:
-                    self.logger.unknown("[Controller] keyboard input: -1")
+                    logger.unknown("[Controller] keyboard input: -1")
                     pass
                 else:
                     input_mode = True
@@ -240,8 +239,8 @@ if __name__ == "__main__":
     from runtime.config import RuntimeConfig
 
     progname = "gfzs.controller"
-    logger = Logger.get_instance(progname, "./tmp/gfzs.log")
-    logger.set_level(0)
+    properties = {"progname": progname, "severity": 0, "log_path": "./tmp/gfzs.log"}
+    logger.init_properties(**properties)
     logger.debug("start %s" % progname)
 
     def handle_sigint(signum, frame):
