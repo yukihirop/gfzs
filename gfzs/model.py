@@ -10,24 +10,35 @@ try:
     if __name__ == "__main__":
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-        from utils import debug
         from runtime.opts import RuntimeOpts
+        from utils.logger import Logger
+
+        if os.environ.get("DEBUG"):
+            import utils.debug as debug
 
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
-        from gfzs.utils import debug
         from gfzs.runtime.opts import RuntimeOpts
+        from gfzs.utils.logger import Logger
+
+        if os.environ.get("DEBUG"):
+            import gfzs.utils.debug as debug
 
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
-    from utils import debug
     from runtime.opts import RuntimeOpts
+    from utils.logger import Logger
+
+    if os.environ.get("DEBUG"):
+        import utils.debug as debug
 
 
 class Model:
     # e.g.) collection = [{ title, url, abstract }, ...]
     def __init__(self, collection):
+        self.logger = Logger.get_instance()
+        self.logger.debug("[Model] init")
         self.collection = collection
         self.result = []
         self.query = self.old_query = None
@@ -47,6 +58,9 @@ class Model:
         return len(self.result)
 
     def update_query(self, query):
+        self.logger.debug(
+            "[Model] update query from '%s' to '%s'" % (self.query, query)
+        )
         self.old_query = self.query
         self.query = query
 
@@ -55,7 +69,9 @@ class Model:
         self.query += char
 
     def valid(self) -> bool:
+        self.logger.debug("[Model] validate")
         if not self._validate_json(self.collection):
+            self.logger.error("[Model] data is invalid.")
             self.errors.append(
                 Exception(
                     "Invalid json format. Please pass in an array of json that keeps `title`, `url` and `abstract` as keys."
@@ -63,12 +79,16 @@ class Model:
             )
             return False
         elif not self._validate_blank(self.collection):
+            self.logger.error("[Model] data is invalid.")
             self.errors.append(Exception("The result passed was empty."))
             return False
         else:
+            self.logger.debug("[Model] data is valid")
             return True
 
     def validate_query(self, query=None) -> bool:
+        self.logger.debug("[Model] validate query: '%s'" % query or self.query)
+
         def fn(q):
             if q is None or q is "\0":
                 return False
@@ -94,6 +114,7 @@ class Model:
             return fn(query)
 
     def find(self, query=None):
+        self.logger.debug("[Model] find with query: '%s'" % query or self.query)
         score = self.runtime_opts.score
 
         if query != None and query != "":
@@ -217,9 +238,19 @@ if __name__ == "__main__":
     import signal
     import argparse
 
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-
     from runtime.opts import RuntimeOpts
+
+    progname = "gfzs.model"
+    logger = Logger.get_instance(progname, "./tmp/gfzs.log")
+    logger.set_level(0)
+    logger.debug("start %s" % progname)
+
+    def handle_sigint(signum, frame):
+        logger.debug("detect SIGINT (Ctrl-c)")
+        logger.debug("exit 0")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, handle_sigint)
 
     json_str = open("fixtures/rust.json", "r").read()
     data = json.loads(json_str)
@@ -229,6 +260,10 @@ if __name__ == "__main__":
     model = TestModel(data)
 
     result = model.find("Amazon")
+    logger.debug(
+        "Search (query=Amazon, score=%d):  %d / %d"
+        % (config.score, model.data_size, model.summary_count)
+    )
     print(
         "Search (query=Amazon, score=%d):  %d / %d"
         % (config.score, model.data_size, model.summary_count)
@@ -237,6 +272,10 @@ if __name__ == "__main__":
         print(result[i]["title"])
 
     result = model.find("\0")
+    logger.debug(
+        "Search (query=\0, score=%d):  %d / %d"
+        % (config.score, model.data_size, model.summary_count)
+    )
     print(
         "Search (query=\0, score=%d):  %d / %d"
         % (config.score, model.data_size, model.summary_count)
@@ -245,9 +284,15 @@ if __name__ == "__main__":
         print(result[i]["title"])
 
     result = model.find("a")
+    logger.debug(
+        "Search (query=\0, score=%d):  %d / %d"
+        % (config.score, model.data_size, model.summary_count)
+    )
     print(
         "Search (query=\0, score=%d):  %d / %d"
         % (config.score, model.data_size, model.summary_count)
     )
     for i in range(len(result)):
         print(result[i]["title"])
+
+    logger.debug("end %s" % progname, new_line=True)

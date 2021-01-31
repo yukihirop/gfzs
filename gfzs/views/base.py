@@ -6,9 +6,11 @@ try:
     if __name__ == "__main__":
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-        from utils import debug
         from utils.color import Color
         from runtime.config import RuntimeConfig
+
+        if os.environ.get("DEBUG"):
+            import utils.debug as debug
 
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
@@ -17,13 +19,18 @@ try:
         from gfzs.utils.color import Color
         from gfzs.runtime.config import RuntimeConfig
 
+        if os.environ.get("DEBUG"):
+            import gfzs.utils.debug as debug
+
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
-    from utils import debug
     from utils.color import Color
     from runtime.config import RuntimeConfig
+
+    if os.environ.get("DEBUG"):
+        import utils.debug as debug
 
 
 class Base(object):

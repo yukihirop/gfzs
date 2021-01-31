@@ -5,6 +5,7 @@ import os
 import sys
 import json
 from flatten_dict import flatten
+from typing import Union
 
 # local
 
@@ -13,17 +14,26 @@ try:
     if __name__ == "__main__":
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-        from utils import debug
+        from utils.logger import Logger
+
+        if os.environ.get("DEBUG"):
+            from utils import debug
 
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
-        from gfzs.utils import debug
+        from gfzs.utils.logger import Logger
+
+        if os.environ.get("DEBUG"):
+            import gfzs.utils.debug as debug
 
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
-    from utils import debug
+    from utils.logger import Logger
+
+    if os.environ.get("DEBUG"):
+        import utils.debug as debug
 
 # ~/.gfzsrc
 DEFAULT_CONFIG_PATH = "%s/.gfzsrc" % os.path.expanduser("~")
@@ -126,6 +136,8 @@ class RuntimeConfig(Singleton):
     SUPPORT_STYLES = ["normal", "link", "bold"]
 
     def __init__(self):
+        self.logger = Logger.get_instance()
+        self.logger.debug("[RuntimeConfig] init")
         self.data = self._create_data()
         self.errors = []
 
@@ -134,6 +146,7 @@ class RuntimeConfig(Singleton):
         return DEFAULT_CONFIG_PATH
 
     def valid(self) -> bool:
+        self.logger.debug("[RuntimeConfig] validate")
         flatten_data = flatten(
             self.data, reducer="dot", keep_empty_types=(dict, str, int, list)
         )
@@ -167,8 +180,10 @@ class RuntimeConfig(Singleton):
                         )
 
         if self.errors != []:
+            self.logger.error("[RuntimeConfig] is invalid")
             return False
         else:
+            self.logger.debug("[RuntimeConfig] is valid")
             return True
 
     def _create_data(self) -> dict:
@@ -180,22 +195,33 @@ class RuntimeConfig(Singleton):
             try:
                 json_str = open(config_path).read()
                 data = json.loads(json_str)
+                self.logger.debug("[RuntimeConfig] file is loaded")
             except json.decoder.JSONDecodeError as e:
+                self.logger.debug(e)
                 self._end_curses()
                 raise e
         else:
+            self.logger.debug(
+                "[RuntimeConfig] file do not exist. so load default config data"
+            )
             data = DEFAULT_CONFIG
 
         return data
 
     def _end_curses(self):
         """ Terminates the curses application. """
+        self.logger.debug("end curses")
         curses.nocbreak()
         curses.echo()
         curses.endwin()
 
 
 if __name__ == "__main__":
+    progname = "gfzs.runtime.config"
+    logger = Logger.get_instance(progname, "./tmp/gfzs.log")
+    logger.set_level(0)
+    logger.debug("start %s" % progname)
 
     config = RuntimeConfig.get_instance()
+    logger.debug("end %s" % progname, new_line=True)
     print(config.data)

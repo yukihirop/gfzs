@@ -8,31 +8,42 @@ try:
     if __name__ == "__main__":
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-        import debug
         from multibyte import Multibyte
         from color import Color
+        from logger import Logger
         from runtime.config import RuntimeConfig
+
+        if os.environ.get("DEBUG"):
+            import debug
 
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
-        from gfzs.utils import debug
         from gfzs.utils.multibyte import Multibyte
         from gfzs.utils.color import Color
+        from gfzs.utils.logger import Logger
         from gfzs.runtime.config import RuntimeConfig
+
+        if os.environ.get("DEBUG"):
+            from gfzs.utils import debug
 
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
-    from utils import debug
     from utils.multibyte import Multibyte
     from utils.color import Color
+    from utils.logger import Logger
     from runtime.config import RuntimeConfig
+
+    if os.environ.get("DEBUG"):
+        from utils import debug
 
 
 class Markup:
     def __init__(self):
+        self.logger = Logger.get_instance()
+        self.logger.debug("[Markup] init")
         self.multibyte = Multibyte()
         self.runtime_config = RuntimeConfig.get_instance()
         self.color = Color.get_instance()
@@ -40,6 +51,7 @@ class Markup:
         self.colors = self._create_colors(self.runtime_config, self.color_data)
 
     def parse(self, text, search_text):
+        self.logger.debug("[Markup] parse by search_text: %s" % search_text)
         result = {}
 
         if search_text is None or search_text is "":
@@ -119,21 +131,25 @@ class Markup:
 if __name__ == "__main__":
     import curses
 
-    # local
-
-    # https://codechacha.com/ja/how-to-import-python-files/
-    sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-    from runtime.config import RuntimeConfig
+    progname = "gfzs.utils.markup"
+    logger = Logger.get_instance(progname, "./tmp/gfzs.log")
+    logger.set_level(0)
+    logger.debug("start %s" % progname)
 
     runtime_config = RuntimeConfig.get_instance()
     if not runtime_config.valid():
+        logger.debug("[print] Config is invalid.")
         print("Config is invalid.")
         for error in runtime_config.errors:
+            logger.error(error)
             print("Error: %s" % error)
+
+        logger.debug("exit 0")
         sys.exit(1)
 
     try:
         # initscr() returns a window object representing the entire screen.
+        logger.debug("init curses")
         stdscr = curses.initscr()
 
         markup = Markup()
@@ -160,4 +176,6 @@ if __name__ == "__main__":
         print("Null: ", result)
 
     finally:
+        logger.debug("end curses")
+        logger.debug("end %s" % progname, new_line=True)
         curses.endwin()

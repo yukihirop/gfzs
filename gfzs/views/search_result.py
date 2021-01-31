@@ -15,6 +15,7 @@ try:
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from utils.markup import Markup
         from utils.multibyte import Multibyte
+        from utils.logger import Logger
 
         from not_found import NotFound
         from paging import Paging
@@ -27,6 +28,7 @@ try:
     else:
         from gfzs.utils.markup import Markup
         from gfzs.utils.multibyte import Multibyte
+        from gfzs.utils.logger import Logger
 
         from gfzs.views.not_found import NotFound
         from gfzs.views.paging import Paging
@@ -39,6 +41,7 @@ except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from utils.markup import Markup
     from utils.multibyte import Multibyte
+    from utils.logger import Logger
 
     from views.not_found import NotFound
     from views.paging import Paging
@@ -50,6 +53,8 @@ except ModuleNotFoundError:
 
 class SearchResultHelper:
     def __init__(self):
+        self.logger = Logger.get_instance()
+        self.logger.debug("[SearchResultHelper] init")
         self.current_selected = 0
         self.last = 1
         self.topy = 1
@@ -59,12 +64,27 @@ class SearchResultHelper:
         self.change_page = False
 
     def update_attributues(self, current_selected, last, topy, top_textbox):
+        self.logger.debug(
+            "[SearchResultHelper] update attributes (current_selected, last, topy) from '(%d, %d, %d)' to '(%d, %d, %d)'"
+            % (
+                self.current_selected,
+                self.last,
+                self.topy,
+                current_selected,
+                last,
+                topy,
+            )
+        )
         self.current_selected = current_selected
         self.last = last
         self.topy = topy
         self.top_textbox = top_textbox
 
     def update_per_page(self, value):
+        self.logger.debug(
+            "[SearchResultHelper] update per_page from '%d' to '%d'"
+            % (self.per_page, value)
+        )
         self.per_page = value
 
     @property
@@ -72,6 +92,7 @@ class SearchResultHelper:
         return self.current_selected // self.per_page + 1
 
     def prev_page(self, total_data_size):
+        self.logger.debug("[SearchResultHelper] prev page")
         per_page = self.per_page
         old_current_selected = self.current_selected
         current_pagetop_index = per_page * math.floor(old_current_selected / per_page)
@@ -88,6 +109,7 @@ class SearchResultHelper:
             self.current_selected = current_pagetop_index - per_page
 
     def next_page(self, total_data_size):
+        self.logger.debug("[SearchResultHelper] next page")
         per_page = self.per_page
         old_current_selected = self.current_selected
         current_pagetop_index = per_page * math.floor(old_current_selected / per_page)
@@ -100,6 +122,7 @@ class SearchResultHelper:
             self.current_selected = current_pagetop_index + per_page
 
     def down(self, total_data_size):
+        self.logger.debug("[SearchResultHelper] down")
         old_current_page = self.current_page
         old_current_selected = self.current_selected
 
@@ -112,6 +135,7 @@ class SearchResultHelper:
                 self.change_page = True
 
     def up(self, total_data_size):
+        self.logger.debug("[SearchResultHelper] up")
         old_current_page = self.current_page
         old_current_selected = self.current_selected
 
@@ -134,6 +158,8 @@ class SearchResult(Base):
         'data' is list of string. Each string is used to build
         a textbox.
         """
+        self.logger = Logger.get_instance()
+        self.logger.debug("[SearchResult] init")
         super().__init__(stdscr, model, "search_result")
         self.paging = Paging(stdscr, self)
         self.stop_loop = False
@@ -168,6 +194,7 @@ class SearchResult(Base):
         self.helper.update_per_page(value)
 
     def init_properties_after_create(self):
+        self.logger.debug("[SearchResult] init properties")
         current_selected = 0
         textboxes_len = len(self.textboxes)
 
@@ -182,6 +209,7 @@ class SearchResult(Base):
             self.helper.update_attributues(current_selected, last, topy, top_textbox)
 
     def create(self, pad_begin_y=0):
+        self.logger.debug("[SearchResult] create")
         self.helper.pad_begin_y = pad_begin_y
         self._init_layout()
         self._create_pad()
@@ -191,12 +219,17 @@ class SearchResult(Base):
             self.paging.create()
 
     def destroy(self):
+        self.logger.debug("[SearchResult] destroy")
         self._delete_pad()
 
     def update_query(self, query):
+        self.logger.debug(
+            "[SearchResult] update query from '%s' to '%s'" % (self.model.query, query)
+        )
         self.model.update_query(query)
 
     def reset(self):
+        self.logger.debug("[SearchResult] reset")
         self._reset_pad()
         self._init_layout()
         self.textboxes = self._make_textboxes()
@@ -345,6 +378,7 @@ class SearchResult(Base):
         return (cy, cx)
 
     def update_view_in_loop(self) -> bool:
+        self.logger.debug("[SearchResult] update view in loop")
         textboxes = self.textboxes
         textboxes_len = len(textboxes)
 
@@ -407,6 +441,7 @@ class SearchResult(Base):
         return True
 
     def handle_key_in_loop(self, user_input):
+        self.logger.debug("[SearchResult] handle key in loop with '%s'" % user_input)
         self.helper.change_page = False
         textboxes = self.textboxes
         textboxes_len = len(textboxes)
@@ -444,6 +479,7 @@ if __name__ == "__main__":
 
         def _end_curses(self):
             """ Terminates the curses application. """
+            self.logger.debug("[TestSearchResult] end curses")
             curses.nocbreak()
             self.window.keypad(0)
             curses.echo()
@@ -486,9 +522,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    import curses
     import signal
-    import os, sys
     import json
 
     # local
@@ -497,20 +531,35 @@ if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
     from model import Model
     from runtime.config import RuntimeConfig
+    from utils.logger import Logger
 
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    progname = "gfzs.views.search_result"
+    logger = Logger.get_instance(progname, "./tmp/gfzs.log")
+    logger.set_level(0)
+    logger.debug("start %s" % progname)
+
+    def handle_sigint(signum, frame):
+        logger.debug("detect SIGINT (Ctrl-c)")
+        logger.debug("exit 0")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, handle_sigint)
 
     runtime_config = RuntimeConfig.get_instance()
     if not runtime_config.valid():
+        logger.debug("[print] Config is invalid.")
         print("Config is invalid.")
         for error in runtime_config.errors:
+            logger.error(error)
             print("Error: %s" % error)
+        logger.debug("exit 1")
         sys.exit(1)
 
     json_str = open("fixtures/rust.json", "r").read()
     data = json.loads(json_str)
 
     # initscr() returns a window object representing the entire screen.
+    logger.debug("init curses")
     stdscr = curses.initscr()
 
     # turn off automatic echoing of keys to the screen
@@ -531,9 +580,17 @@ if __name__ == "__main__":
     try:
         choice = target.run(pad_begin_y=1)
         if choice != None:
-            print(model.result[choice].get("title"))
+            enter_result = model.result[choice].get("title")
+            logger.debug("Enter Result: %s" % enter_result)
+            print(enter_result)
     except curses.error as e:
-        error = str(e)
+        error = e
+    except Exception as e:
+        error = e
     finally:
+        target._end_curses()
         if error != None:
-            print(error)
+            logger.error(error)
+            print("Error: %s" % error)
+
+        logger.debug("end %s" % progname, new_line=True)

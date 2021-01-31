@@ -11,17 +11,27 @@ try:
     if __name__ == "__main__":
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-        import debug
+        from logger import Logger
+
+        if os.environ.get("DEBUG"):
+            import utils.debug as debug
+
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
-        from gfzs.utils import debug
+        from gfzs.utils.logger import Logger
+
+        if os.environ.get("DEBUG"):
+            import gfzs.utils.debug as debug
+
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
-    import utils
-    from utils import debug
+    from utils.logger import Logger
+
+    if os.environ.get("DEBUG"):
+        import utils.debug as debug
 
 
 # https://seiai.ed.jp/sys/text/cs/mcodes/ucodeutf8.html
@@ -41,6 +51,8 @@ BYTE4_END = 0xFF
 
 class Multibyte:
     def __init__(self, stdscr=None):
+        self.logger = Logger.get_instance()
+        self.logger.debug("[Multibyte] init")
         self.stdscr = stdscr
 
     # https://note.nkmk.me/python-unicodedata-east-asian-width-count/
@@ -75,12 +87,16 @@ class Multibyte:
         codepoint = key
 
         if BYTE1_START <= key <= BYTE1_END:
+            self.logger.debug("[Multibyte] keyboard input: ascii '%s'" % key)
             # e.g.) ascii
             pass
         elif INVALID_BYTE_START <= key <= INVALID_BYTE_END:
+            self.logger.debug("[Multibyte] keyboard input: invalid byte '%s'" % key)
             self._end_curses()
             e = Exception("[Multibyte] Invalid Byte: %s" % key)
+            self.logger.error(e)
             print("Error: %s" % str(e))
+            self.logger.debug("exit 1")
             sys.exit(1)
         elif BYTE2_START <= key <= BYTE2_END:
             # e.g.) Umlaut
@@ -88,6 +104,7 @@ class Multibyte:
             a, b = text_pool
             tmp = map(lambda x: bin(x)[2:], [0b00011111 & a, 0b00111111 & b])
             tmp = "".join(item.zfill(6) for item in tmp)
+            self.logger.debug("[Multibyte] keyboard input: Umlaut '%s'" % tmp)
             codepoint = int(tmp, 2)
         elif BYTE3_START <= key <= BYTE3_END:
             # e.g.) Japanease
@@ -100,6 +117,7 @@ class Multibyte:
                 lambda x: bin(x)[2:], [0b00001111 & a, 0b00111111 & b, 0b00111111 & c]
             )
             tmp = "".join([item.zfill(6) for item in tmp])
+            self.logger.debug("[Multibyte] keyboard input: Japanease '%s'" % tmp)
             codepoint = int(tmp, 2)
         elif BYTE4_START <= key <= BYTE4_END:
             for _ in range(3):
@@ -111,6 +129,7 @@ class Multibyte:
                 [0b00000111 & a, 0b00111111 & b, 0b00111111 & c, 0b00111111 & d],
             )
             tmp = "".join([item.zfill(6) for item in tmp])
+            self.logger.debug("[Multibyte] keyboard input: Unknown '%s'" % tmp)
             codepoint = int(tmp, 2)
         else:
             pass
@@ -119,6 +138,7 @@ class Multibyte:
 
     def _end_curses(self):
         """ Terminates the curses application. """
+        self.logger.debug("[Multibyte] end curses")
         curses.nocbreak()
         curses.echo()
         curses.endwin()
