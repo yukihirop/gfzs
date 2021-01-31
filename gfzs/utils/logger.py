@@ -27,133 +27,7 @@ except ModuleNotFoundError:
     if os.environ.get("DEBUG"):
         from utils import debug
 
-
-class Singleton(object):
-    @classmethod
-    def get_instance(cls, *args):
-        if not hasattr(cls, "_instance"):
-            cls._instance = cls(*args)
-
-        return cls._instance
-
-
-class Logger(Singleton):
-    """A logger whose display can be controlled at the log level"""
-
-    """Log Level"""
-    DEBUG = 0
-    INFO = 1
-    WARN = 2
-    ERROR = 3
-    FATAL = 4
-    UNKNOWNN = 5
-    NULL = 6
-
-    """Severity Label for logging (max 5 chars)"""
-    SEV_LABEL = ("DEBUG", "INFO", "WARN", "ERROR", "FATAL", "NULL", "ANY")
-
-    """Default Log Path"""
-    DEFAULT_LOG_PATH = "~/.gfzs.log"
-
-    def __init__(self, progname: str, log_path=DEFAULT_LOG_PATH):
-        self.progname = progname
-        self.level = Logger.INFO
-        self.default_formatter = Formatter()
-        self.formatter = None
-        self.log_path = log_path or DEFAULT_LOG_PATH
-
-    def set_level(self, severity: Union[int, str]) -> None:
-        """Set logging severity threshold.
-
-        Args:
-          severity: The Severity of the long message.
-        """
-
-        if str(severity).isnumeric():
-            self.level = severity
-        else:
-            _severity = severity.lower()
-
-            if _severity == "debug":
-                self.level = Logger.DEBUG
-            elif _severity == "info":
-                self.level = Logger.INFO
-            elif _severity == "warn":
-                self.level = Logger.ERROR
-            elif _severity == "fatal":
-                self.level = Logger.FATAL
-            elif _severity == "UNKNOWN":
-                self.level = Logger.UNKNOWN
-            elif _severity == "NULL":
-                self.level = Logger.NULL
-            else:
-                raise Exception("Invalid log level: #{severity}")
-
-    def debug(self, msg: Union[str, Exception], new_line=False) -> None:
-        self._add(Logger.DEBUG, self.progname, msg)
-        if new_line:
-            self._add(Logger.DEBUG, self.progname, "")
-
-    def info(self, msg: Union[str, Exception], new_line=False) -> None:
-        self._add(Logger.INFO, self.progname, msg)
-        if new_line:
-            self._add(Logger.INFO, self.progname, "")
-
-    def warn(self, msg: Union[str, Exception], new_line=False) -> None:
-        self._add(Logger.WARAN, self.progname, msg)
-        if new_line:
-            self._add(Logger.WARAN, self.progname, "")
-
-    def error(self, msg: Union[str, Exception], new_line=False) -> None:
-        self._add(Logger.ERROR, self.progname, msg)
-        if new_line:
-            self._add(Logger.ERROR, self.progname, "")
-
-    def fatal(self, msg: Union[str, Exception], new_line=False) -> None:
-        self._add(Logger.FATAL, self.progname, msg)
-        if new_line:
-            self._add(Logger.FATAL, self.progname, "")
-
-    def unknown(self, msg: Union[str, Exception], new_line=False) -> None:
-        self._add(Logger.UNKNOWN, self.progname, msg)
-        if new_line:
-            self._add(Logger.UNKNOWN, self.progname, "")
-
-    def _add(
-        self, severity: Union[str, int], progname: str, msg: Union[str, Exception]
-    ) -> Optional[bool]:
-        if severity is None:
-            severity = Logger.UNKNOWNN
-        if severity < self.level:
-            return True
-
-        stack = inspect.stack()[2]
-
-        with open(self.log_path, "a") as f:
-            f.write(
-                self._format_message(
-                    self._format_severity(severity),
-                    datetime.datetime.now(),
-                    progname,
-                    msg,
-                    stack,
-                )
-            )
-
-    def _format_message(
-        self,
-        severity: Union[str, int],
-        datetime,
-        progname: str,
-        msg: Union[str, Exception],
-        stack: inspect.FrameInfo,
-    ) -> str:
-        return (self.formatter or self.default_formatter).call(
-            severity, datetime, progname, msg, stack
-        )
-
-    def _format_severity(self, severity: int) -> str:
-        return Logger.SEV_LABEL[severity] or "ANY"
+"""Log Formatter Class"""
 
 
 class Formatter:
@@ -225,8 +99,148 @@ class Formatter:
             return str(msg)
 
 
+"""Logger Singleton Class"""
+
+# https://qiita.com/risuoku/items/23789030db29489f8214
+self = sys.modules[__name__]
+
+"""Log Level"""
+DEBUG = 0
+INFO = 1
+WARN = 2
+ERROR = 3
+FATAL = 4
+UNKNOWNN = 5
+NULL = 6
+
+"""Severity Label for logging (max 5 chars)"""
+SEV_LABEL = ("DEBUG", "INFO", "WARN", "ERROR", "FATAL", "NULL", "ANY")
+
+"""Default Log Path"""
+DEFAULT_LOG_PATH = "~/.gfzs.log"
+
+self.progname = ""
+self.log_path = DEFAULT_LOG_PATH
+self.level = INFO
+self.default_formatter = Formatter()
+self.formatter = None
+
+
+def init_properties(*, progname: str, severity: Union[int, str], log_path: str) -> None:
+    self.progname = progname
+    self.log_path = log_path
+    self.set_level(severity)
+
+
+def set_level(severity: Union[int, str]) -> None:
+    """Set logging severity threshold.
+
+    Args:
+        severity: The Severity of the long message.
+    """
+
+    if str(severity).isnumeric():
+        self.level = severity
+    else:
+        _severity = severity.lower()
+
+        if _severity == "debug":
+            self.level = DEBUG
+        elif _severity == "info":
+            self.level = INFO
+        elif _severity == "warn":
+            self.level = ERROR
+        elif _severity == "fatal":
+            self.level = FATAL
+        elif _severity == "UNKNOWN":
+            self.level = UNKNOWN
+        elif _severity == "NULL":
+            self.level = NULL
+        else:
+            raise Exception("Invalid log level: #{severity}")
+
+
+def debug(msg: Union[str, Exception], new_line=False) -> None:
+    self._add(DEBUG, self.progname, msg)
+    if new_line:
+        self._add(DEBUG, self.progname, "")
+
+
+def info(msg: Union[str, Exception], new_line=False) -> None:
+    self._add(INFO, self.progname, msg)
+    if new_line:
+        self._add(INFO, self.progname, "")
+
+
+def warn(msg: Union[str, Exception], new_line=False) -> None:
+    self._add(WARAN, self.progname, msg)
+    if new_line:
+        self._add(WARAN, self.progname, "")
+
+
+def error(msg: Union[str, Exception], new_line=False) -> None:
+    self._add(ERROR, self.progname, msg)
+    if new_line:
+        self._add(ERROR, self.progname, "")
+
+
+def fatal(msg: Union[str, Exception], new_line=False) -> None:
+    self._add(FATAL, self.progname, msg)
+    if new_line:
+        self._add(FATAL, self.progname, "")
+
+
+def unknown(msg: Union[str, Exception], new_line=False) -> None:
+    self._add(UNKNOWN, self.progname, msg)
+    if new_line:
+        self._add(UNKNOWN, self.progname, "")
+
+
+def _add(
+    severity: Union[str, int], progname: str, msg: Union[str, Exception]
+) -> Optional[bool]:
+    if severity is None:
+        severity = UNKNOWNN
+
+    if severity < self.level:
+        return True
+
+    stack = inspect.stack()[2]
+
+    with open(self.log_path, "a") as f:
+        f.write(
+            self._format_message(
+                self._format_severity(severity),
+                datetime.datetime.now(),
+                progname,
+                msg,
+                stack,
+            )
+        )
+
+
+def _format_message(
+    severity: Union[str, int],
+    datetime,
+    progname: str,
+    msg: Union[str, Exception],
+    stack: inspect.FrameInfo,
+) -> str:
+    return (self.formatter or self.default_formatter).call(
+        severity, datetime, progname, msg, stack
+    )
+
+
+def _format_severity(severity: int) -> str:
+    return SEV_LABEL[severity] or "ANY"
+
+
 if __name__ == "__main__":
-    progname = "gfzs.utils.logger"
-    logger = Logger.get_instance(progname, "./tmp/gfzs.log")
-    logger.info("test logger")
-    logger.info()
+    properties = {
+        "progname": "gfzs.utils.logger",
+        "severity": "INFO",
+        "log_path": "./tmp/gfzs.log",
+    }
+    self.init_properties(**properties)
+    self.info("info")
+    self.debug("debug")
