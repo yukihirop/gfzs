@@ -39,10 +39,10 @@ Instead, the operation is guaranteed by executing the following command and actu
 - [ ] python3 gfzs/cmd/valid.py
 - [ ] python3 gfzs/controller.py
 - [ ] python3 gfzs/model.py
-- [ ] cat fixtures/rust.json | bin/gfzs -s 20
-- [ ] cat fixtures/rust.json | python3 -m gfzs -s 40
-- [ ] bin/gfzs init
-- [ ] bin/gfzs edit
-- [ ] bin/gfzs demo
-- [ ] bin/gfzs valid
+- [ ] cat fixtures/rust.json | bin/gfzs -s 20  -l 0 -p ./tmp/gfzs.log
+- [ ] cat fixtures/rust.json | python3 -m gfzs -s 40 -l 0 -p ./tmp/gfzs.log
+- [ ] bin/gfzs -l 0 -p ./tmp/gfzs.log init
+- [ ] bin/gfzs -l 0 -p ./tmp/gfzs.log edit
+- [ ] bin/gfzs -l 0 -p ./tmp/gfzs.log demo
+- [ ] bin/gfzs -l 0 -p ./tmp/gfzs.log valid
 - [ ] black gfzs/**/*.py

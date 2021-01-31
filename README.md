@@ -53,6 +53,35 @@ gfzs demo
 
 ## 📖 Usage
 
+```bash
+$ gfzs -h
+
+usage: gfzs [-h] [--version] [--score SCORE] [--log-level LOG_LEVEL]
+            [--log-path LOG_PATH]
+            {init,edit,demo,valid} ...
+
+Google Fuzzy Search. Pipe the search result(json) of googler and use it
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --version, -v         show program's version number and exit
+  --score SCORE, -s SCORE
+                        fuzzywuzzy's score (default: 30). please see
+                        https://github.com/seatgeek/fuzzywuzzy
+  --log-level LOG_LEVEL, -l LOG_LEVEL
+                        Log Level (default: 1). [0: DEBUG, 1: INFO, 2: WARN,
+                        3: ERROR, 4: FATAL, 5: UNKNOWN, 6: NULL]
+  --log-path LOG_PATH, -p LOG_PATH
+                        Log Path (default: ~/gfzs.log)
+
+SubCommands:
+  {init,edit,demo,valid}
+    init                Initialize gfzs
+    edit                Edit config
+    demo                Play with Demo
+    valid               Validate ~/.gfzsrc
+```
+
 Initialize first. A configuration file (`.gfzsrc`) is created in your home directory.
 
 ```bash
@@ -241,6 +270,29 @@ Config is valid
 |----|-----------|
 |`DEBUG`|You will be able to use the `debug` module.|
 |`EDITOR`|Set the command to open the editor.|
+
+
+## 💌 Logging
+
+By default, logs with a `log level of INFO` or higher will be sent to `~/gfzs.log`.
+
+|Log Level|value|desc|
+|---------|-----|----|
+|`DEBUG`|0|||
+|`INFO`|1|default|
+|`WARN`|2||
+|`ERROR`|3||
+|`FATAL`|4||
+|`UNKNOWN`|5||
+|`NULL`|6||
+
+## 🐛 Debug
+
+When you want to know the details of the movement or identify the cause of the error, you can change the log level to `DEBUG(0)` and debug with the log.
+
+```bash
+$ cat fixtures/python.json | bin/gfzs --log-level 0
+```
 
 ## 💪 Development
 
