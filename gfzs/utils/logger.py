@@ -110,7 +110,7 @@ INFO = 1
 WARN = 2
 ERROR = 3
 FATAL = 4
-UNKNOWNN = 5
+UNKNOWN = 5
 NULL = 6
 
 """Severity Label for logging (max 5 chars)"""
@@ -200,7 +200,7 @@ def _add(
     severity: Union[str, int], progname: str, msg: Union[str, Exception]
 ) -> Optional[bool]:
     if severity is None:
-        severity = UNKNOWNN
+        severity = UNKNOWN
 
     if severity < self.level:
         return True
