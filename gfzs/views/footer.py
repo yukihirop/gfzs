@@ -209,7 +209,7 @@ if __name__ == "__main__":
 
     runtime_config = RuntimeConfig.get_instance()
     if not runtime_config.valid():
-        logger.debug("[print] Config is invalid.")
+        logger.debug("[print] 'Config is invalid.'")
         print("Config is invalid.")
         for error in runtime_config.errors:
             logger.error(error)
@@ -235,8 +235,8 @@ if __name__ == "__main__":
     error = None
     try:
         inp = target.run()
-        logger.debug("query: %s" % model.query)
-        logger.debug("result: %s" % inp)
+        logger.debug("query: '%s'" % model.query)
+        logger.debug("result: '%s'" % inp)
         print("query:", model.query)
         print("result:", inp)
     except curses.error as e:

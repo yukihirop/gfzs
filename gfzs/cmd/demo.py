@@ -153,7 +153,7 @@ def main(args: argparse.Namespace):
     runtime_config = RuntimeConfig.get_instance()
     _ = RuntimeOpts.get_instance(args)
     if not runtime_config.valid():
-        logger.debug("[print] Config is invalid.")
+        logger.debug("[print] 'Config is invalid.'")
         print("Config is invalid.")
         for error in runtime_config.errors:
             logger.error(error)

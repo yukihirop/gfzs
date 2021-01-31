@@ -53,10 +53,10 @@ def main(args: argparse.Namespace):
     data = runtime_config.data
 
     if os.path.exists(config_path):
-        logger.debug("[print] Reinitialized existing in %s" % config_path)
+        logger.debug("[print] 'Reinitialized existing in %s'" % config_path)
         print("Reinitialized existing in %s" % config_path)
     else:
-        logger.debug("[print] Initialize config in %s" % config_path)
+        logger.debug("[print] 'Initialize config in %s'" % config_path)
         with open(config_path, mode="w") as f:
             f.write(json.dumps(data, indent=2))
             print("Initialize config in %s" % config_path)

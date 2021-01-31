@@ -154,16 +154,16 @@ class Controller:
                 if user_input in arrow_keys:
                     input_mode = False
                     logger.debug(
-                        "[Controller] keyboard input: %s" % (arrow_keys[user_input])
+                        "[Controller] keyboard input: '%s'" % (arrow_keys[user_input])
                     )
                     self._search_and_refresh_display(user_input, is_init_query=False)
                 elif user_input == KEY_ESC:
-                    logger.debug("[Controller] keyboard input: KEY_ESC (pass)")
+                    logger.debug("[Controller] keyboard input: 'KEY_ESC' (pass)")
                     pass
                 elif user_input == KEY_ENTER:
                     input_mode = False
                     logger.debug(
-                        "[Controller] keyboard input: KEY_ENTER. query is '%s'"
+                        "[Controller] keyboard input: 'KEY_ENTER'. query is '%s'"
                         % (self.model.query)
                     )
                     self._search_and_refresh_display(user_input, is_init_query=False)
@@ -177,7 +177,7 @@ class Controller:
                             user_input, is_init_property=True, is_init_query=False
                         )
                 elif user_input == curses.KEY_RESIZE:
-                    logger.debug("[Controller] keyboard input: KEY_RESIZE")
+                    logger.debug("[Controller] keyboard input: 'KEY_RESIZE'")
                     self._handle_resize(user_input)
                 # I don't know the reason, but - 1 may come in
                 elif user_input == -1:
@@ -195,13 +195,13 @@ class Controller:
                 if user_input in arrow_keys:
                     self.search_result.handle_key_in_loop(user_input)
                 elif user_input == KEY_ESC:
-                    logger.debug("[Controller] keyboard input: KEY_ESC (pass)")
+                    logger.debug("[Controller] keyboard input: 'KEY_ESC' (pass)")
                     pass
                 elif user_input == KEY_ENTER:
                     self.execute_when_enter(self.search_result.current_selected)
                 elif user_input in backspace_keys:
                     logger.debug(
-                        "[Controller] keyboard input: %s" % backspace_keys[user_input]
+                        "[Controller] keyboard input: '%s'" % backspace_keys[user_input]
                     )
                     input_mode = True
                     self.footer.activate()
@@ -213,7 +213,7 @@ class Controller:
                     self._handle_resize(user_input)
                 # I don't know the reason, but - 1 may come in
                 elif user_input == -1:
-                    logger.unknown("[Controller] keyboard input: -1")
+                    logger.unknown("[Controller] keyboard input: '-1'")
                     pass
                 else:
                     input_mode = True

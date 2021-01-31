@@ -544,7 +544,7 @@ if __name__ == "__main__":
 
     runtime_config = RuntimeConfig.get_instance()
     if not runtime_config.valid():
-        logger.debug("[print] Config is invalid.")
+        logger.debug("[print] 'Config is invalid.'")
         print("Config is invalid.")
         for error in runtime_config.errors:
             logger.error(error)
@@ -578,7 +578,7 @@ if __name__ == "__main__":
         choice = target.run(pad_begin_y=1)
         if choice != None:
             enter_result = model.result[choice].get("title")
-            logger.debug("Enter Result: %s" % enter_result)
+            logger.debug("Enter Result: '%s'" % enter_result)
             print(enter_result)
     except curses.error as e:
         error = e

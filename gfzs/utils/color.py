@@ -196,7 +196,7 @@ if __name__ == "__main__":
     progname = "gfzs.utils.color"
     properties = {
         "progname": progname,
-        "severity": "INFO",
+        "severity": 0,
         "log_path": "./tmp/gfzs.log",
     }
     logger.init_properties(**properties)

@@ -92,7 +92,7 @@ class Multibyte:
         elif INVALID_BYTE_START <= key <= INVALID_BYTE_END:
             logger.debug("[Multibyte] keyboard input: invalid byte '%s'" % key)
             self._end_curses()
-            e = Exception("[Multibyte] Invalid Byte: %s" % key)
+            e = Exception("[Multibyte] Invalid Byte: '%s'" % key)
             logger.error(e)
             print("Error: %s" % str(e))
             logger.debug("exit 1")

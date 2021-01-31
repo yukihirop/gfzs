@@ -137,7 +137,7 @@ if __name__ == "__main__":
 
     runtime_config = RuntimeConfig.get_instance()
     if not runtime_config.valid():
-        logger.debug("[print] Config is invalid.")
+        logger.debug("[print] 'Config is invalid.'")
         print("Config is invalid.")
         for error in runtime_config.errors:
             logger.error(error)

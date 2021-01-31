@@ -70,7 +70,7 @@ def reconnect_descriptors(tty):
             except OSError:
                 # maybe mode specification is invalid or /dev/null is specified (?)
                 target[name] = None
-                error = "Error: Failed to open {0}".format(other_desc)
+                error = "Error: Failed to open '{0}'".format(other_desc)
                 logger.error(error)
                 print(error)
 
