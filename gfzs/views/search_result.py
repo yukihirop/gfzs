@@ -146,6 +146,7 @@ class SearchResultHelper:
             if self.current_page != old_current_page:
                 self.change_page = True
 
+
 class SearchResult(Base):
     """Display options build from a list of strings in a (unix) terminal.
     The user can browser though the textboxes and select one with enter.
@@ -445,7 +446,11 @@ class SearchResult(Base):
             return
 
         per_page = self.per_page
-        backspace_keys = {curses.ascii.BS: 'ASCII_BS', curses.ascii.DEL: 'ASCII_DEL', curses.KEY_BACKSPACE: 'KEY_BACKSPACE'}
+        backspace_keys = {
+            curses.ascii.BS: "ASCII_BS",
+            curses.ascii.DEL: "ASCII_DEL",
+            curses.KEY_BACKSPACE: "KEY_BACKSPACE",
+        }
 
         if textboxes_len > 1 and user_input == curses.KEY_DOWN:
             logger.debug("[SearchResult] handle key in loop with 'KEY_DOWN'")
@@ -463,8 +468,12 @@ class SearchResult(Base):
             logger.debug("[SearchResult] handle key in loop with 'KEY_RESIZE'")
             self.reset()
         elif user_input in backspace_keys:
-            logger.debug("[SearchResult] handle key in loop with '%s'" % backspace_keys[user_input])
+            logger.debug(
+                "[SearchResult] handle key in loop with '%s'"
+                % backspace_keys[user_input]
+            )
             self.reset()
+
 
 if __name__ == "__main__":
 

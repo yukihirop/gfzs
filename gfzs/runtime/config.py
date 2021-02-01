@@ -139,6 +139,7 @@ def init() -> None:
     self.data = self._create_data()
     self.errors = []
 
+
 def valid() -> bool:
     logger.debug("[RuntimeConfig] validate")
     flatten_data = flatten(
@@ -172,7 +173,7 @@ def valid() -> bool:
                             % (flatten_key, target_val)
                         )
                     )
-                    
+
     if self.errors != []:
         logger.error("[RuntimeConfig] is invalid")
         return False
