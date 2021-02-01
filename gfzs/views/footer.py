@@ -221,6 +221,7 @@ if __name__ == "__main__":
     # initscr() returns a window object representing the entire screen.
     logger.debug("init curses")
     stdscr = curses.initscr()
+    color.init()
 
     # turn off automatic echoing of keys to the screen
     curses.noecho()

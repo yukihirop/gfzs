@@ -14,6 +14,7 @@ try:
     from gfzs.views.search_result import SearchResult
     from gfzs.views.footer import Footer
     import gfzs.utils.logger as logger
+    import gfzs.utils.color as color
 
     if os.environ.get("DEBUG"):
         import gfzs.utils.debug as debug
@@ -26,6 +27,7 @@ except ModuleNotFoundError:
     from views.search_result import SearchResult
     from views.footer import Footer
     import utils.logger as logger
+    import utils.color as color
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
@@ -50,6 +52,8 @@ class Controller:
 
         # initscr() returns a window object representing the entire screen.
         self.stdscr = curses.initscr()
+        color.init()
+
         # turn off automatic echoing of keys to the screen
         curses.noecho()
         # Enable non-blocking mode. keys are read directly, without hitting enter.
