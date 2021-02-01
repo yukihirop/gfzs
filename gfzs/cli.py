@@ -15,7 +15,7 @@ try:
     from gfzs.utils import debug
     from gfzs.controller import Controller
     from gfzs.model import Model
-    from gfzs.runtime.opts import RuntimeOpts
+    import gfzs.runtime.opts as runtime_opts
     from gfzs.runtime.config import RuntimeConfig
     import gfzs.utils.logger as logger
     import gfzs.cmd.init as cmd_init
@@ -28,7 +28,7 @@ except ModuleNotFoundError:
     from utils import debug
     from controller import Controller
     from model import Model
-    from runtime.opts import RuntimeOpts
+    import runtime.opts as runtime_opts
     from runtime.config import RuntimeConfig
     import cmd.init as cmd_init
     import cmd.edit as cmd_edit
@@ -52,9 +52,9 @@ def init_parser():
         "--score",
         "-s",
         type=int,
-        default=RuntimeOpts.default_score,
+        default=runtime_opts.default_score,
         help="fuzzywuzzy's score (default: {0}). please see https://github.com/seatgeek/fuzzywuzzy".format(
-            RuntimeOpts.default_score
+            runtime_opts.default_score
         ),
     )
     parser.add_argument(
@@ -128,7 +128,7 @@ def main() -> None:
     error = None
     errors = []
     printable_len = 100
-    _ = RuntimeOpts.get_instance(args)
+    runtime_opts.init(args)
     ttyname = tty.get_ttyname()
 
     with open_tty(ttyname) as tty_f:

@@ -30,37 +30,27 @@ except ModuleNotFoundError:
     if os.environ.get("DEBUG"):
         import utils.debug as debug
 
+"""RuntimeOpts Class that reads and manages the options passed in the runtime"""
+
+# https://qiita.com/risuoku/items/23789030db29489f8214
+self = sys.modules[__name__]
+
+"""fuzzywuzzy's score. please see https://github.com/seatgeek/fuzzywuzzy"""
 DEFAULT_SCORE = 30
-
-# ref: https://qiita.com/ttsubo/items/c4af71ceba15b5b213f8
-class Singleton(object):
-    @classmethod
-    def get_instance(cls, args: Optional[argparse.Namespace] = None):
-        if not hasattr(cls, "_instance"):
-            cls._instance = cls(args)
-        else:
-            if args != None:
-                cls._instance.args = args
-
-        return cls._instance
+default_score = DEFAULT_SCORE
 
 
-class RuntimeOpts(Singleton):
-    """A class that reads and manages the options passed in the runtime"""
+def init(args: argparse.Namespace) -> None:
+    logger.debug("[RuntimeOpts] init")
+    self.args = args
+    self.score = self._score()
 
-    """fuzzywuzzy's score. please see https://github.com/seatgeek/fuzzywuzzy"""
-    default_score = DEFAULT_SCORE
 
-    def __init__(self, args):
-        logger.debug("[RuntimeOpts] init")
-        self.args = args
-
-    @property
-    def score(self) -> int:
-        if self.args is None:
-            return RuntimeOpts.default_score
-        elif self.args != None and not ("score" in self.args):
-            return RuntimeOpts.default_score
-        else:
-            logger.debug("[RuntimeOpts] score = %d" % self.args.score)
-            return self.args.score
+def _score() -> int:
+    if self.args is None:
+        return default_score
+    elif self.args != None and not ("score" in self.args):
+        return default_score
+    else:
+        logger.debug("[RuntimeOpts] score = %d" % self.args.score)
+        return self.args.score

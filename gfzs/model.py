@@ -10,7 +10,7 @@ try:
     if __name__ == "__main__":
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-        from runtime.opts import RuntimeOpts
+        import runtime.opts as runtime_opts
         import utils.logger as logger
 
         if os.environ.get("DEBUG"):
@@ -19,7 +19,7 @@ try:
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
-        from gfzs.runtime.opts import RuntimeOpts
+        import gfzs.runtime.opts as runtime_opts
         import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
@@ -27,7 +27,7 @@ try:
 
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
-    from runtime.opts import RuntimeOpts
+    import runtime.opts as runtime_opts
     import utils.logger as logger
 
     if os.environ.get("DEBUG"):
@@ -41,7 +41,6 @@ class Model:
         self.collection = collection
         self.result = []
         self.query = self.old_query = None
-        self.runtime_opts = RuntimeOpts.get_instance()
         self.errors = []
 
         self.char_regex = re.compile(r"^\w|\W+")
@@ -112,7 +111,7 @@ class Model:
 
     def find(self, query=None):
         logger.debug("[Model] find with query: '%s'" % query or self.query)
-        score = self.runtime_opts.score
+        score = runtime_opts.score
 
         if query != None and query != "":
             self.update_query(query)
@@ -235,8 +234,6 @@ if __name__ == "__main__":
     import signal
     import argparse
 
-    from runtime.opts import RuntimeOpts
-
     progname = "gfzs.model"
     properties = {"progname": progname, "severity": 0, "log_path": "./tmp/gfzs.log"}
     logger.init_properties(**properties)
@@ -253,17 +250,18 @@ if __name__ == "__main__":
     data = json.loads(json_str)
 
     args = argparse.Namespace(score=30)
-    config = RuntimeOpts.get_instance(args)
+    runtime_opts.init(args)
+
     model = TestModel(data)
 
     result = model.find("Amazon")
     logger.debug(
         "Search (query=Amazon, score=%d):  %d / %d"
-        % (config.score, model.data_size, model.summary_count)
+        % (runtime_opts.score, model.data_size, model.summary_count)
     )
     print(
         "Search (query=Amazon, score=%d):  %d / %d"
-        % (config.score, model.data_size, model.summary_count)
+        % (runtime_opts.score, model.data_size, model.summary_count)
     )
     for i in range(len(result)):
         print(result[i]["title"])
@@ -271,11 +269,11 @@ if __name__ == "__main__":
     result = model.find("\0")
     logger.debug(
         "Search (query=\0, score=%d):  %d / %d"
-        % (config.score, model.data_size, model.summary_count)
+        % (runtime_opts.score, model.data_size, model.summary_count)
     )
     print(
         "Search (query=\0, score=%d):  %d / %d"
-        % (config.score, model.data_size, model.summary_count)
+        % (runtime_opts.score, model.data_size, model.summary_count)
     )
     for i in range(len(result)):
         print(result[i]["title"])
@@ -283,11 +281,11 @@ if __name__ == "__main__":
     result = model.find("a")
     logger.debug(
         "Search (query=\0, score=%d):  %d / %d"
-        % (config.score, model.data_size, model.summary_count)
+        % (runtime_opts.score, model.data_size, model.summary_count)
     )
     print(
         "Search (query=\0, score=%d):  %d / %d"
-        % (config.score, model.data_size, model.summary_count)
+        % (runtime_opts.score, model.data_size, model.summary_count)
     )
     for i in range(len(result)):
         print(result[i]["title"])

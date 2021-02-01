@@ -16,7 +16,7 @@ try:
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from controller import Controller
         from runtime.config import RuntimeConfig
-        from runtime.opts import RuntimeOpts
+        import runtime.opts as runtime_opts
         import utils.logger as logger
 
         if os.environ.get("DEBUG"):
@@ -27,7 +27,7 @@ try:
     else:
         from gfzs.controller import Controller
         from gfzs.runtime.config import RuntimeConfig
-        from gfzs.runtime.opts import RuntimeOpts
+        import gfzs.runtime.opts as runtime_opts
         import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
@@ -39,7 +39,7 @@ except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from controller import Controller
     from runtime.config import RuntimeConfig
-    from runtime.opts import RuntimeOpts
+    import runtime.opts as runtime_opts
     import utils.logger as logger
 
     if os.environ.get("DEBUG"):
@@ -151,7 +151,7 @@ def main(args: argparse.Namespace):
     warnings.simplefilter("ignore", FutureWarning)
 
     runtime_config = RuntimeConfig.get_instance()
-    _ = RuntimeOpts.get_instance(args)
+    runtime_opts.init(args)
     if not runtime_config.valid():
         logger.debug("[print] 'Config is invalid.'")
         print("Config is invalid.")
