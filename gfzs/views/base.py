@@ -42,6 +42,7 @@ class Base(object):
         self.parent_height, self.parent_width = stdscr.getmaxyx()
         self.model = model
         self.color = color
+        self.runtime_config = runtime_config
         self.color_data = runtime_config.data["view"][view_name]["color"]
         self.colors = self._create_colors(self.color_data)
 

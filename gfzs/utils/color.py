@@ -223,7 +223,7 @@ if __name__ == "__main__":
 
         for i in range(0, 8):
             for j in range(0, 8):
-                use_color = color.use({"text": i, "background": j, "style": "normal"})
+                use_color = self.use({"text": i, "background": j, "style": "normal"})
                 screen.addstr("(%d, %d)" % (i, j), use_color)
 
         screen.getch()

@@ -241,6 +241,7 @@ if __name__ == "__main__":
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
     import runtime.config as runtime_config
+    import runtime.opts as runtime_opts
 
     progname = "gfzs.controller"
     properties = {"progname": progname, "severity": 0, "log_path": "./tmp/gfzs.log"}
@@ -255,6 +256,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, handle_sigint)
 
     runtime_config.init()
+    runtime_opts.init()
     if not runtime_config.valid():
         logger.debug("[prinnt] Config is invalid.")
         print("Config is invalid.")

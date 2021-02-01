@@ -40,7 +40,7 @@ DEFAULT_SCORE = 30
 default_score = DEFAULT_SCORE
 
 
-def init(args: argparse.Namespace) -> None:
+def init(args: argparse.Namespace = None) -> None:
     logger.debug("[RuntimeOpts] init")
     self.args = args
     self.score = self._score()
