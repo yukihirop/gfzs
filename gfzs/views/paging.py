@@ -114,7 +114,7 @@ if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
     from model import Model
     from search_result import SearchResult
-    from runtime.config import RuntimeConfig
+    import runtime.config as runtime_config
 
     progname = "gfzs.views.paging"
     properties = {"progname": progname, "severity": 0, "log_path": "./tmp/gfzs.log"}
@@ -128,7 +128,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, handle_sigint)
 
-    runtime_config = RuntimeConfig.get_instance()
+    runtime_config.init()
     if not runtime_config.valid():
         logger.debug("[print] 'Config is invalid.'")
         print("Config is invalid.")

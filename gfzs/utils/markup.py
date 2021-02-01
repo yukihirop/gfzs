@@ -10,7 +10,7 @@ try:
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from multibyte import Multibyte
         from color import Color
-        from runtime.config import RuntimeConfig
+        import runtime.config as runtime_config
         import logger
 
         if os.environ.get("DEBUG"):
@@ -21,7 +21,7 @@ try:
     else:
         from gfzs.utils.multibyte import Multibyte
         from gfzs.utils.color import Color
-        from gfzs.runtime.config import RuntimeConfig
+        import gfzs.runtime.config as runtime_config
         import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
@@ -33,7 +33,7 @@ except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from utils.multibyte import Multibyte
     from utils.color import Color
-    from runtime.config import RuntimeConfig
+    import runtime.config as runtime_config
     import utils.logger as logger
 
     if os.environ.get("DEBUG"):
@@ -44,10 +44,9 @@ class Markup:
     def __init__(self):
         logger.debug("[Markup] init")
         self.multibyte = Multibyte()
-        self.runtime_config = RuntimeConfig.get_instance()
         self.color = Color.get_instance()
-        self.color_data = self.runtime_config.data["view"]["search_result"]["color"]
-        self.colors = self._create_colors(self.runtime_config, self.color_data)
+        self.color_data = runtime_config.data["view"]["search_result"]["color"]
+        self.colors = self._create_colors(self.color_data)
 
     def parse(self, text, search_text):
         logger.debug("[Markup] parse by search_text: '%s'" % search_text)
@@ -119,7 +118,7 @@ class Markup:
 
         return result
 
-    def _create_colors(self, runtime_config, color_data) -> dict:
+    def _create_colors(self, color_data) -> dict:
         result = {}
         for view_name in color_data:
             result[view_name] = self.color.use(color_data[view_name])
@@ -135,7 +134,7 @@ if __name__ == "__main__":
     logger.init_properties(**properties)
     logger.debug("start %s" % progname)
 
-    runtime_config = RuntimeConfig.get_instance()
+    runtime_config.init()
     if not runtime_config.valid():
         logger.debug("[print] 'Config is invalid.'")
         print("Config is invalid.")
