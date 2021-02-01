@@ -13,21 +13,22 @@ try:
     from gfzs.views.header import Header
     from gfzs.views.search_result import SearchResult
     from gfzs.views.footer import Footer
+    import gfzs.utils.logger as logger
 
     if os.environ.get("DEBUG"):
         import gfzs.utils.debug as debug
 
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
-    import utils, views
     from model import Model
     from utils.multibyte import Multibyte
     from views.header import Header
     from views.search_result import SearchResult
     from views.footer import Footer
+    import utils.logger as logger
 
     if os.environ.get("DEBUG"):
-        from utils import debug
+        import utils.debug as debug
 
 KEY_ENTER = 10
 KEY_ESC = 27
@@ -35,6 +36,7 @@ KEY_ESC = 27
 
 class Controller:
     def __init__(self, data):
+        logger.debug("[Controller] init")
         self._init_curses()
         self.model = Model(data)
         self.header = Header(self.stdscr)
@@ -44,6 +46,8 @@ class Controller:
 
     def _init_curses(self):
         """ Inits the curses application """
+        logger.debug("[Controller] init curses")
+
         # initscr() returns a window object representing the entire screen.
         self.stdscr = curses.initscr()
         # turn off automatic echoing of keys to the screen
@@ -58,6 +62,8 @@ class Controller:
 
     def _end_curses(self):
         """ Terminates the curses application. """
+        logger.debug("[Controller] end curses")
+
         curses.nocbreak()
         self.stdscr.keypad(0)
         curses.echo()
@@ -77,12 +83,15 @@ class Controller:
         result = self.search_result.update_view_in_loop()
 
         if is_init_query:
+            logger.debug("[Controller] reset query")
             self.search_result.update_query("")
 
         if result:
             self.search_result.handle_key_in_loop(user_input)
 
     def _handle_resize(self, user_input):
+        logger.debug("[Controller] detect resize")
+
         self.header.reset()
         self.footer.reset()
         self._search_and_refresh_display(
@@ -92,14 +101,27 @@ class Controller:
     def execute_when_enter(self, current_selected):
         result = self.model.result
         if len(result) != 0:
-            webbrowser.open(result[current_selected].get("url"), new=2)
+            url = result[current_selected].get("url")
+            webbrowser.open(url, new=2)
+            logger.debug("[Controller] detect Enter. open url: %s" % url)
+        else:
+            logger.debug("[Controller] detect Enter. but result is empty.")
 
     def run(self) -> int:
         input_mode = True
         user_input = ""
         box_select_begin_y = 2
-        arrow_keys = (curses.KEY_DOWN, curses.KEY_UP, curses.KEY_LEFT, curses.KEY_RIGHT)
-        backspace_keys = (curses.ascii.BS, curses.ascii.DEL, curses.KEY_BACKSPACE)
+        arrow_keys = {
+            curses.KEY_DOWN: "KEY_DOWN",
+            curses.KEY_UP: "KEY_UP",
+            curses.KEY_LEFT: "KEY_LEFT",
+            curses.KEY_RIGHT: "KEY_RIGHT",
+        }
+        backspace_keys = {
+            curses.ascii.BS: "ASCII_BS",
+            curses.ascii.DEL: "ASCII_DEL",
+            curses.KEY_BACKSPACE: "KEY_BACKSPACE",
+        }
 
         self.header.create()
 
@@ -128,13 +150,22 @@ class Controller:
                 break
 
             if input_mode:
+                logger.debug("[Controller] input mode")
                 if user_input in arrow_keys:
                     input_mode = False
+                    logger.debug(
+                        "[Controller] keyboard input: '%s'" % (arrow_keys[user_input])
+                    )
                     self._search_and_refresh_display(user_input, is_init_query=False)
                 elif user_input == KEY_ESC:
+                    logger.debug("[Controller] keyboard input: 'KEY_ESC' (pass)")
                     pass
                 elif user_input == KEY_ENTER:
                     input_mode = False
+                    logger.debug(
+                        "[Controller] keyboard input: 'KEY_ENTER'. query is '%s'"
+                        % (self.model.query)
+                    )
                     self._search_and_refresh_display(user_input, is_init_query=False)
                 # https://www.programcreek.com/python/?code=mingrammer%2Fawesome-finder%2Fawesome-finder-master%2Fawesome%2Ftui.py
                 elif user_input in backspace_keys:
@@ -146,6 +177,7 @@ class Controller:
                             user_input, is_init_property=True, is_init_query=False
                         )
                 elif user_input == curses.KEY_RESIZE:
+                    logger.debug("[Controller] keyboard input: 'KEY_RESIZE'")
                     self._handle_resize(user_input)
                 # I don't know the reason, but - 1 may come in
                 elif user_input == -1:
@@ -159,13 +191,18 @@ class Controller:
                             user_input, is_init_property=True, is_init_query=False
                         )
             else:
+                logger.debug("[Controller] input mode")
                 if user_input in arrow_keys:
                     self.search_result.handle_key_in_loop(user_input)
                 elif user_input == KEY_ESC:
+                    logger.debug("[Controller] keyboard input: 'KEY_ESC' (pass)")
                     pass
                 elif user_input == KEY_ENTER:
                     self.execute_when_enter(self.search_result.current_selected)
                 elif user_input in backspace_keys:
+                    logger.debug(
+                        "[Controller] keyboard input: '%s'" % backspace_keys[user_input]
+                    )
                     input_mode = True
                     self.footer.activate()
                     self.footer.delete_char()
@@ -176,6 +213,7 @@ class Controller:
                     self._handle_resize(user_input)
                 # I don't know the reason, but - 1 may come in
                 elif user_input == -1:
+                    logger.unknown("[Controller] keyboard input: '-1'")
                     pass
                 else:
                     input_mode = True
@@ -192,20 +230,34 @@ if __name__ == "__main__":
     # https://note.nkmk.me/python-warnings-ignore-warning/
     import warnings
 
+    warnings.simplefilter("ignore", FutureWarning)
+
     # local
 
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
     from runtime.config import RuntimeConfig
 
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-    warnings.simplefilter("ignore", FutureWarning)
+    progname = "gfzs.controller"
+    properties = {"progname": progname, "severity": 0, "log_path": "./tmp/gfzs.log"}
+    logger.init_properties(**properties)
+    logger.debug("start %s" % progname)
+
+    def handle_sigint(signum, frame):
+        logger.debug("detect SIGINT (Ctrl-c)")
+        logger.debug("exit 0")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, handle_sigint)
 
     runtime_config = RuntimeConfig.get_instance()
     if not runtime_config.valid():
+        logger.debug("[prinnt] Config is invalid.")
         print("Config is invalid.")
         for error in runtime_config.errors:
+            logger.error(error)
             print("Error: %s" % error)
+        logger.debug("exit 1")
         sys.exit(1)
 
     json_str = open("fixtures/rust.json", "r").read()
@@ -217,10 +269,15 @@ if __name__ == "__main__":
         choice = controller.run()
         result = controller.model.result
         if not choice is None:
-            print(result[choice].get("title"))
+            enter_result = result[choice].get("title")
+            logger.debug(enter_result)
+            print(enter_result)
     except curses.error as e:
         error = str(e)
     finally:
         controller._end_curses()
         if error != None:
+            logger.error(error)
             print(error)
+
+        logger.debug("end %s" % progname, new_line=True)

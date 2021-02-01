@@ -5,6 +5,7 @@ import os, sys
 import signal
 import warnings
 import curses
+import argparse
 
 # local
 
@@ -16,9 +17,10 @@ try:
         from controller import Controller
         from runtime.config import RuntimeConfig
         from runtime.opts import RuntimeOpts
+        import utils.logger as logger
 
         if os.environ.get("DEBUG"):
-            import debug
+            import utils.debug as debug
 
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
@@ -26,6 +28,7 @@ try:
         from gfzs.controller import Controller
         from gfzs.runtime.config import RuntimeConfig
         from gfzs.runtime.opts import RuntimeOpts
+        import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -37,6 +40,7 @@ except ModuleNotFoundError:
     from controller import Controller
     from runtime.config import RuntimeConfig
     from runtime.opts import RuntimeOpts
+    import utils.logger as logger
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
@@ -128,15 +132,31 @@ DEMO_JSON_DATA = [
 ]
 
 
-def main(args=None):
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
+def main(args: argparse.Namespace):
+    progname = "gfzs.cmd.demo"
+    properties = {
+        "progname": progname,
+        "severity": int(args.log_level),
+        "log_path": args.log_path,
+    }
+    logger.init_properties(**properties)
+    logger.debug("start %s" % progname)
+
+    def handle_sigint(signum, fframe) -> None:
+        logger.debug("detect SIGINT (Ctrl-c)")
+        logger.debug("exit 0")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, handle_sigint)
     warnings.simplefilter("ignore", FutureWarning)
 
-    _ = RuntimeOpts.get_instance(args)
     runtime_config = RuntimeConfig.get_instance()
+    _ = RuntimeOpts.get_instance(args)
     if not runtime_config.valid():
+        logger.debug("[print] 'Config is invalid.'")
         print("Config is invalid.")
         for error in runtime_config.errors:
+            logger.error(error)
             print("Error: %s" % error)
         sys.exit(1)
 
@@ -152,9 +172,17 @@ def main(args=None):
     finally:
         controller._end_curses()
         if error != None:
+            logger.error(error)
             print("Error: %s" % error)
+            logger.debug("exit 1")
             sys.exit(1)
+
+        logger.debug("end %s" % progname, new_line=True)
 
 
 if __name__ == "__main__":
-    main()
+    args = argparse.Namespace()
+    args.log_path = "./tmp/gfzs.log"
+    args.log_level = 0
+
+    main(args)

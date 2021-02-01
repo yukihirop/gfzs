@@ -9,8 +9,8 @@ try:
     if __name__ == "__main__":
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-        import utils
         from utils.color import Color
+        import utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import utils.debug as debug
@@ -19,6 +19,7 @@ try:
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs.utils.color import Color
+        import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -27,6 +28,7 @@ try:
 except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from utils.color import Color
+    import utils.logger as logger
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
@@ -600,6 +602,7 @@ NOT_FOUND = "Not Found"
 
 class NotFound:
     def __init__(self, stdscr):
+        logger.debug("[NotFound] init")
         self.block = "■"
         self.stdscr = stdscr
         self.window = None
@@ -608,11 +611,13 @@ class NotFound:
         self.color = Color.get_instance()
 
     def create(self):
+        logger.debug("[NotFound] create")
         self._init_layout()
         self._make_not_found()
         self.window.refresh()
 
     def destroy(self):
+        logger.debug("[NotFound] destroy")
         if not self.window is None:
             self.window.erase()
             self.window.refresh()
@@ -724,22 +729,38 @@ if __name__ == "__main__":
             while True:
                 pass
 
+        def _end_curses(self):
+            """ Terminates the curses application. """
+            logger.debug("[TestNotFound] end curses")
+            curses.nocbreak()
+            self.window.keypad(0)
+            curses.echo()
+            curses.endwin()
+
 
 if __name__ == "__main__":
-    import curses
     import signal
-    import sys, os
 
     # local
 
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-    import utils, model
     from model import Model
 
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    progname = "gfzs.views.not_found"
+    properties = {"progname": progname, "severity": 0, "log_path": "./tmp/gfzs.log"}
+    logger.init_properties(**properties)
+    logger.debug("start %s" % progname)
+
+    def handle_sigint(signum, frame):
+        logger.debug("detect SIGINT (Ctrl-c)")
+        logger.debug("exit 0")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, handle_sigint)
 
     # initscr() returns a window object representing the entire screen.
+    logger.debug("init curses")
     stdscr = curses.initscr()
 
     # turn off automatic echoing of keys to the screen
@@ -759,4 +780,7 @@ if __name__ == "__main__":
     finally:
         target._end_curses()
         if error != None:
+            logger.error(error)
             print(error)
+
+        logger.debug("end %s" % progname, new_line=True)

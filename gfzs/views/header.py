@@ -11,7 +11,7 @@ try:
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         import info
-        from utils import debug
+        import utils.logger as logger
 
         from base import Base
 
@@ -21,8 +21,8 @@ try:
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs import info
-        from gfzs.utils import debug
         from gfzs.views.base import Base
+        import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -32,8 +32,8 @@ except ModuleNotFoundError:
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     import info
-    from utils import debug
     from views.base import Base
+    import utils.logger as logger
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
@@ -46,11 +46,13 @@ class Header(Base):
         self.copyright = info.__copyright__
 
     def create(self):
+        logger.debug("[Header] create")
         self._init_layout()
         self._make_header()
         self.window.refresh()
 
     def reset(self):
+        logger.debug("[Header] reset")
         self.window.erase()
         self._init_layout()
         self._make_header()
@@ -109,6 +111,7 @@ if __name__ == "__main__":
 
         def _end_curses(self):
             """ Terminates the curses application. """
+            logger.debug("[TestHeader] end curses")
             curses.nocbreak()
             self.window.keypad(0)
             curses.echo()
@@ -130,28 +133,40 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    import curses
     import signal
-    import os, sys
 
     # local
 
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-    import utils, model
     from model import Model
     from runtime.config import RuntimeConfig
 
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    progname = "gfzs.views.header"
+    properties = {"progname": progname, "severity": 0, "log_path": "./tmp/gfzs.log"}
+    logger.init_properties(**properties)
+    logger.debug("start %s" % progname)
+
+    def handle_sigint(signum, frame):
+        logger.debug("detect SIGINT (Ctrl-c)")
+        logger.debug("exit 0")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, handle_sigint)
 
     runtime_config = RuntimeConfig.get_instance()
     if not runtime_config.valid():
+        logger.debug("[print] 'Config is invalid.'")
         print("Config is invalid.")
         for error in runtime_config.errors:
+            logger.error(error)
             print("Error: %s" % error)
+
+        logger.debug("exit 1")
         sys.exit(1)
 
     # initscr() returns a window object representing the entire screen.
+    logger.debug("init curses")
     stdscr = curses.initscr()
 
     # turn off automatic echoing of keys to the screen
@@ -171,4 +186,7 @@ if __name__ == "__main__":
     finally:
         target._end_curses()
         if error != None:
+            logger.error(error)
             print(error)
+
+        logger.debug("end %s" % progname, new_line=True)
