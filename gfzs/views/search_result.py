@@ -146,7 +146,6 @@ class SearchResultHelper:
             if self.current_page != old_current_page:
                 self.change_page = True
 
-
 class SearchResult(Base):
     """Display options build from a list of strings in a (unix) terminal.
     The user can browser though the textboxes and select one with enter.
@@ -160,7 +159,6 @@ class SearchResult(Base):
         logger.debug("[SearchResult] init")
         super().__init__(stdscr, model, "search_result")
         self.paging = Paging(stdscr, self)
-        self.stop_loop = False
         self.textboxes = []
         self.helper = SearchResultHelper()
         self.not_found = NotFound(stdscr)
@@ -439,7 +437,6 @@ class SearchResult(Base):
         return True
 
     def handle_key_in_loop(self, user_input):
-        logger.debug("[SearchResult] handle key in loop with '%s'" % user_input)
         self.helper.change_page = False
         textboxes = self.textboxes
         textboxes_len = len(textboxes)
@@ -448,22 +445,26 @@ class SearchResult(Base):
             return
 
         per_page = self.per_page
+        backspace_keys = {curses.ascii.BS: 'ASCII_BS', curses.ascii.DEL: 'ASCII_DEL', curses.KEY_BACKSPACE: 'KEY_BACKSPACE'}
 
         if textboxes_len > 1 and user_input == curses.KEY_DOWN:
+            logger.debug("[SearchResult] handle key in loop with 'KEY_DOWN'")
             self.helper.down(textboxes_len)
         elif textboxes_len > 1 and user_input == curses.KEY_UP:
+            logger.debug("[SearchResult] handle key in loop with 'KEY_UP'")
             self.helper.up(textboxes_len)
         elif textboxes_len > per_page + 1 and user_input == curses.KEY_RIGHT:
+            logger.debug("[SearchResult] handle key in loop with 'KEY_RIGHT'")
             self.helper.next_page(textboxes_len)
         elif textboxes_len > per_page + 1 and user_input == curses.KEY_LEFT:
+            logger.debug("[SearchResult] handle key in loop with 'KEY_LEFT'")
             self.helper.prev_page(textboxes_len)
         elif user_input == curses.KEY_RESIZE:
+            logger.debug("[SearchResult] handle key in loop with 'KEY_RESIZE'")
             self.reset()
-        elif user_input in (curses.ascii.BS, curses.ascii.DEL, curses.KEY_BACKSPACE):
+        elif user_input in backspace_keys:
+            logger.debug("[SearchResult] handle key in loop with '%s'" % backspace_keys[user_input])
             self.reset()
-        elif user_input == ord("q"):  # Quit without selecting.
-            self.stop_loop = True
-
 
 if __name__ == "__main__":
 
@@ -501,9 +502,6 @@ if __name__ == "__main__":
                 )
 
             while True:
-                if self.stop_loop:
-                    break
-
                 self.update_view_in_loop()
 
                 try:
