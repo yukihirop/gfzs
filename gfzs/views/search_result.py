@@ -458,10 +458,10 @@ class SearchResult(Base):
         elif textboxes_len > 1 and user_input == curses.KEY_UP:
             logger.debug("[SearchResult] handle key in loop with 'KEY_UP'")
             self.helper.up(textboxes_len)
-        elif textboxes_len > per_page + 1 and user_input == curses.KEY_RIGHT:
+        elif textboxes_len >= per_page + 1 and user_input == curses.KEY_RIGHT:
             logger.debug("[SearchResult] handle key in loop with 'KEY_RIGHT'")
             self.helper.next_page(textboxes_len)
-        elif textboxes_len > per_page + 1 and user_input == curses.KEY_LEFT:
+        elif textboxes_len >= per_page + 1 and user_input == curses.KEY_LEFT:
             logger.debug("[SearchResult] handle key in loop with 'KEY_LEFT'")
             self.helper.prev_page(textboxes_len)
         elif user_input == curses.KEY_RESIZE:
