@@ -287,6 +287,8 @@ class SearchResult(Base):
         # When all are displayed as multi-byte character strings
         gap = 6  # 4 = 1 (Frame border) + 3(padding) + 2(margin)
         abstract_line_len = self.parent_width // 2 - gap
+        can_write_fn = lambda y: (4 + y) <= (self.TEXTBOX_HEIGHT - 1)
+
         for k in range(len(textboxes)):
             textboxes[k].box()
 
@@ -301,7 +303,8 @@ class SearchResult(Base):
             textboxes[k].addstr(3, 6, url, self.colors["url"])
             lines = textwrap.wrap(abstract, abstract_line_len)
             for l in range(len(lines)):
-                textboxes[k].addstr(4 + l, 6, lines[l], self.colors["abstract"])
+                if can_write_fn(l):
+                    textboxes[k].addstr(4 + l, 6, lines[l], self.colors["abstract"])
 
             # Markup Search Query for title
             markup_data = self.markup.parse(title, self.model.query)
@@ -327,9 +330,13 @@ class SearchResult(Base):
                             match_text
                         )
                         if offset_x + 6 + match_text_byte_len <= self.parent_width - 1:
-                            textboxes[k].addstr(
-                                4 + l, 6 + offset_x, match_text, color | curses.A_BOLD
-                            )
+                            if can_write_fn(l):
+                                textboxes[k].addstr(
+                                    4 + l,
+                                    6 + offset_x,
+                                    match_text,
+                                    color | curses.A_BOLD,
+                                )
                         # Wrap display
                         else:
                             match_text_before = match_text[
@@ -339,17 +346,18 @@ class SearchResult(Base):
                                 match_text_before
                             )
                             gap = 6  # 4 = 1 (Frame border) + 3(padding) + 2(margin)
-                            textboxes[k].addstr(
-                                4 + l,
-                                self.parent_width - byte_len - gap,
-                                match_text_before,
-                                color,
-                            )
+                            if can_write_fn(l + 1):
+                                textboxes[k].addstr(
+                                    4 + l,
+                                    self.parent_width - byte_len - gap,
+                                    match_text_before,
+                                    color,
+                                )
 
-                            match_text_after = match_text[
-                                (self.parent_width - offset_x) :
-                            ]
-                            textboxes[k].addstr(5 + l, 6, match_text_after, color)
+                                match_text_after = match_text[
+                                    (self.parent_width - offset_x) :
+                                ]
+                                textboxes[k].addstr(5 + l, 6, match_text_after, color)
 
         return textboxes
 
