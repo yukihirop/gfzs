@@ -9,7 +9,7 @@ try:
     if __name__ == "__main__":
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-        from utils.color import Color
+        import utils.color as color
         import utils.logger as logger
 
         if os.environ.get("DEBUG"):
@@ -18,7 +18,7 @@ try:
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
-        from gfzs.utils.color import Color
+        import gfzs.utils.color as color
         import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
@@ -27,7 +27,7 @@ try:
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
-    from utils.color import Color
+    import utils.color as color
     import utils.logger as logger
 
     if os.environ.get("DEBUG"):
@@ -608,7 +608,7 @@ class NotFound:
         self.window = None
         self.logo_height = 24
         self.logo_width = 126
-        self.color = Color.get_instance()
+        self.color = color
 
     def create(self):
         logger.debug("[NotFound] create")
@@ -762,6 +762,7 @@ if __name__ == "__main__":
     # initscr() returns a window object representing the entire screen.
     logger.debug("init curses")
     stdscr = curses.initscr()
+    color.init()
 
     # turn off automatic echoing of keys to the screen
     curses.noecho()

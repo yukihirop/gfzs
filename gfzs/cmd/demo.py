@@ -15,8 +15,8 @@ try:
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from controller import Controller
-        from runtime.config import RuntimeConfig
-        from runtime.opts import RuntimeOpts
+        import runtime.config as runtime_config
+        import runtime.opts as runtime_opts
         import utils.logger as logger
 
         if os.environ.get("DEBUG"):
@@ -26,8 +26,8 @@ try:
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs.controller import Controller
-        from gfzs.runtime.config import RuntimeConfig
-        from gfzs.runtime.opts import RuntimeOpts
+        import gfzs.runtime.config as runtime_config
+        import gfzs.runtime.opts as runtime_opts
         import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
@@ -38,8 +38,8 @@ except ModuleNotFoundError:
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from controller import Controller
-    from runtime.config import RuntimeConfig
-    from runtime.opts import RuntimeOpts
+    import runtime.config as runtime_config
+    import runtime.opts as runtime_opts
     import utils.logger as logger
 
     if os.environ.get("DEBUG"):
@@ -150,8 +150,8 @@ def main(args: argparse.Namespace):
     signal.signal(signal.SIGINT, handle_sigint)
     warnings.simplefilter("ignore", FutureWarning)
 
-    runtime_config = RuntimeConfig.get_instance()
-    _ = RuntimeOpts.get_instance(args)
+    runtime_config.init()
+    runtime_opts.init(args)
     if not runtime_config.valid():
         logger.debug("[print] 'Config is invalid.'")
         print("Config is invalid.")

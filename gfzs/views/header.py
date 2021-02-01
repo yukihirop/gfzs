@@ -140,7 +140,8 @@ if __name__ == "__main__":
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
     from model import Model
-    from runtime.config import RuntimeConfig
+    import runtime.config as runtime_config
+    import utils.color as color
 
     progname = "gfzs.views.header"
     properties = {"progname": progname, "severity": 0, "log_path": "./tmp/gfzs.log"}
@@ -154,7 +155,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, handle_sigint)
 
-    runtime_config = RuntimeConfig.get_instance()
+    runtime_config.init()
     if not runtime_config.valid():
         logger.debug("[print] 'Config is invalid.'")
         print("Config is invalid.")
@@ -168,6 +169,7 @@ if __name__ == "__main__":
     # initscr() returns a window object representing the entire screen.
     logger.debug("init curses")
     stdscr = curses.initscr()
+    color.init()
 
     # turn off automatic echoing of keys to the screen
     curses.noecho()

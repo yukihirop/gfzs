@@ -15,8 +15,8 @@ try:
     from gfzs.utils import debug
     from gfzs.controller import Controller
     from gfzs.model import Model
-    from gfzs.runtime.opts import RuntimeOpts
-    from gfzs.runtime.config import RuntimeConfig
+    import gfzs.runtime.opts as runtime_opts
+    import gfzs.runtime.config as runtime_config
     import gfzs.utils.logger as logger
     import gfzs.cmd.init as cmd_init
     import gfzs.cmd.edit as cmd_edit
@@ -28,8 +28,8 @@ except ModuleNotFoundError:
     from utils import debug
     from controller import Controller
     from model import Model
-    from runtime.opts import RuntimeOpts
-    from runtime.config import RuntimeConfig
+    import runtime.opts as runtime_opts
+    import runtime.config as runtime_config
     import cmd.init as cmd_init
     import cmd.edit as cmd_edit
     import cmd.demo as cmd_demo
@@ -52,9 +52,9 @@ def init_parser():
         "--score",
         "-s",
         type=int,
-        default=RuntimeOpts.default_score,
+        default=runtime_opts.default_score,
         help="fuzzywuzzy's score (default: {0}). please see https://github.com/seatgeek/fuzzywuzzy".format(
-            RuntimeOpts.default_score
+            runtime_opts.default_score
         ),
     )
     parser.add_argument(
@@ -70,8 +70,8 @@ def init_parser():
         "--log-path",
         "-p",
         type=str,
-        default=RuntimeConfig.default_log_path,
-        help="Log Path (default: {0})".format(RuntimeConfig.default_log_path),
+        default=runtime_config.default_log_path,
+        help="Log Path (default: {0})".format(runtime_config.default_log_path),
     )
 
     subparsers = parser.add_subparsers(title="SubCommands", dest="command")
@@ -81,7 +81,7 @@ def init_parser():
     subparsers.add_parser("edit", help="Edit config")
     subparsers.add_parser("demo", help="Play with Demo")
     subparsers.add_parser(
-        "valid", help="Validate {0}".format(RuntimeConfig.default_config_path)
+        "valid", help="Validate {0}".format(runtime_config.default_config_path)
     )
 
     return parser
@@ -128,7 +128,7 @@ def main() -> None:
     error = None
     errors = []
     printable_len = 100
-    _ = RuntimeOpts.get_instance(args)
+    runtime_opts.init(args)
     ttyname = tty.get_ttyname()
 
     with open_tty(ttyname) as tty_f:
@@ -138,7 +138,7 @@ def main() -> None:
             json_str = sys.stdin.read()
             data = json.loads(json_str)
             validator = Model(data)
-            runtime_config = RuntimeConfig.get_instance()
+            runtime_config.init()
 
             if not runtime_config.valid():
                 logger.debug("[print] Config is invalid.")

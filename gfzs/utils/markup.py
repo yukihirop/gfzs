@@ -9,8 +9,8 @@ try:
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from multibyte import Multibyte
-        from color import Color
-        from runtime.config import RuntimeConfig
+        import color
+        import runtime.config as runtime_config
         import logger
 
         if os.environ.get("DEBUG"):
@@ -20,8 +20,8 @@ try:
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
         from gfzs.utils.multibyte import Multibyte
-        from gfzs.utils.color import Color
-        from gfzs.runtime.config import RuntimeConfig
+        import gfzs.utils.color as color
+        import gfzs.runtime.config as runtime_config
         import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
@@ -32,8 +32,8 @@ except ModuleNotFoundError:
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from utils.multibyte import Multibyte
-    from utils.color import Color
-    from runtime.config import RuntimeConfig
+    import utils.color as color
+    import runtime.config as runtime_config
     import utils.logger as logger
 
     if os.environ.get("DEBUG"):
@@ -44,10 +44,8 @@ class Markup:
     def __init__(self):
         logger.debug("[Markup] init")
         self.multibyte = Multibyte()
-        self.runtime_config = RuntimeConfig.get_instance()
-        self.color = Color.get_instance()
-        self.color_data = self.runtime_config.data["view"]["search_result"]["color"]
-        self.colors = self._create_colors(self.runtime_config, self.color_data)
+        self.color_data = runtime_config.data["view"]["search_result"]["color"]
+        self.colors = self._create_colors(self.color_data)
 
     def parse(self, text, search_text):
         logger.debug("[Markup] parse by search_text: '%s'" % search_text)
@@ -119,10 +117,10 @@ class Markup:
 
         return result
 
-    def _create_colors(self, runtime_config, color_data) -> dict:
+    def _create_colors(self, color_data) -> dict:
         result = {}
         for view_name in color_data:
-            result[view_name] = self.color.use(color_data[view_name])
+            result[view_name] = color.use(color_data[view_name])
 
         return result
 
@@ -135,7 +133,7 @@ if __name__ == "__main__":
     logger.init_properties(**properties)
     logger.debug("start %s" % progname)
 
-    runtime_config = RuntimeConfig.get_instance()
+    runtime_config.init()
     if not runtime_config.valid():
         logger.debug("[print] 'Config is invalid.'")
         print("Config is invalid.")
@@ -150,6 +148,7 @@ if __name__ == "__main__":
         # initscr() returns a window object representing the entire screen.
         logger.debug("init curses")
         stdscr = curses.initscr()
+        color.init()
 
         markup = Markup()
         text = "Rustは非常に高速でメモリ効率が高くランタイムやガベージコレクタがないため、パフォーマンス重視のサービスを実装できますし、組込み機器上で実行したり他の言語との調和も簡単にできます。 信頼性. Rustの豊かな型システムと所有権 ..."
