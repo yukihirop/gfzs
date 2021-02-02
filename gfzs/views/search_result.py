@@ -2,7 +2,6 @@
 
 import curses
 import unicodedata
-import textwrap
 import math
 import os, sys
 
@@ -15,6 +14,7 @@ try:
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from utils.markup import Markup
         from utils.multibyte import Multibyte
+        from utils.text_wrapper import TextWrapper
         import utils.logger as logger
 
         from not_found import NotFound
@@ -28,6 +28,7 @@ try:
     else:
         from gfzs.utils.markup import Markup
         from gfzs.utils.multibyte import Multibyte
+        from gfzs.utils.text_wrapper import TextWrapper
         import gfzs.utils.logger as logger
 
         from gfzs.views.not_found import NotFound
@@ -41,6 +42,7 @@ except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from utils.markup import Markup
     from utils.multibyte import Multibyte
+    from utils.text_wrapper import TextWrapper
     import utils.logger as logger
 
     from views.not_found import NotFound
@@ -285,8 +287,9 @@ class SearchResult(Base):
             i += self.TEXTBOX_HEIGHT
 
         # When all are displayed as multi-byte character strings
-        gap = 6  # 4 = 1 (Frame border) + 3(padding) + 2(margin)
-        abstract_line_len = self.parent_width // 2 - gap
+        gap = 7  # 4 = 1 (Frame border) + 3(padding) + 3(margin)
+        abstract_line_len = self.parent_width - 2 * gap
+        text_wrapper = TextWrapper(width=abstract_line_len)
         can_write_fn = lambda y: (4 + y) <= (self.TEXTBOX_HEIGHT - 1)
 
         for k in range(len(textboxes)):
@@ -301,7 +304,8 @@ class SearchResult(Base):
             )
             textboxes[k].addstr(2, 6, title, self.colors["title"])
             textboxes[k].addstr(3, 6, url, self.colors["url"])
-            lines = textwrap.wrap(abstract, abstract_line_len)
+
+            lines = text_wrapper.wrap(abstract)
             for l in range(len(lines)):
                 if can_write_fn(l):
                     textboxes[k].addstr(4 + l, 6, lines[l], self.colors["abstract"])
