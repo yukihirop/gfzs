@@ -2,7 +2,6 @@
 
 import curses
 import unicodedata
-import textwrap
 import math
 import os, sys
 
@@ -15,6 +14,7 @@ try:
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from utils.markup import Markup
         from utils.multibyte import Multibyte
+        from utils.text_wrapper import TextWrapper
         import utils.logger as logger
 
         from not_found import NotFound
@@ -28,6 +28,7 @@ try:
     else:
         from gfzs.utils.markup import Markup
         from gfzs.utils.multibyte import Multibyte
+        from gfzs.utils.text_wrapper import TextWrapper
         import gfzs.utils.logger as logger
 
         from gfzs.views.not_found import NotFound
@@ -41,6 +42,7 @@ except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from utils.markup import Markup
     from utils.multibyte import Multibyte
+    from utils.text_wrapper import TextWrapper
     import utils.logger as logger
 
     from views.not_found import NotFound
@@ -285,8 +287,11 @@ class SearchResult(Base):
             i += self.TEXTBOX_HEIGHT
 
         # When all are displayed as multi-byte character strings
-        gap = 6  # 4 = 1 (Frame border) + 3(padding) + 2(margin)
-        abstract_line_len = self.parent_width // 2 - gap
+        gap = 7  # 4 = 1 (Frame border) + 3(padding) + 3(margin)
+        abstract_line_len = self.parent_width - 2 * gap
+        text_wrapper = TextWrapper(width=abstract_line_len)
+        can_write_fn = lambda y: (4 + y) <= (self.TEXTBOX_HEIGHT - 1)
+
         for k in range(len(textboxes)):
             textboxes[k].box()
 
@@ -299,9 +304,11 @@ class SearchResult(Base):
             )
             textboxes[k].addstr(2, 6, title, self.colors["title"])
             textboxes[k].addstr(3, 6, url, self.colors["url"])
-            lines = textwrap.wrap(abstract, abstract_line_len)
+
+            lines = text_wrapper.wrap(abstract)
             for l in range(len(lines)):
-                textboxes[k].addstr(4 + l, 6, lines[l], self.colors["abstract"])
+                if can_write_fn(l):
+                    textboxes[k].addstr(4 + l, 6, lines[l], self.colors["abstract"])
 
             # Markup Search Query for title
             markup_data = self.markup.parse(title, self.model.query)
@@ -327,9 +334,13 @@ class SearchResult(Base):
                             match_text
                         )
                         if offset_x + 6 + match_text_byte_len <= self.parent_width - 1:
-                            textboxes[k].addstr(
-                                4 + l, 6 + offset_x, match_text, color | curses.A_BOLD
-                            )
+                            if can_write_fn(l):
+                                textboxes[k].addstr(
+                                    4 + l,
+                                    6 + offset_x,
+                                    match_text,
+                                    color | curses.A_BOLD,
+                                )
                         # Wrap display
                         else:
                             match_text_before = match_text[
@@ -339,17 +350,18 @@ class SearchResult(Base):
                                 match_text_before
                             )
                             gap = 6  # 4 = 1 (Frame border) + 3(padding) + 2(margin)
-                            textboxes[k].addstr(
-                                4 + l,
-                                self.parent_width - byte_len - gap,
-                                match_text_before,
-                                color,
-                            )
+                            if can_write_fn(l + 1):
+                                textboxes[k].addstr(
+                                    4 + l,
+                                    self.parent_width - byte_len - gap,
+                                    match_text_before,
+                                    color,
+                                )
 
-                            match_text_after = match_text[
-                                (self.parent_width - offset_x) :
-                            ]
-                            textboxes[k].addstr(5 + l, 6, match_text_after, color)
+                                match_text_after = match_text[
+                                    (self.parent_width - offset_x) :
+                                ]
+                                textboxes[k].addstr(5 + l, 6, match_text_after, color)
 
         return textboxes
 
@@ -458,10 +470,10 @@ class SearchResult(Base):
         elif textboxes_len > 1 and user_input == curses.KEY_UP:
             logger.debug("[SearchResult] handle key in loop with 'KEY_UP'")
             self.helper.up(textboxes_len)
-        elif textboxes_len > per_page + 1 and user_input == curses.KEY_RIGHT:
+        elif textboxes_len >= per_page + 1 and user_input == curses.KEY_RIGHT:
             logger.debug("[SearchResult] handle key in loop with 'KEY_RIGHT'")
             self.helper.next_page(textboxes_len)
-        elif textboxes_len > per_page + 1 and user_input == curses.KEY_LEFT:
+        elif textboxes_len >= per_page + 1 and user_input == curses.KEY_LEFT:
             logger.debug("[SearchResult] handle key in loop with 'KEY_LEFT'")
             self.helper.prev_page(textboxes_len)
         elif user_input == curses.KEY_RESIZE:
