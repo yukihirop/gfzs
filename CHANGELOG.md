@@ -1,3 +1,12 @@
+## 0.2.3
+
+2021/02/02
+
+- `[Fix bugs]` Bug about a page turning ([#21](https://github.com/yukihirop/gfzs/pull/21))
+- `[New Features]` Output a Log ([#19](https://github.com/yukihirop/gfzs/pull/19))
+
+Please see [milestone](https://github.com/yukihirop/gfzs/milestone/5)
+
 ## 0.2.2
 
 2021/01/27
