@@ -5,6 +5,33 @@
 import sys
 import os
 
+# local
+
+try:
+    # need when 「python3 gfzs/tty.py」
+    if __name__ == "__main__":
+        # https://codechacha.com/ja/how-to-import-python-files/
+        sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+        import utils.logger as logger
+
+        if os.environ.get("DEBUG"):
+            import utils.debug as debug
+
+    # need when 「cat fixtures/rust.json | python -m gfzs」
+    # need when 「cat fixtures/rust.json | bin/gfzs」
+    else:
+        import gfzs.utils.logger as logger
+
+        if os.environ.get("DEBUG"):
+            import gfzs.utils.debug as debug
+
+# need when 「python3 gfzs/controller.py」
+except ModuleNotFoundError:
+    import utils.logger as logger
+
+    if os.environ.get("DEBUG"):
+        import utils.debug as debug
+
 
 def get_ttyname():
     for f in sys.stdin, sys.stdout, sys.stderr:
@@ -43,6 +70,8 @@ def reconnect_descriptors(tty):
             except OSError:
                 # maybe mode specification is invalid or /dev/null is specified (?)
                 target[name] = None
-                print("Error: Failed to open {0}".format(other_desc))
+                error = "Error: Failed to open '{0}'".format(other_desc)
+                logger.error(error)
+                print(error)
 
     return target

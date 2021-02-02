@@ -12,6 +12,7 @@ try:
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from base import Base
+        import utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import utils.debug as debug
@@ -19,8 +20,8 @@ try:
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
-        from gfzs.utils import debug
         from gfzs.views.base import Base
+        import gfzs.utils.logger as logger
 
         if os.environ.get("DEBUG"):
             import gfzs.utils.debug as debug
@@ -29,8 +30,8 @@ try:
 except ModuleNotFoundError:
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
-    from utils import debug
     from views.base import Base
+    import utils.logger as logger
 
     if os.environ.get("DEBUG"):
         import utils.debug as debug
@@ -38,21 +39,25 @@ except ModuleNotFoundError:
 
 class Paging(Base):
     def __init__(self, stdscr, view):
+        logger.debug("[Paging] init")
         super().__init__(stdscr, None, "paging")
         self.view = view
 
     def create(self):
+        logger.debug("[Paging] create")
         self._init_layout()
         self._make_paging()
         self.window.refresh()
 
     def reset(self):
+        logger.debug("[Paging] reset")
         self.destroy()
         self._init_layout()
         self._make_paging()
         self.window.refresh()
 
     def destroy(self):
+        logger.debug("[Paging] destroy")
         self.window.erase()
 
     def _init_layout(self):
@@ -78,6 +83,7 @@ if __name__ == "__main__":
 
         def _end_curses(self):
             """ Terminates the curses application. """
+            logger.debug("[TestPaging] end curses")
             curses.nocbreak()
             self.window.keypad(0)
             curses.echo()
@@ -99,8 +105,6 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    import os, sys
-    import curses
     import signal
     import json
 
@@ -110,22 +114,42 @@ if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
     from model import Model
     from search_result import SearchResult
-    from runtime.config import RuntimeConfig
+    import runtime.config as runtime_config
+    import runtime.opts as runtime_opts
+    import utils.color as color
 
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    progname = "gfzs.views.paging"
+    properties = {"progname": progname, "severity": 0, "log_path": "./tmp/gfzs.log"}
+    logger.init_properties(**properties)
+    logger.debug("start %s" % progname)
 
-    runtime_config = RuntimeConfig.get_instance()
+    def handle_sigint(signum, frame):
+        logger.debug("detect SIGINT (Ctrl-c)")
+        logger.debug("exit 0")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, handle_sigint)
+
+    runtime_config.init()
+    runtime_opts.init()
     if not runtime_config.valid():
+        logger.debug("[print] 'Config is invalid.'")
         print("Config is invalid.")
         for error in runtime_config.errors:
+            logger.error(error)
             print("Error: %s" % error)
+
+        logger.debug("exit 1")
+        logger.debug("end %s" % progname, new_line=True)
         sys.exit(1)
 
     json_str = open("fixtures/rust.json", "r").read()
     data = json.loads(json_str)
 
     # initscr() returns a window object representing the entire screen.
+    logger.debug("init curses")
     stdscr = curses.initscr()
+    color.init()
 
     # turn off automatic echoing of keys to the screen
     curses.noecho()
@@ -152,4 +176,7 @@ if __name__ == "__main__":
     finally:
         target._end_curses()
         if error != None:
+            logger.error(error)
             print(error)
+
+        logger.debug("end %s" % progname, new_line=True)

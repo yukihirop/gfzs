@@ -2,7 +2,6 @@
 
 import curses
 import unicodedata
-import textwrap
 import math
 import os, sys
 
@@ -15,6 +14,8 @@ try:
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
         from utils.markup import Markup
         from utils.multibyte import Multibyte
+        from utils.text_wrapper import TextWrapper
+        import utils.logger as logger
 
         from not_found import NotFound
         from paging import Paging
@@ -27,6 +28,8 @@ try:
     else:
         from gfzs.utils.markup import Markup
         from gfzs.utils.multibyte import Multibyte
+        from gfzs.utils.text_wrapper import TextWrapper
+        import gfzs.utils.logger as logger
 
         from gfzs.views.not_found import NotFound
         from gfzs.views.paging import Paging
@@ -39,6 +42,8 @@ except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
     from utils.markup import Markup
     from utils.multibyte import Multibyte
+    from utils.text_wrapper import TextWrapper
+    import utils.logger as logger
 
     from views.not_found import NotFound
     from views.paging import Paging
@@ -50,6 +55,7 @@ except ModuleNotFoundError:
 
 class SearchResultHelper:
     def __init__(self):
+        logger.debug("[SearchResultHelper] init")
         self.current_selected = 0
         self.last = 1
         self.topy = 1
@@ -59,12 +65,27 @@ class SearchResultHelper:
         self.change_page = False
 
     def update_attributues(self, current_selected, last, topy, top_textbox):
+        logger.debug(
+            "[SearchResultHelper] update attributes '(current_selected, last, topy)' from '(%d, %d, %d)' to '(%d, %d, %d)'"
+            % (
+                self.current_selected,
+                self.last,
+                self.topy,
+                current_selected,
+                last,
+                topy,
+            )
+        )
         self.current_selected = current_selected
         self.last = last
         self.topy = topy
         self.top_textbox = top_textbox
 
     def update_per_page(self, value):
+        logger.debug(
+            "[SearchResultHelper] update per_page from '%d' to '%d'"
+            % (self.per_page, value)
+        )
         self.per_page = value
 
     @property
@@ -72,6 +93,7 @@ class SearchResultHelper:
         return self.current_selected // self.per_page + 1
 
     def prev_page(self, total_data_size):
+        logger.debug("[SearchResultHelper] prev page")
         per_page = self.per_page
         old_current_selected = self.current_selected
         current_pagetop_index = per_page * math.floor(old_current_selected / per_page)
@@ -88,6 +110,7 @@ class SearchResultHelper:
             self.current_selected = current_pagetop_index - per_page
 
     def next_page(self, total_data_size):
+        logger.debug("[SearchResultHelper] next page")
         per_page = self.per_page
         old_current_selected = self.current_selected
         current_pagetop_index = per_page * math.floor(old_current_selected / per_page)
@@ -100,6 +123,7 @@ class SearchResultHelper:
             self.current_selected = current_pagetop_index + per_page
 
     def down(self, total_data_size):
+        logger.debug("[SearchResultHelper] down")
         old_current_page = self.current_page
         old_current_selected = self.current_selected
 
@@ -112,6 +136,7 @@ class SearchResultHelper:
                 self.change_page = True
 
     def up(self, total_data_size):
+        logger.debug("[SearchResultHelper] up")
         old_current_page = self.current_page
         old_current_selected = self.current_selected
 
@@ -134,9 +159,9 @@ class SearchResult(Base):
         'data' is list of string. Each string is used to build
         a textbox.
         """
+        logger.debug("[SearchResult] init")
         super().__init__(stdscr, model, "search_result")
         self.paging = Paging(stdscr, self)
-        self.stop_loop = False
         self.textboxes = []
         self.helper = SearchResultHelper()
         self.not_found = NotFound(stdscr)
@@ -168,6 +193,7 @@ class SearchResult(Base):
         self.helper.update_per_page(value)
 
     def init_properties_after_create(self):
+        logger.debug("[SearchResult] init properties")
         current_selected = 0
         textboxes_len = len(self.textboxes)
 
@@ -182,6 +208,7 @@ class SearchResult(Base):
             self.helper.update_attributues(current_selected, last, topy, top_textbox)
 
     def create(self, pad_begin_y=0):
+        logger.debug("[SearchResult] create")
         self.helper.pad_begin_y = pad_begin_y
         self._init_layout()
         self._create_pad()
@@ -191,12 +218,17 @@ class SearchResult(Base):
             self.paging.create()
 
     def destroy(self):
+        logger.debug("[SearchResult] destroy")
         self._delete_pad()
 
     def update_query(self, query):
+        logger.debug(
+            "[SearchResult] update query from '%s' to '%s'" % (self.model.query, query)
+        )
         self.model.update_query(query)
 
     def reset(self):
+        logger.debug("[SearchResult] reset")
         self._reset_pad()
         self._init_layout()
         self.textboxes = self._make_textboxes()
@@ -255,8 +287,11 @@ class SearchResult(Base):
             i += self.TEXTBOX_HEIGHT
 
         # When all are displayed as multi-byte character strings
-        gap = 6  # 4 = 1 (Frame border) + 3(padding) + 2(margin)
-        abstract_line_len = self.parent_width // 2 - gap
+        gap = 7  # 4 = 1 (Frame border) + 3(padding) + 3(margin)
+        abstract_line_len = self.parent_width - 2 * gap
+        text_wrapper = TextWrapper(width=abstract_line_len)
+        can_write_fn = lambda y: (4 + y) <= (self.TEXTBOX_HEIGHT - 1)
+
         for k in range(len(textboxes)):
             textboxes[k].box()
 
@@ -269,9 +304,11 @@ class SearchResult(Base):
             )
             textboxes[k].addstr(2, 6, title, self.colors["title"])
             textboxes[k].addstr(3, 6, url, self.colors["url"])
-            lines = textwrap.wrap(abstract, abstract_line_len)
+
+            lines = text_wrapper.wrap(abstract)
             for l in range(len(lines)):
-                textboxes[k].addstr(4 + l, 6, lines[l], self.colors["abstract"])
+                if can_write_fn(l):
+                    textboxes[k].addstr(4 + l, 6, lines[l], self.colors["abstract"])
 
             # Markup Search Query for title
             markup_data = self.markup.parse(title, self.model.query)
@@ -297,9 +334,13 @@ class SearchResult(Base):
                             match_text
                         )
                         if offset_x + 6 + match_text_byte_len <= self.parent_width - 1:
-                            textboxes[k].addstr(
-                                4 + l, 6 + offset_x, match_text, color | curses.A_BOLD
-                            )
+                            if can_write_fn(l):
+                                textboxes[k].addstr(
+                                    4 + l,
+                                    6 + offset_x,
+                                    match_text,
+                                    color | curses.A_BOLD,
+                                )
                         # Wrap display
                         else:
                             match_text_before = match_text[
@@ -309,17 +350,18 @@ class SearchResult(Base):
                                 match_text_before
                             )
                             gap = 6  # 4 = 1 (Frame border) + 3(padding) + 2(margin)
-                            textboxes[k].addstr(
-                                4 + l,
-                                self.parent_width - byte_len - gap,
-                                match_text_before,
-                                color,
-                            )
+                            if can_write_fn(l + 1):
+                                textboxes[k].addstr(
+                                    4 + l,
+                                    self.parent_width - byte_len - gap,
+                                    match_text_before,
+                                    color,
+                                )
 
-                            match_text_after = match_text[
-                                (self.parent_width - offset_x) :
-                            ]
-                            textboxes[k].addstr(5 + l, 6, match_text_after, color)
+                                match_text_after = match_text[
+                                    (self.parent_width - offset_x) :
+                                ]
+                                textboxes[k].addstr(5 + l, 6, match_text_after, color)
 
         return textboxes
 
@@ -345,6 +387,7 @@ class SearchResult(Base):
         return (cy, cx)
 
     def update_view_in_loop(self) -> bool:
+        logger.debug("[SearchResult] update view in loop")
         textboxes = self.textboxes
         textboxes_len = len(textboxes)
 
@@ -415,21 +458,33 @@ class SearchResult(Base):
             return
 
         per_page = self.per_page
+        backspace_keys = {
+            curses.ascii.BS: "ASCII_BS",
+            curses.ascii.DEL: "ASCII_DEL",
+            curses.KEY_BACKSPACE: "KEY_BACKSPACE",
+        }
 
         if textboxes_len > 1 and user_input == curses.KEY_DOWN:
+            logger.debug("[SearchResult] handle key in loop with 'KEY_DOWN'")
             self.helper.down(textboxes_len)
         elif textboxes_len > 1 and user_input == curses.KEY_UP:
+            logger.debug("[SearchResult] handle key in loop with 'KEY_UP'")
             self.helper.up(textboxes_len)
-        elif textboxes_len > per_page + 1 and user_input == curses.KEY_RIGHT:
+        elif textboxes_len >= per_page + 1 and user_input == curses.KEY_RIGHT:
+            logger.debug("[SearchResult] handle key in loop with 'KEY_RIGHT'")
             self.helper.next_page(textboxes_len)
-        elif textboxes_len > per_page + 1 and user_input == curses.KEY_LEFT:
+        elif textboxes_len >= per_page + 1 and user_input == curses.KEY_LEFT:
+            logger.debug("[SearchResult] handle key in loop with 'KEY_LEFT'")
             self.helper.prev_page(textboxes_len)
         elif user_input == curses.KEY_RESIZE:
+            logger.debug("[SearchResult] handle key in loop with 'KEY_RESIZE'")
             self.reset()
-        elif user_input in (curses.ascii.BS, curses.ascii.DEL, curses.KEY_BACKSPACE):
+        elif user_input in backspace_keys:
+            logger.debug(
+                "[SearchResult] handle key in loop with '%s'"
+                % backspace_keys[user_input]
+            )
             self.reset()
-        elif user_input == ord("q"):  # Quit without selecting.
-            self.stop_loop = True
 
 
 if __name__ == "__main__":
@@ -444,6 +499,7 @@ if __name__ == "__main__":
 
         def _end_curses(self):
             """ Terminates the curses application. """
+            logger.debug("[TestSearchResult] end curses")
             curses.nocbreak()
             self.window.keypad(0)
             curses.echo()
@@ -467,9 +523,6 @@ if __name__ == "__main__":
                 )
 
             while True:
-                if self.stop_loop:
-                    break
-
                 self.update_view_in_loop()
 
                 try:
@@ -486,9 +539,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    import curses
     import signal
-    import os, sys
     import json
 
     # local
@@ -496,22 +547,40 @@ if __name__ == "__main__":
     # https://codechacha.com/ja/how-to-import-python-files/
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
     from model import Model
-    from runtime.config import RuntimeConfig
+    import runtime.config as runtime_config
+    import runtime.opts as runtime_opts
+    import utils.color as color
 
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    progname = "gfzs.views.search_result"
+    properties = {"progname": progname, "severity": 0, "log_path": "./tmp/gfzs.log"}
+    logger.init_properties(**properties)
+    logger.debug("start %s" % progname)
 
-    runtime_config = RuntimeConfig.get_instance()
+    def handle_sigint(signum, frame):
+        logger.debug("detect SIGINT (Ctrl-c)")
+        logger.debug("exit 0")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, handle_sigint)
+
+    runtime_config.init()
+    runtime_opts.init()
     if not runtime_config.valid():
+        logger.debug("[print] 'Config is invalid.'")
         print("Config is invalid.")
         for error in runtime_config.errors:
+            logger.error(error)
             print("Error: %s" % error)
+        logger.debug("exit 1")
         sys.exit(1)
 
     json_str = open("fixtures/rust.json", "r").read()
     data = json.loads(json_str)
 
     # initscr() returns a window object representing the entire screen.
+    logger.debug("init curses")
     stdscr = curses.initscr()
+    color.init()
 
     # turn off automatic echoing of keys to the screen
     curses.noecho()
@@ -531,9 +600,17 @@ if __name__ == "__main__":
     try:
         choice = target.run(pad_begin_y=1)
         if choice != None:
-            print(model.result[choice].get("title"))
+            enter_result = model.result[choice].get("title")
+            logger.debug("Enter Result: '%s'" % enter_result)
+            print(enter_result)
     except curses.error as e:
-        error = str(e)
+        error = e
+    except Exception as e:
+        error = e
     finally:
+        target._end_curses()
         if error != None:
-            print(error)
+            logger.error(error)
+            print("Error: %s" % error)
+
+        logger.debug("end %s" % progname, new_line=True)

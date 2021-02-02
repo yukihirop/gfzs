@@ -5,6 +5,7 @@ import os
 import sys
 import json
 from flatten_dict import flatten
+from typing import Union
 
 # local
 
@@ -13,20 +14,36 @@ try:
     if __name__ == "__main__":
         # https://codechacha.com/ja/how-to-import-python-files/
         sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-        from utils import debug
+        import utils.logger as logger
+
+        if os.environ.get("DEBUG"):
+            from utils import debug
 
     # need when 「cat fixtures/rust.json | python -m gfzs」
     # need when 「cat fixtures/rust.json | bin/gfzs」
     else:
-        from gfzs.utils import debug
+        import gfzs.utils.logger as logger
+
+        if os.environ.get("DEBUG"):
+            import gfzs.utils.debug as debug
 
 # need when 「python3 gfzs/controller.py」
 except ModuleNotFoundError:
     sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("../"))))
-    from utils import debug
+    import utils.logger as logger
+
+    if os.environ.get("DEBUG"):
+        import utils.debug as debug
+
+"""RuntimeConfig Class that reads and manages the options passed in the runtime"""
+
+# https://qiita.com/risuoku/items/23789030db29489f8214
+self = sys.modules[__name__]
 
 # ~/.gfzsrc
 DEFAULT_CONFIG_PATH = "%s/.gfzsrc" % os.path.expanduser("~")
+# ~/gfzs.log
+DEFAULT_LOG_PATH = "%s/gfzs.log" % os.path.expanduser("~")
 
 # 0: curses.COLOR_BLACK
 # 1: curses.COLOR_RED
@@ -105,97 +122,101 @@ DEFAULT_CONFIG = {
                 }
             }
         },
-    }
+    },
 }
 
+SUPPORT_FLATTEN_KEYS = list(flatten(DEFAULT_CONFIG, reducer="dot"))
+SUPPORT_COLOR_NUMBERS = list(range(8))
+SUPPORT_STYLES = ["normal", "link", "bold"]
 
-class Singleton(object):
-    @classmethod
-    def get_instance(cls):
-        if not hasattr(cls, "_instance"):
-            cls._instance = cls()
-
-        return cls._instance
+default_log_path = DEFAULT_LOG_PATH
+default_config_path = DEFAULT_CONFIG_PATH
 
 
-class RuntimeConfig(Singleton):
-    """A class that reads and manages the options passed in the runtime"""
+def init() -> None:
+    logger.debug("[RuntimeConfig] init")
+    self.config_path = DEFAULT_CONFIG_PATH
+    self.data = self._create_data()
+    self.errors = []
 
-    SUPPORT_FLATTEN_KEYS = list(flatten(DEFAULT_CONFIG, reducer="dot"))
-    SUPPORT_COLOR_NUMBERS = list(range(8))
-    SUPPORT_STYLES = ["normal", "link", "bold"]
 
-    def __init__(self):
-        self.data = self._create_data()
-        self.errors = []
-
-    @property
-    def config_path(self):
-        return DEFAULT_CONFIG_PATH
-
-    def valid(self) -> bool:
-        flatten_data = flatten(
-            self.data, reducer="dot", keep_empty_types=(dict, str, int, list)
-        )
-        for flatten_key in flatten_data:
-            target_val = flatten_data[flatten_key]
-            # Check key
-            if not flatten_key in RuntimeConfig.SUPPORT_FLATTEN_KEYS:
-                self.errors.append(
-                    Exception(
-                        "Contains unsupported key.   (key_path, value) = (%s, %s)."
-                        % (flatten_key, target_val)
-                    )
+def valid() -> bool:
+    logger.debug("[RuntimeConfig] validate")
+    flatten_data = flatten(
+        self.data, reducer="dot", keep_empty_types=(dict, str, int, list)
+    )
+    for flatten_key in flatten_data:
+        target_val = flatten_data[flatten_key]
+        # Check key
+        if not flatten_key in SUPPORT_FLATTEN_KEYS:
+            self.errors.append(
+                Exception(
+                    "Contains unsupported key.   (key_path, value) = (%s, %s)."
+                    % (flatten_key, target_val)
                 )
-            # Check value
-            else:
-                if flatten_key.endswith("text") or flatten_key.endswith("background"):
-                    if not target_val in RuntimeConfig.SUPPORT_COLOR_NUMBERS:
-                        self.errors.append(
-                            Exception(
-                                "Contains unsupported value. (key_path, value) = (%s, %s)."
-                                % (flatten_key, target_val)
-                            )
-                        )
-                elif flatten_key.endswith("style"):
-                    if not target_val in RuntimeConfig.SUPPORT_STYLES:
-                        self.errors.append(
-                            Exception(
-                                "Contains unsupported value. (key_path, value) = (%s, %s)."
-                                % (flatten_key, target_val)
-                            )
-                        )
-
-        if self.errors != []:
-            return False
+            )
+        # Check value
         else:
-            return True
+            if flatten_key.endswith("text") or flatten_key.endswith("background"):
+                if not target_val in SUPPORT_COLOR_NUMBERS:
+                    self.errors.append(
+                        Exception(
+                            "Contains unsupported value. (key_path, value) = (%s, %s)."
+                            % (flatten_key, target_val)
+                        )
+                    )
+            elif flatten_key.endswith("style"):
+                if not target_val in SUPPORT_STYLES:
+                    self.errors.append(
+                        Exception(
+                            "Contains unsupported value. (key_path, value) = (%s, %s)."
+                            % (flatten_key, target_val)
+                        )
+                    )
 
-    def _create_data(self) -> dict:
-        """Load the app settings. If the config file does not exist, it will load the default config."""
-        config_path = self.config_path
+    if self.errors != []:
+        logger.error("[RuntimeConfig] is invalid")
+        return False
+    else:
+        logger.debug("[RuntimeConfig] is valid")
+        return True
 
-        data = dict
-        if os.path.exists(config_path):
-            try:
-                json_str = open(config_path).read()
-                data = json.loads(json_str)
-            except json.decoder.JSONDecodeError as e:
-                self._end_curses()
-                raise e
-        else:
-            data = DEFAULT_CONFIG
 
-        return data
+def _create_data() -> dict:
+    """Load the app settings. If the config file does not exist, it will load the default config."""
+    config_path = self.config_path
+    data = dict
 
-    def _end_curses(self):
-        """ Terminates the curses application. """
-        curses.nocbreak()
-        curses.echo()
-        curses.endwin()
+    if os.path.exists(config_path):
+        try:
+            json_str = open(config_path).read()
+            data = json.loads(json_str)
+            logger.debug("[RuntimeConfig] file is loaded")
+        except json.decoder.JSONDecodeError as e:
+            logger.debug(e)
+            self._end_curses()
+            raise e
+    else:
+        logger.debug("[RuntimeConfig] file do not exist. so load default config data")
+        data = DEFAULT_CONFIG
+
+    return data
+
+
+def _end_curses():
+    """ Terminates the curses application. """
+    logger.debug("end curses")
+    curses.nocbreak()
+    curses.echo()
+    curses.endwin()
 
 
 if __name__ == "__main__":
+    progname = "gfzs.runtime.config"
+    properties = {"progname": progname, "severity": 0, "log_path": "./tmp/gfzs.log"}
+    logger.init_properties(**properties)
+    logger.debug("start %s" % progname)
 
-    config = RuntimeConfig.get_instance()
-    print(config.data)
+    self.init()
+    logger.debug("end %s" % progname, new_line=True)
+    print(self.data)
