@@ -1,5 +1,9 @@
 ![gfzs](https://user-images.githubusercontent.com/11146767/105204059-25556c80-5b87-11eb-862e-828a80aa6a94.png)
 
+[![Downloads](https://pepy.tech/badge/gfzs)](https://pepy.tech/project/gfzs)
+[![Downloads](https://pepy.tech/badge/gfzs/month)](https://pepy.tech/project/gfzs)
+[![Downloads](https://pepy.tech/badge/gfzs/week)](https://pepy.tech/project/gfzs)
+
 `Google Fuzzy Search` is a tool for fuzzy find for the result of searching with [googler](https://github.com/jarun/googler).
 
 ![gfzs](https://user-images.githubusercontent.com/11146767/105366627-e2f16580-5c42-11eb-92ef-8cd1aa87ce77.gif)
@@ -19,9 +23,9 @@ Error: Expecting value: line 1 column 2 (char 1)
 Input data: [ERROR] Connection blocked due to unusual activity. THIS IS NOT A BUG, please do NOT report it as a bug unless you have specific information that may lead to the development of a workaround. You IP address is temporarily or permanently blocked by Google and requires reCAPTCHA-solving to use the service, which googler is not capable of. Possible causes include issuing too many queries in a short time frame, or operating from a shared / low reputation IP with a history of abuse. Please do NOT use googler for automated scraping.
 ```
 
-To avoid such problems, __it is better not to set `googler's count option`.__
+To avoid such problems, **it is better not to set `googler's count option`.**
 
-__We are not responsible if you ignore the advice and block your IP. please note that.__
+**We are not responsible if you ignore the advice and block your IP. please note that.**
 
 ![alert_tape](https://user-images.githubusercontent.com/11146767/105363618-93f60100-5c3f-11eb-8cb9-4f01ec49b486.png)
 
@@ -142,7 +146,7 @@ cat data.json | gfzs
 
 ## 🚀 Practical Example (using googler)
 
-__It is recommended to use [alias](https://github.com/yukihirop/gfzs/wiki/%F0%9F%8D%96-Tips) to avoid accidentally passing the -n (--count) option to googler.__
+**It is recommended to use [alias](https://github.com/yukihirop/gfzs/wiki/%F0%9F%8D%96-Tips) to avoid accidentally passing the -n (--count) option to googler.**
 
 #### Search python articles on github.com
 
@@ -160,9 +164,9 @@ googler --json --site github.com python | gfzs -s 50
 
 ## ⚙ Configure
 
-The default setting is the following file, and each key can enter the following values.  
+The default setting is the following file, and each key can enter the following values.
 
-After changing the settings, you can check if the settings are correct with the `valid` command. 
+After changing the settings, you can check if the settings are correct with the `valid` command.
 
 ```bash
 $ gfzs valid
@@ -245,46 +249,45 @@ Config is valid
 }
 ```
 
-|key|description|value|
-|---|-----------|-----|
-|<kbd>text</kbd>|curses color|`0〜7`|
-|<kbd>background</kbd>|curses color|`0〜7`|
-|<kbd>style</kbd>|text style|`"normal", "link", "bold"`|
+| key                   | description  | value                      |
+| --------------------- | ------------ | -------------------------- |
+| <kbd>text</kbd>       | curses color | `0〜7`                     |
+| <kbd>background</kbd> | curses color | `0〜7`                     |
+| <kbd>style</kbd>      | text style   | `"normal", "link", "bold"` |
 
 ### curses color
 
-|number|description|
-|------|-----------|
-|`0`|`curses.COLOR_BLACK`|
-|`1`|`curses.COLOR_RED`|
-|`2`|`curses.COLOR_GREEN`|
-|`3`|`curses.COLOR_YELLOW`|
-|`4`|`curses.COLOR_BLUE`|
-|`5`|`curses.COLOR_MAGENTA`|
-|`6`|`curses.COLOR_CYAN`|
-|`7`|`curses.COLOR_WHITE`|
+| number | description            |
+| ------ | ---------------------- |
+| `0`    | `curses.COLOR_BLACK`   |
+| `1`    | `curses.COLOR_RED`     |
+| `2`    | `curses.COLOR_GREEN`   |
+| `3`    | `curses.COLOR_YELLOW`  |
+| `4`    | `curses.COLOR_BLUE`    |
+| `5`    | `curses.COLOR_MAGENTA` |
+| `6`    | `curses.COLOR_CYAN`    |
+| `7`    | `curses.COLOR_WHITE`   |
 
 ## ⚙ Environment Variable
 
-|name|description|
-|----|-----------|
-|`DEBUG`|You will be able to use the `debug` module.|
-|`EDITOR`|Set the command to open the editor.|
-
+| name     | description                                 |
+| -------- | ------------------------------------------- |
+| `DEBUG`  | You will be able to use the `debug` module. |
+| `EDITOR` | Set the command to open the editor.         |
 
 ## 💌 Logging
 
 By default, logs with a `log level of INFO` or higher will be sent to `~/gfzs.log`.
 
-|Log Level|value|desc|
-|---------|-----|----|
-|`DEBUG`|0|||
-|`INFO`|1|default|
-|`WARN`|2||
-|`ERROR`|3||
-|`FATAL`|4||
-|`UNKNOWN`|5||
-|`NULL`|6||
+| Log Level | value | desc    |
+| --------- | ----- | ------- | --- |
+| `DEBUG`   | 0     |         |     |
+| `INFO`    | 1     | default |
+| `WARN`    | 2     |         |
+| `ERROR`   | 3     |         |
+| `FATAL`   | 4     |         |
+| `UNKNOWN` | 5     |         |
+| `NULL`    | 6     |         |
 
 ## 🐛 Debug
 
@@ -354,7 +357,6 @@ $ python3 gfzs/views/footer.py
 
 ![image](https://user-images.githubusercontent.com/11146767/104927398-b93b0300-59e4-11eb-99a8-5b1e85dc000d.png)
 
-
 ### not_found
 
 ```bash
@@ -362,7 +364,6 @@ $ python3 gfzs/views/not_found.py
 ```
 
 ![image](https://user-images.githubusercontent.com/11146767/104927669-0d45e780-59e5-11eb-9dc8-76baec0c04ac.png)
-
 
 ## 📚 Reference
 
